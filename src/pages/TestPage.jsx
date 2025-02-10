@@ -1,7 +1,6 @@
 import React from 'react';
 import { Beaker } from 'lucide-react';
 import Header from '../components/Header';
-import PropTypes from 'prop-types';
 
 export default function TestPage() {
   return (

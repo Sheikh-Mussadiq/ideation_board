@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import { Send, ExternalLink, RefreshCw } from 'lucide-react';
 import { createSocialHubPost, updateSocialHubPost } from '../services/postService';
 import toast from 'react-hot-toast';
@@ -96,7 +95,7 @@ export default function SocialPostButton({ card, onUpdateCard }) {
             href={socialHubAttachment.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-1 text-indigo-600 hover:text-indigo-800"
+            className="p-1 text-primary hover:text-primary-hover transition-all hover:scale-110"
             onClick={(e) => e.stopPropagation()}
           >
             <ExternalLink className="h-4 w-4" />
@@ -104,7 +103,7 @@ export default function SocialPostButton({ card, onUpdateCard }) {
           <button
             onClick={handleUpdate}
             disabled={isPosting}
-            className="p-1 text-gray-400 hover:text-indigo-600 rounded-full hover:bg-gray-100 transition-colors"
+            className="btn-ghost p-1 rounded-full hover:bg-primary-light transition-all hover:scale-110"
             title="Update SocialHub post"
           >
             <RefreshCw className={`h-4 w-4 ${isPosting ? 'animate-spin' : ''}`} />
@@ -114,7 +113,7 @@ export default function SocialPostButton({ card, onUpdateCard }) {
         <button
           onClick={handlePost}
           disabled={isPosting}
-          className="p-1 text-gray-400 hover:text-indigo-600 rounded-full hover:bg-gray-100 transition-colors"
+          className="btn-ghost p-1 rounded-full hover:bg-primary-light transition-all hover:scale-110"
           title="Post to SocialHub"
         >
           <Send className={`h-4 w-4 ${isPosting ? 'animate-pulse' : ''}`} />
@@ -133,19 +132,3 @@ export default function SocialPostButton({ card, onUpdateCard }) {
     </>
   );
 }
-
-SocialPostButton.propTypes = {
-  card: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    attachments: PropTypes.arrayOf(PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      type: PropTypes.string.isRequired,
-      url: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      createdAt: PropTypes.string.isRequired
-    }))
-  }).isRequired,
-  onUpdateCard: PropTypes.func.isRequired
-};

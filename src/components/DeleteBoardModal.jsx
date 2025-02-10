@@ -1,61 +1,90 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { X } from 'lucide-react';
+"use client"
+
+import { Fragment } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import { X, AlertTriangle } from 'lucide-react';
 
 export default function DeleteBoardModal({ isOpen, onClose, onConfirm, boardTitle }) {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4">
-        <div className="fixed inset-0 bg-black opacity-30" onClick={onClose}></div>
-        
-        <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-          <div className="absolute top-4 right-4">
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-500"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black/25 backdrop-blur-sm" />
+        </Transition.Child>
 
-          <div className="mt-3 text-center sm:mt-0 sm:text-left">
-            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
-              Delete Board
-            </h3>
-            <div className="mt-2">
-              <p className="text-sm text-gray-500">
-                Are you sure you want to delete the board "{boardTitle}"? This action cannot be undone.
-              </p>
-            </div>
-          </div>
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="card w-full max-w-md transform overflow-hidden p-6 text-left align-middle transition-all">
+                <div className="absolute top-4 right-4 flex items-center gap-2">
+                  <button
+                    onClick={onClose}
+                    className="btn-ghost p-2 rounded-full hover:rotate-90 transition-transform"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
 
-          <div className="mt-6 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={onConfirm}
-              className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-            >
-              Delete
-            </button>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex-shrink-0">
+                    <AlertTriangle className="h-6 w-6 text-semantic-error" />
+                  </div>
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-semibold leading-6"
+                  >
+                    Delete Board
+                  </Dialog.Title>
+                </div>
+
+                <div className="mt-3 text-center sm:mt-0 sm:text-left animate-in slide-in-from-top">
+                  <h3 className="text-lg font-semibold leading-6 text-gray-900 mb-4">
+                    Delete Board
+                  </h3>
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      Are you sure you want to delete the board "{boardTitle}"? This action cannot be undone.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="btn-secondary"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onConfirm}
+                    className="btn bg-semantic-error text-white hover:bg-semantic-error-hover focus:ring-semantic-error"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
           </div>
         </div>
-      </div>
-    </div>
+      </Dialog>
+    </Transition>
   );
 }
-
-DeleteBoardModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  onConfirm: PropTypes.func.isRequired,
-  boardTitle: PropTypes.string.isRequired
-};

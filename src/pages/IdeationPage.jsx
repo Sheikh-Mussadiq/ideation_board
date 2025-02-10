@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { DndContext, DragOverlay, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
 import { Plus, ChevronDown, Trash2 } from 'lucide-react';
@@ -286,29 +285,32 @@ export default function IdeationPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
-        <div className="text-gray-500">Loading boards...</div>
+      <div className="min-h-screen bg-gradient-to-br from-primary-light to-white p-6 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <div className="text-primary font-medium">Loading boards...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-primary-light to-white p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold text-gray-900">Ideation Board</h1>
+            <h1 className="text-2xl font-bold text-primary">Ideation Board</h1>
             <div className="relative">
               <select
                 value={selectedBoardId || ''}
                 onChange={(e) => setSelectedBoardId(e.target.value)}
-                className="appearance-none bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="appearance-none bg-white/80 backdrop-blur-sm border border-primary/20 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all hover:border-primary"
               >
                 {boards.map(board => (
                   <option key={board.id} value={board.id}>{board.title}</option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-primary pointer-events-none" />
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -319,12 +321,12 @@ export default function IdeationPage() {
                   value={newBoardTitle}
                   onChange={(e) => setNewBoardTitle(e.target.value)}
                   placeholder="Board title..."
-                  className="px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="input"
                   autoFocus
                 />
                 <button
                   onClick={handleAddBoard}
-                  className="px-3 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700"
+                  className="btn-primary"
                 >
                   Add
                 </button>
@@ -333,7 +335,7 @@ export default function IdeationPage() {
                     setIsAddingBoard(false);
                     setNewBoardTitle('');
                   }}
-                  className="px-3 py-2 text-gray-600 hover:text-gray-900"
+                  className="btn-ghost"
                 >
                   Cancel
                 </button>
@@ -342,15 +344,15 @@ export default function IdeationPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsAddingBoard(true)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="btn-primary group hover:scale-105 transition-transform"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform" />
                   Add Board
                 </button>
                 {selectedBoardId && (
                   <button
                     onClick={() => setIsDeleteModalOpen(true)}
-                    className="p-2 text-gray-400 hover:text-red-600 rounded-full hover:bg-gray-100"
+                    className="btn-ghost p-2 hover:text-semantic-error hover:rotate-90 transition-all"
                     title="Delete Board"
                   >
                     <Trash2 className="h-5 w-5" />
@@ -367,7 +369,7 @@ export default function IdeationPage() {
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           >
-            <div className="flex gap-6 overflow-x-auto pb-4">
+            <div className="flex gap-6 overflow-x-auto pb-4 min-h-[calc(100vh-12rem)]">
               <SortableContext items={selectedBoard.columns.map(col => col.id)}>
                 {selectedBoard.columns.map(column => (
                   <KanbanColumn
@@ -384,19 +386,19 @@ export default function IdeationPage() {
               </SortableContext>
 
               {isAddingColumn ? (
-                <div className="flex-shrink-0 w-80 bg-gray-100 rounded-lg p-4">
+                <div className="flex-shrink-0 w-80 bg-primary-light/50 backdrop-blur-sm rounded-lg p-4 snap-start animate-in slide-in-from-right">
                   <input
                     type="text"
                     value={newColumnTitle}
                     onChange={(e) => setNewColumnTitle(e.target.value)}
                     placeholder="Column title..."
-                    className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="input"
                     autoFocus
                   />
                   <div className="flex justify-end gap-2 mt-2">
                     <button
                       onClick={handleAddColumn}
-                      className="px-3 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700"
+                      className="btn-primary"
                     >
                       Add
                     </button>
@@ -405,7 +407,7 @@ export default function IdeationPage() {
                         setIsAddingColumn(false);
                         setNewColumnTitle('');
                       }}
-                      className="px-3 py-2 text-gray-600 hover:text-gray-900"
+                      className="btn-ghost"
                     >
                       Cancel
                     </button>
@@ -414,9 +416,9 @@ export default function IdeationPage() {
               ) : (
                 <button
                   onClick={() => setIsAddingColumn(true)}
-                  className="flex-shrink-0 w-80 bg-gray-100 rounded-lg p-4 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+                  className="flex-shrink-0 w-80 bg-primary-light/30 backdrop-blur-sm rounded-lg p-4 flex items-center justify-center text-primary hover:text-primary-hover hover:bg-primary-light/50 transition-all hover:scale-105 snap-start group"
                 >
-                  <Plus className="h-5 w-5 mr-2" />
+                  <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform" />
                   Add Column
                 </button>
               )}

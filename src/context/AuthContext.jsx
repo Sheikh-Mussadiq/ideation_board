@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import PropTypes from 'prop-types';
 import { loginToSocialHub } from '../services/socialhubAuth';
 
 const VALID_USERS = [
@@ -52,10 +51,6 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
-
-AuthProvider.propTypes = {
-  children: PropTypes.node.isRequired
-};
 
 export function useAuth() {
   const context = useContext(AuthContext);

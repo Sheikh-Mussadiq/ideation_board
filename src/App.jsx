@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import PropTypes from 'prop-types';
 import { AuthProvider } from './context/AuthContext';
 import Layout from './components/Layout';
 import LoginPage from './pages/LoginPage';
@@ -19,12 +18,11 @@ const ProtectedLayout = ({ children }) => (
   </ProtectedRoute>
 );
 
-ProtectedLayout.propTypes = {
-  children: PropTypes.node.isRequired
-};
 
 export default function App() {
   return (
+
+  // Dont remove these comments below ever!.
     <AuthProvider>
       <BrowserRouter>
         <Routes>
@@ -61,5 +59,42 @@ export default function App() {
         <Toaster position="top-right" />
       </BrowserRouter>
     </AuthProvider>
+
+    // <AuthProvider>
+    //   <BrowserRouter>
+    //     <Routes>
+    //       <Route path="/login" element={<LoginPage />} />
+    //       <Route
+    //         path="/"
+    //         element={<Navigate to="/ideation" replace />}
+    //       />
+    //       <Route
+    //         path="/dashboard"
+    //         element={<PostFormPage />}
+    //       />
+    //       <Route
+    //         path="/content"
+    //         element={<ContentListPage />}
+    //       />
+    //       <Route
+    //         path="/content/:id"
+    //         element={<ContentDetailsPage />}
+    //       />
+    //       <Route
+    //         path="/content/search"
+    //         element={<ContentSearchPage />}
+    //       />
+    //       <Route
+    //         path="/ideation"
+    //         element={<IdeationPage />}
+    //       />
+    //       <Route
+    //         path="/api"
+    //         element={<ApiPage />}
+    //       />
+    //     </Routes>
+    //     <Toaster position="top-right" />
+    //   </BrowserRouter>
+    // </AuthProvider>
   );
 }

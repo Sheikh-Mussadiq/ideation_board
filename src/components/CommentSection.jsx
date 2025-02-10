@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import { format } from 'date-fns';
 import { User, Edit2, Trash2, MessageSquare } from 'lucide-react';
 
@@ -29,7 +28,7 @@ export default function CommentSection({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animate-in fade-in-50">
       <div className="flex items-center text-sm text-gray-700">
         <MessageSquare className="h-4 w-4 mr-2" />
         Comments
@@ -41,12 +40,12 @@ export default function CommentSection({
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Add a comment..."
-          className="flex-1 min-w-0 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          className="input flex-1 min-w-0"
         />
         <button
           type="submit"
           disabled={!newComment.trim()}
-          className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          className="btn-primary disabled:opacity-50"
         >
           Add
         </button>
@@ -54,25 +53,25 @@ export default function CommentSection({
 
       <div className="space-y-3">
         {comments.map(comment => (
-          <div key={comment.id} className="bg-gray-50 rounded-lg p-3">
+          <div key={comment.id} className="bg-primary-light/50 rounded-lg p-3 hover:bg-primary-light transition-all hover:scale-[1.02] group">
             {editingId === comment.id ? (
               <div className="space-y-2">
                 <textarea
                   value={editText}
                   onChange={(e) => setEditText(e.target.value)}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  className="input w-full"
                   rows={2}
                 />
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setEditingId(null)}
-                    className="px-2 py-1 text-sm text-gray-600 hover:text-gray-900"
+                    className="btn-ghost btn-sm"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={() => handleEdit(comment.id)}
-                    className="px-2 py-1 text-sm text-indigo-600 hover:text-indigo-900"
+                    className="btn-primary btn-sm"
                   >
                     Save
                   </button>
@@ -82,12 +81,14 @@ export default function CommentSection({
               <>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <User className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm font-medium text-gray-700">
+                    <div className="h-6 w-6 rounded-full bg-primary-light flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <User className="h-4 w-4 text-primary" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-800">
                       {comment.author}
                     </span>
                     <span className="text-xs text-gray-500">
-                      {format(new Date(comment.createdAt), 'MMM d, yyyy HH:mm')}
+                      {format(new Date(comment.created_at), 'MMM d, yyyy HH:mm')}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -96,19 +97,19 @@ export default function CommentSection({
                         setEditingId(comment.id);
                         setEditText(comment.text);
                       }}
-                      className="text-gray-400 hover:text-gray-600"
+                      className="btn-ghost p-1 hover:scale-110 transition-transform"
                     >
                       <Edit2 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => onDeleteComment(comment.id)}
-                      className="text-gray-400 hover:text-red-600"
+                      className="btn-ghost p-1 hover:text-semantic-error hover:scale-110 transition-transform"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
-                <p className="mt-1 text-sm text-gray-600">{comment.text}</p>
+                <p className="mt-2 text-sm text-gray-700 leading-relaxed">{comment.text}</p>
               </>
             )}
           </div>
@@ -117,16 +118,3 @@ export default function CommentSection({
     </div>
   );
 }
-
-CommentSection.propTypes = {
-  comments: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    text: PropTypes.string.isRequired,
-    author: PropTypes.string.isRequired,
-    createdAt: PropTypes.string.isRequired,
-    editedAt: PropTypes.string
-  })).isRequired,
-  onAddComment: PropTypes.func.isRequired,
-  onEditComment: PropTypes.func.isRequired,
-  onDeleteComment: PropTypes.func.isRequired
-};

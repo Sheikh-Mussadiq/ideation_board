@@ -70,18 +70,18 @@ export default function ApiPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-primary-light to-white">
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="card">
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h1 className="text-2xl font-bold text-gray-900">API Documentation</h1>
+              <h1>API Documentation</h1>
               <a
                 href="https://automation-api.socialhub.io/docs"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-900"
+                className="inline-flex items-center text-sm text-primary hover:text-primary-hover"
               >
                 Full Documentation
                 <ExternalLink className="ml-1 h-4 w-4" />
@@ -89,15 +89,15 @@ export default function ApiPage() {
             </div>
 
             <div className="prose max-w-none">
-              <p className="text-gray-600 mb-8">
+              <p className="text-gray-600 mb-8 leading-relaxed">
                 The SocialHub API allows you to programmatically create, update, and manage posts in the Content Planner.
                 Here are the main endpoints available:
               </p>
 
               <div className="space-y-8">
                 {API_ENDPOINTS.map((endpoint, index) => (
-                  <div key={index} className="border rounded-lg overflow-hidden">
-                    <div className="bg-gray-50 px-4 py-2 border-b flex items-center justify-between">
+                  <div key={index} className="card">
+                    <div className="bg-gray-50 px-4 py-2 border-b flex items-center justify-between hover:bg-gray-100 transition-colors">
                       <div className="flex items-center space-x-2">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                           ${endpoint.method === 'GET' ? 'bg-green-100 text-green-800' :
@@ -111,18 +111,18 @@ export default function ApiPage() {
                       <Code2 className="h-4 w-4 text-gray-400" />
                     </div>
                     <div className="p-4">
-                      <p className="text-gray-600 mb-4">{endpoint.description}</p>
+                      <p className="text-gray-600 mb-4 leading-relaxed">{endpoint.description}</p>
                       
                       {endpoint.example && (
                         <div className="mb-4">
-                          <h4 className="text-sm font-medium text-gray-700 mb-2">Request Body:</h4>
+                          <h4 className="label mb-2">Request Body:</h4>
                           <div className="relative">
                             <pre className="bg-gray-50 rounded p-4 text-sm overflow-x-auto">
                               {endpoint.example}
                             </pre>
                             <button
                               onClick={() => copyToClipboard(endpoint.example)}
-                              className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600"
+                              className="absolute top-2 right-2 p-1 text-gray-400 hover:text-primary transition-colors"
                             >
                               <Copy className="h-4 w-4" />
                             </button>
@@ -131,14 +131,14 @@ export default function ApiPage() {
                       )}
 
                       <div>
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Response:</h4>
+                        <h4 className="label mb-2">Response:</h4>
                         <div className="relative">
                           <pre className="bg-gray-50 rounded p-4 text-sm overflow-x-auto">
                             {endpoint.response}
                           </pre>
                           <button
                             onClick={() => copyToClipboard(endpoint.response)}
-                            className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600"
+                            className="absolute top-2 right-2 p-1 text-gray-400 hover:text-primary transition-colors"
                           >
                             <Copy className="h-4 w-4" />
                           </button>

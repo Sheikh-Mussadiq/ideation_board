@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import PropTypes from 'prop-types';
 import { PostForm } from '../components/PostForm';
 import { DebugPanel } from '../components/DebugPanel';
-import { API_CONFIG } from '../config';
 
 export default function PostFormPage() {
   const location = useLocation();

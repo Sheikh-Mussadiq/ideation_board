@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import PropTypes from 'prop-types';
 
 export default function EditableText({ value, onChange, className = '', isTitle = false }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -39,7 +38,7 @@ export default function EditableText({ value, onChange, className = '', isTitle 
         onChange={(e) => setText(e.target.value)}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        className={`w-full px-2 py-1 text-sm font-medium text-gray-900 border border-indigo-500 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 ${className}`}
+        className={`input text-sm font-medium ${className}`}
       />
     ) : (
       <textarea
@@ -48,7 +47,7 @@ export default function EditableText({ value, onChange, className = '', isTitle 
         onChange={(e) => setText(e.target.value)}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        className={`w-full px-2 py-1 text-sm text-gray-500 border border-indigo-500 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 ${className}`}
+        className={`input text-sm ${className}`}
         rows={3}
       />
     );
@@ -57,16 +56,9 @@ export default function EditableText({ value, onChange, className = '', isTitle 
   return (
     <div
       onClick={() => setIsEditing(true)}
-      className={`cursor-text ${className}`}
+      className={`cursor-text hover:bg-primary-light rounded transition-all hover:scale-[1.02] p-1 group ${className}`}
     >
-      {value}
+      <span className="group-hover:text-primary transition-colors">{value}</span>
     </div>
   );
 }
-
-EditableText.propTypes = {
-  value: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  className: PropTypes.string,
-  isTitle: PropTypes.bool
-};

@@ -1,11 +1,10 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { ChevronDown } from 'lucide-react';
 
 const priorityColors = {
-  low: 'bg-green-100 text-green-800 hover:bg-green-200',
-  medium: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
-  high: 'bg-red-100 text-red-800 hover:bg-red-200'
+  low: 'bg-semantic-success-light text-semantic-success hover:bg-semantic-success-hover',
+  medium: 'bg-semantic-warning-light text-semantic-warning hover:bg-semantic-warning-hover',
+  high: 'bg-semantic-error-light text-semantic-error hover:bg-semantic-error-hover'
 };
 
 export default function PrioritySelect({ value, onChange }) {
@@ -20,20 +19,20 @@ export default function PrioritySelect({ value, onChange }) {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${priorityColors[value]}`}
+        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium transition-colors ${priorityColors[value]}`}
       >
         {value}
         <ChevronDown className="ml-1 h-3 w-3" />
       </button>
       
       {isOpen && (
-        <div className="absolute z-10 mt-1 w-24 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+        <div className="absolute z-10 mt-1 w-24 rounded-md shadow-lg bg-white ring-1 ring-primary ring-opacity-10">
           <div className="py-1" role="menu">
             {Object.entries(priorityColors).map(([priority, colorClass]) => (
               <button
                 key={priority}
                 onClick={() => handleSelect(priority)}
-                className={`block w-full text-left px-4 py-2 text-xs ${colorClass}`}
+                className={`block w-full text-left px-4 py-2 text-xs transition-colors ${colorClass}`}
                 role="menuitem"
               >
                 {priority}
@@ -45,8 +44,3 @@ export default function PrioritySelect({ value, onChange }) {
     </div>
   );
 }
-
-PrioritySelect.propTypes = {
-  value: PropTypes.oneOf(['low', 'medium', 'high']).isRequired,
-  onChange: PropTypes.func.isRequired
-};

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { LogIn, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
-import PropTypes from 'prop-types';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -44,10 +43,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary-light to-white">
+      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg border border-gray-100">
         <div className="text-center">
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
+          <h2 className="mt-6 text-3xl font-bold text-gray-900">Sign in to your account</h2>
         </div>
         
         <div className="flex justify-center space-x-4 mb-8">
@@ -58,8 +57,8 @@ export default function LoginPage() {
             }}
             className={`px-4 py-2 rounded-md transition-colors duration-200 ${
               authType === 'local'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-primary text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-primary-light hover:text-primary'
             }`}
           >
             Local Auth
@@ -71,8 +70,8 @@ export default function LoginPage() {
             }}
             className={`px-4 py-2 rounded-md transition-colors duration-200 ${
               authType === 'socialhub'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-primary text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-primary-light hover:text-primary'
             }`}
           >
             SocialHub
@@ -80,13 +79,13 @@ export default function LoginPage() {
         </div>
 
         {error && (
-          <div className="rounded-md bg-red-50 p-4">
+          <div className="rounded-md bg-semantic-error-light p-4">
             <div className="flex">
               <div className="flex-shrink-0">
-                <AlertCircle className="h-5 w-5 text-red-400" />
+                <AlertCircle className="h-5 w-5 text-semantic-error" />
               </div>
               <div className="ml-3">
-                <p className="text-sm text-red-700">{error}</p>
+                <p className="text-sm text-semantic-error">{error}</p>
               </div>
             </div>
           </div>
@@ -95,7 +94,7 @@ export default function LoginPage() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="label">
                 {authType === 'local' ? 'Email address' : 'SocialHub Username'}
               </label>
               <input
@@ -106,12 +105,12 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="input"
                 placeholder={authType === 'local' ? 'Email address' : 'SocialHub username'}
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="label">
                 Password
               </label>
               <input
@@ -122,7 +121,7 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="input"
                 placeholder="Password"
               />
             </div>
@@ -131,7 +130,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <LogIn className={`h-5 w-5 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
             {isLoading ? 'Signing in...' : 'Sign in'}

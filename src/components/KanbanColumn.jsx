@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext } from '@dnd-kit/sortable';
 import { Plus, Trash2 } from 'lucide-react';
@@ -34,20 +33,20 @@ export default function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className="flex-shrink-0 w-80 bg-gray-100 rounded-lg p-4"
+      className="flex-shrink-0 w-80 bg-primary-light rounded-lg p-4"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold text-gray-900">{column.title}</h3>
+          <h3 className="text-sm font-semibold text-primary">{column.title}</h3>
           <PresenceIndicator location="column" id={column.id} />
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-gray-600 bg-white rounded-full">
+          <span className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-primary-hover bg-white rounded-full">
             {visibleCards.length}
           </span>
           <button
             onClick={onDeleteColumn}
-            className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-white"
+            className="btn-ghost p-1"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -70,7 +69,7 @@ export default function KanbanColumn({
 
         <button
           onClick={onAddCard}
-          className="w-full py-2 flex items-center justify-center text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-md transition-colors"
+          className="btn-secondary w-full"
         >
           <Plus className="h-4 w-4 mr-1" />
           Add Card
@@ -79,29 +78,3 @@ export default function KanbanColumn({
     </div>
   );
 }
-
-KanbanColumn.propTypes = {
-  column: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    cards: PropTypes.arrayOf(PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      description: PropTypes.string.isRequired,
-      priority: PropTypes.oneOf(['low', 'medium', 'high']).isRequired,
-      assignee: PropTypes.string,
-      dueDate: PropTypes.string,
-      labels: PropTypes.array.isRequired,
-      checklist: PropTypes.array,
-      attachments: PropTypes.array,
-      comments: PropTypes.array,
-      archived: PropTypes.bool
-    })).isRequired
-  }).isRequired,
-  onAddCard: PropTypes.func.isRequired,
-  onUpdateCard: PropTypes.func.isRequired,
-  onDeleteCard: PropTypes.func.isRequired,
-  onArchiveCard: PropTypes.func.isRequired,
-  onDeleteColumn: PropTypes.func.isRequired,
-  boardId: PropTypes.string.isRequired
-};

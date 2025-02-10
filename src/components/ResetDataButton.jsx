@@ -29,9 +29,9 @@ export default function ResetDataButton() {
     <button
       onClick={handleReset}
       disabled={isResetting}
-      className="fixed bottom-4 right-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+      className="fixed bottom-4 right-4 btn-primary disabled:opacity-50 hover:scale-105 transition-transform shadow-lg hover:shadow-xl"
     >
-      <RefreshCw className={`h-4 w-4 mr-2 ${isResetting ? 'animate-spin' : ''}`} />
+      <RefreshCw className={`h-4 w-4 mr-2 ${isResetting ? 'animate-spin' : 'group-hover:rotate-180 transition-transform'}`} />
       {isResetting ? 'Wird zurückgesetzt...' : 'Daten zurücksetzen'}
     </button>
   );

@@ -1,21 +1,18 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 const LABEL_COLORS = {
-  red: 'bg-rose-100 text-rose-800 border border-rose-200',
-  blue: 'bg-sky-100 text-sky-800 border border-sky-200',
-  green: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
-  yellow: 'bg-amber-100 text-amber-800 border border-amber-200',
-  purple: 'bg-violet-100 text-violet-800 border border-violet-200',
-  pink: 'bg-pink-100 text-pink-800 border border-pink-200',
-  indigo: 'bg-indigo-100 text-indigo-800 border border-indigo-200',
-  gray: 'bg-slate-100 text-slate-800 border border-slate-200'
+  red: 'bg-semantic-error-light text-semantic-error border border-semantic-error',
+  blue: 'bg-semantic-info-light text-semantic-info border border-semantic-info',
+  green: 'bg-semantic-success-light text-semantic-success border border-semantic-success',
+  yellow: 'bg-semantic-warning-light text-semantic-warning border border-semantic-warning',
+  purple: 'bg-primary-light text-primary border border-primary',
+  gray: 'bg-gray-100 text-gray-700 border border-gray-200'
 };
 
 export default function CardLabel({ label, onDelete }) {
   return (
     <span 
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium shadow-sm ${
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors ${
         LABEL_COLORS[label.color]
       }`}
     >
@@ -26,7 +23,7 @@ export default function CardLabel({ label, onDelete }) {
             e.stopPropagation();
             onDelete();
           }}
-          className="ml-1.5 hover:text-red-500 focus:outline-none"
+          className="ml-1.5 hover:text-semantic-error focus:outline-none transition-colors"
         >
           ×
         </button>
@@ -34,11 +31,3 @@ export default function CardLabel({ label, onDelete }) {
     </span>
   );
 }
-
-CardLabel.propTypes = {
-  label: PropTypes.shape({
-    text: PropTypes.string.isRequired,
-    color: PropTypes.string.isRequired
-  }).isRequired,
-  onDelete: PropTypes.func
-};

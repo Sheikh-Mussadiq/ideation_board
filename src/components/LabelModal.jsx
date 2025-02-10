@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import { X, Plus } from 'lucide-react';
 
 const LABEL_COLORS = {
-  red: '#fda4af',
-  blue: '#7dd3fc',
-  green: '#6ee7b7',
-  yellow: '#fcd34d',
-  purple: '#c4b5fd',
-  pink: '#f9a8d4',
-  indigo: '#818cf8',
-  gray: '#d1d5db'
+  red: 'bg-semantic-error-light text-semantic-error',
+  blue: 'bg-semantic-info-light text-semantic-info',
+  green: 'bg-semantic-success-light text-semantic-success',
+  yellow: 'bg-semantic-warning-light text-semantic-warning',
+  purple: 'bg-primary-light text-primary',
+  gray: 'bg-gray-100 text-gray-700'
 };
 
 export default function LabelModal({ isOpen, onClose, labels, onUpdate }) {
@@ -53,17 +50,12 @@ export default function LabelModal({ isOpen, onClose, labels, onUpdate }) {
                 {labels.map((label, index) => (
                   <span
                     key={index}
-                    className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium"
-                    style={{
-                      backgroundColor: `${LABEL_COLORS[label.color]}20`,
-                      color: LABEL_COLORS[label.color],
-                      borderColor: LABEL_COLORS[label.color]
-                    }}
+                    className={`inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium ${LABEL_COLORS[label.color]}`}
                   >
                     {label.text}
                     <button
                       onClick={() => handleDeleteLabel(index)}
-                      className="ml-1.5 hover:text-red-500 focus:outline-none"
+                      className="ml-1.5 hover:text-semantic-error focus:outline-none transition-colors"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -79,7 +71,7 @@ export default function LabelModal({ isOpen, onClose, labels, onUpdate }) {
                     value={newLabelText}
                     onChange={(e) => setNewLabelText(e.target.value)}
                     placeholder="Enter label text..."
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="input"
                   />
                   
                   <div>
@@ -91,10 +83,9 @@ export default function LabelModal({ isOpen, onClose, labels, onUpdate }) {
                         <button
                           key={color}
                           onClick={() => setSelectedColor(color)}
-                          className={`w-8 h-8 rounded-full transition-transform ${
+                          className={`w-8 h-8 rounded-full transition-all ${LABEL_COLORS[color]} ${
                             selectedColor === color ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : ''
                           }`}
-                          style={{ backgroundColor: value }}
                         />
                       ))}
                     </div>
@@ -103,7 +94,7 @@ export default function LabelModal({ isOpen, onClose, labels, onUpdate }) {
                   <button
                     onClick={handleAddLabel}
                     disabled={!newLabelText.trim()}
-                    className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Add Label
@@ -117,13 +108,3 @@ export default function LabelModal({ isOpen, onClose, labels, onUpdate }) {
     </div>
   );
 }
-
-LabelModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  labels: PropTypes.arrayOf(PropTypes.shape({
-    text: PropTypes.string.isRequired,
-    color: PropTypes.string.isRequired
-  })).isRequired,
-  onUpdate: PropTypes.func.isRequired
-};
