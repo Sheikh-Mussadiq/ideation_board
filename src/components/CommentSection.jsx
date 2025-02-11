@@ -1,22 +1,22 @@
-import React, { useState } from 'react';
-import { format } from 'date-fns';
-import { User, Edit2, Trash2, MessageSquare } from 'lucide-react';
+import React, { useState } from "react";
+import { format } from "date-fns";
+import { User, Edit2, Trash2, MessageSquare } from "lucide-react";
 
 export default function CommentSection({
   comments,
   onAddComment,
   onEditComment,
-  onDeleteComment
+  onDeleteComment,
 }) {
-  const [newComment, setNewComment] = useState('');
+  const [newComment, setNewComment] = useState("");
   const [editingId, setEditingId] = useState(null);
-  const [editText, setEditText] = useState('');
+  const [editText, setEditText] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (newComment.trim()) {
       onAddComment(newComment.trim());
-      setNewComment('');
+      setNewComment("");
     }
   };
 
@@ -28,32 +28,75 @@ export default function CommentSection({
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in-50">
+    <div className="space-y-4 animate-in fade-in-50 bg-gray-50/50 border border-gray-100 p-4 rounded-xl">
       <div className="flex items-center text-sm text-gray-700">
         <MessageSquare className="h-4 w-4 mr-2" />
-        Comments
+        <span className="font-medium">Comments</span>
+        {comments.length > 0 && (
+          <span className="ml-2 px-2 py-0.5 rounded-full text-xs bg-primary-light text-primary">
+            {comments.length}
+          </span>
+        )}
       </div>
 
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      <form
+        onSubmit={handleSubmit}
+        className="flex gap-2 bg-white p-3 rounded-lg shadow-sm"
+      >
         <input
           type="text"
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Add a comment..."
-          className="input flex-1 min-w-0"
+          className="input flex-1 min-w-0 border-gray-200 focus:border-primary focus:ring-primary"
         />
         <button
           type="submit"
           disabled={!newComment.trim()}
-          className="btn-primary disabled:opacity-50"
+          className="btn-primary disabled:opacity-50 hover:scale-105 transition-transform"
         >
           Add
         </button>
       </form>
 
       <div className="space-y-3">
-        {comments.map(comment => (
-          <div key={comment.id} className="bg-primary-light/50 rounded-lg p-3 hover:bg-primary-light transition-all hover:scale-[1.02] group">
+        {comments.map((comment) => (
+          <div
+            key={comment.id}
+            className="bg-primary-light/50 rounded-lg p-3 hover:bg-primary-light transition-all hover:scale-[1.02] group"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-2">
+                <div className="h-8 w-8 rounded-full bg-white border-2 border-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <User className="h-4 w-4 text-primary" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-gray-800">
+                    {comment.author}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {format(new Date(comment.created_at), "MMM d, yyyy HH:mm")}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => {
+                    setEditingId(comment.id);
+                    setEditText(comment.text);
+                  }}
+                  className="btn-ghost p-1.5 rounded-lg hover:bg-white hover:scale-110 transition-transform"
+                >
+                  <Edit2 className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => onDeleteComment(comment.id)}
+                  className="btn-ghost p-1.5 rounded-lg hover:bg-white hover:text-semantic-error hover:scale-110 transition-transform"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
             {editingId === comment.id ? (
               <div className="space-y-2">
                 <textarea
@@ -78,39 +121,9 @@ export default function CommentSection({
                 </div>
               </div>
             ) : (
-              <>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="h-6 w-6 rounded-full bg-primary-light flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <User className="h-4 w-4 text-primary" />
-                    </div>
-                    <span className="text-sm font-medium text-gray-800">
-                      {comment.author}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {format(new Date(comment.created_at), 'MMM d, yyyy HH:mm')}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => {
-                        setEditingId(comment.id);
-                        setEditText(comment.text);
-                      }}
-                      className="btn-ghost p-1 hover:scale-110 transition-transform"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => onDeleteComment(comment.id)}
-                      className="btn-ghost p-1 hover:text-semantic-error hover:scale-110 transition-transform"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-                <p className="mt-2 text-sm text-gray-700 leading-relaxed">{comment.text}</p>
-              </>
+              <p className="mt-2 text-sm text-gray-700 leading-relaxed">
+                {comment.text}
+              </p>
             )}
           </div>
         ))}

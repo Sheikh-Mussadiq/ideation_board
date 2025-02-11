@@ -3,14 +3,14 @@
 @tailwind utilities;
 
 :root {
-  --primary: #6D28D9;
-  --primary-light: #F0EEFF;
+  --primary: #6d28d9;
+  --primary-light: #f0eeff;
   --primary-hover: #5b21b6;
 }
 
 @layer base {
   html {
-    font-family: 'Nunito', sans-serif;
+    font-family: "Nunito", sans-serif;
   }
 
   input[type="text"],

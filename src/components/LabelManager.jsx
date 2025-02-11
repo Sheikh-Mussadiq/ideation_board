@@ -2,12 +2,36 @@ import React, { useState } from 'react';
 import { Tag, Plus, X } from 'lucide-react';
 
 const LABEL_COLORS = {
-  red: 'bg-semantic-error-light text-semantic-error',
-  blue: 'bg-semantic-info-light text-semantic-info',
-  green: 'bg-semantic-success-light text-semantic-success',
-  yellow: 'bg-semantic-warning-light text-semantic-warning',
-  purple: 'bg-primary-light text-primary',
-  gray: 'bg-gray-100 text-gray-700'
+  red: {
+    bg: 'bg-semantic-error-light',
+    text: 'text-semantic-error',
+    button: 'bg-semantic-error/20'
+  },
+  blue: {
+    bg: 'bg-semantic-info-light',
+    text: 'text-semantic-info',
+    button: 'bg-semantic-info/20'
+  },
+  green: {
+    bg: 'bg-semantic-success-light',
+    text: 'text-semantic-success',
+    button: 'bg-semantic-success/20'
+  },
+  yellow: {
+    bg: 'bg-semantic-warning-light',
+    text: 'text-semantic-warning',
+    button: 'bg-semantic-warning/20'
+  },
+  purple: {
+    bg: 'bg-primary-light',
+    text: 'text-primary',
+    button: 'bg-primary/20'
+  },
+  gray: {
+    bg: 'bg-gray-100',
+    text: 'text-gray-700',
+    button: 'bg-gray-200'
+  }
 };
 
 export default function LabelManager({ labels, onUpdate }) {
@@ -33,7 +57,7 @@ export default function LabelManager({ labels, onUpdate }) {
         {labels.map((label, index) => (
           <span
             key={index}
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${LABEL_COLORS[label.color]}`}
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${LABEL_COLORS[label.color].bg} ${LABEL_COLORS[label.color].text}`}
           >
             {label.text}
             <button
@@ -72,7 +96,9 @@ export default function LabelManager({ labels, onUpdate }) {
                   className={`w-6 h-6 rounded-full ${
                     selectedColor === color ? 'ring-2 ring-offset-2 ring-gray-400' : ''
                   }`}
-                  style={{ backgroundColor: value }}
+                  className={`w-6 h-6 rounded-full ${LABEL_COLORS[color].button} ${LABEL_COLORS[color].text} ${
+                    selectedColor === color ? 'ring-2 ring-offset-2 ring-gray-400' : ''
+                  }`}
                 />
               ))}
             </div>

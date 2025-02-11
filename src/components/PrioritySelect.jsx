@@ -2,9 +2,21 @@ import React from 'react';
 import { ChevronDown } from 'lucide-react';
 
 const priorityColors = {
-  low: 'bg-semantic-success-light text-semantic-success hover:bg-semantic-success-hover',
-  medium: 'bg-semantic-warning-light text-semantic-warning hover:bg-semantic-warning-hover',
-  high: 'bg-semantic-error-light text-semantic-error hover:bg-semantic-error-hover'
+  low: {
+    bg: 'bg-semantic-success-light',
+    text: 'text-semantic-success',
+    hover: 'hover:bg-semantic-success/20'
+  },
+  medium: {
+    bg: 'bg-semantic-warning-light',
+    text: 'text-semantic-warning',
+    hover: 'hover:bg-semantic-warning/20'
+  },
+  high: {
+    bg: 'bg-semantic-error-light',
+    text: 'text-semantic-error',
+    hover: 'hover:bg-semantic-error/20'
+  }
 };
 
 export default function PrioritySelect({ value, onChange }) {
@@ -19,7 +31,7 @@ export default function PrioritySelect({ value, onChange }) {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium transition-colors ${priorityColors[value]}`}
+        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium transition-colors ${priorityColors[value].bg} ${priorityColors[value].text}`}
       >
         {value}
         <ChevronDown className="ml-1 h-3 w-3" />
@@ -32,7 +44,7 @@ export default function PrioritySelect({ value, onChange }) {
               <button
                 key={priority}
                 onClick={() => handleSelect(priority)}
-                className={`block w-full text-left px-4 py-2 text-xs transition-colors ${colorClass}`}
+                className={`block w-full text-left px-4 py-2 text-xs transition-colors ${priorityColors[priority].bg} ${priorityColors[priority].text} ${priorityColors[priority].hover}`}
                 role="menuitem"
               >
                 {priority}

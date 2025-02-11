@@ -296,7 +296,7 @@ export default function IdeationPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-light to-white p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold text-primary">Ideation Board</h1>

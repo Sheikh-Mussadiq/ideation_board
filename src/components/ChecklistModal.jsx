@@ -167,10 +167,10 @@ export default function ChecklistModal({ isOpen, onClose, checklist, onUpdate })
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-8 text-left align-middle shadow-xl transition-all border border-gray-100">
                 <Dialog.Title
                   as="h3"
-                  className="text-lg font-medium leading-6 text-gray-900 flex justify-between items-center"
+                  className="text-xl font-semibold text-gray-900 flex justify-between items-center mb-6"
                 >
                   <span>
                     Checklist ({completedCount}/{checklist.length})
@@ -180,15 +180,15 @@ export default function ChecklistModal({ isOpen, onClose, checklist, onUpdate })
                   </button>
                 </Dialog.Title>
 
-                <div className="mt-4 space-y-4">
+                <div className="space-y-4">
                   {checklist.map((item) => (
-                    <div key={item.id} className="flex items-center group">
+                    <div key={item.id} className="flex items-center group hover:bg-primary-light/30 p-2 rounded-lg transition-all">
                       <button
                         onClick={() => handleToggleItem(item.id)}
-                        className="flex-shrink-0 mr-2 text-gray-400 hover:text-indigo-600"
+                        className="flex-shrink-0 mr-3 text-gray-400 hover:text-primary transition-colors"
                       >
                         {item.checked ? (
-                          <CheckSquare className="h-5 w-5 text-indigo-600" />
+                          <CheckSquare className="h-5 w-5 text-primary" />
                         ) : (
                           <Square className="h-5 w-5" />
                         )}
@@ -198,7 +198,7 @@ export default function ChecklistModal({ isOpen, onClose, checklist, onUpdate })
                       </span>
                       <button
                         onClick={() => handleDeleteItem(item.id)}
-                        className="flex-shrink-0 ml-2 text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100"
+                        className="flex-shrink-0 ml-2 text-gray-400 hover:text-semantic-error opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -206,14 +206,14 @@ export default function ChecklistModal({ isOpen, onClose, checklist, onUpdate })
                   ))}
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-6">
                   <div className="flex items-center">
                     <input
                       type="text"
                       value={newItemText}
                       onChange={(e) => setNewItemText(e.target.value)}
                       placeholder="Add new item..."
-                      className="flex-grow px-3 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="flex-grow px-4 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           handleAddItem()
@@ -222,7 +222,7 @@ export default function ChecklistModal({ isOpen, onClose, checklist, onUpdate })
                     />
                     <button
                       onClick={handleAddItem}
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="px-4 py-2 bg-primary text-white rounded-r-lg hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary transition-all hover:scale-105"
                     >
                       <Plus className="h-5 w-5" />
                     </button>

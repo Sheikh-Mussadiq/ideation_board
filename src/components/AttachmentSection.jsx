@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
-import { Paperclip, X, ExternalLink, Download } from 'lucide-react';
+import React, { useState } from "react";
+import { Paperclip, X, ExternalLink, Download, Plus } from "lucide-react";
 
 export default function AttachmentSection({
   attachments,
   onAddAttachment,
-  onDeleteAttachment
+  onDeleteAttachment,
 }) {
   const [isAddingLink, setIsAddingLink] = useState(false);
-  const [newLink, setNewLink] = useState('');
+  const [newLink, setNewLink] = useState("");
   const [linkError, setLinkError] = useState(null);
 
   const isValidUrl = (urlString) => {
     try {
       // Add protocol if missing
-      const urlToTest = urlString.match(/^https?:\/\//) ? urlString : `https://${urlString}`;
+      const urlToTest = urlString.match(/^https?:\/\//)
+        ? urlString
+        : `https://${urlString}`;
       new URL(urlToTest);
       return true;
     } catch (e) {
@@ -23,33 +25,35 @@ export default function AttachmentSection({
 
   const handleAddLink = () => {
     setLinkError(null);
-    
+
     if (!newLink.trim()) {
-      setLinkError('Please enter a URL');
+      setLinkError("Please enter a URL");
       return;
     }
 
     // Add protocol if missing
-    const finalUrl = newLink.match(/^https?:\/\//) ? newLink : `https://${newLink}`;
+    const finalUrl = newLink.match(/^https?:\/\//)
+      ? newLink
+      : `https://${newLink}`;
 
     if (!isValidUrl(finalUrl)) {
-      setLinkError('Please enter a valid URL');
+      setLinkError("Please enter a valid URL");
       return;
     }
-    
+
     try {
       const url = new URL(finalUrl);
       onAddAttachment({
         id: Date.now().toString(),
-        type: 'link',
+        type: "link",
         url: finalUrl,
         name: url.hostname,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       });
-      setNewLink('');
+      setNewLink("");
       setIsAddingLink(false);
     } catch (error) {
-      setLinkError('Invalid URL format');
+      setLinkError("Invalid URL format");
     }
   };
 
@@ -58,42 +62,40 @@ export default function AttachmentSection({
     if (file) {
       onAddAttachment({
         id: Date.now().toString(),
-        type: 'file',
+        type: "file",
         url: URL.createObjectURL(file),
         name: file.name,
         size: file.size,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       });
     }
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in-50">
+    <div className="space-y-4 animate-in fade-in-50 bg-gray-50/50 border border-gray-100 p-4 rounded-xl">
       <div className="flex items-center justify-between">
-        <div className="flex items-center text-sm text-gray-700">
+        <div className="flex items-center text-sm font-medium text-gray-700">
           <Paperclip className="h-4 w-4 mr-2" />
           Attachments
         </div>
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setIsAddingLink(true)}
-            className="text-sm text-primary hover:text-primary-hover transition-all hover:scale-105"
+            className="text-sm text-primary hover:text-primary-hover transition-all hover:scale-105 px-3 py-1 rounded-lg hover:bg-primary-light"
           >
+            <Plus className="h-4 w-4 inline-block mr-1" />
             Add Link
           </button>
-          <label className="cursor-pointer text-sm text-primary hover:text-primary-hover transition-all hover:scale-105">
+          <label className="cursor-pointer text-sm text-primary hover:text-primary-hover transition-all hover:scale-105 px-3 py-1 rounded-lg hover:bg-primary-light">
+            <Plus className="h-4 w-4 inline-block mr-1" />
             Upload File
-            <input
-              type="file"
-              className="hidden"
-              onChange={handleFileUpload}
-            />
+            <input type="file" className="hidden" onChange={handleFileUpload} />
           </label>
         </div>
       </div>
 
       {isAddingLink && (
-        <div className="space-y-2 animate-in slide-in-from-top">
+        <div className="space-y-2 animate-in slide-in-from-top bg-white p-4 rounded-lg shadow-sm">
           <div className="flex items-center gap-2">
             <input
               type="url"
@@ -101,25 +103,22 @@ export default function AttachmentSection({
               onChange={(e) => setNewLink(e.target.value)}
               placeholder="Enter URL..."
               className={`input flex-1 ${
-                linkError ? 'border-semantic-error' : ''
+                linkError ? "border-semantic-error" : ""
               }`}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   e.preventDefault();
                   handleAddLink();
                 }
               }}
             />
-            <button
-              onClick={handleAddLink}
-              className="btn-primary"
-            >
+            <button onClick={handleAddLink} className="btn-primary">
               Add
             </button>
             <button
               onClick={() => {
                 setIsAddingLink(false);
-                setNewLink('');
+                setNewLink("");
                 setLinkError(null);
               }}
               className="btn-ghost p-2 hover:rotate-90 transition-transform"
@@ -134,18 +133,29 @@ export default function AttachmentSection({
       )}
 
       <div className="space-y-2">
-        {attachments.map(attachment => (
+        {attachments.map((attachment) => (
           <div
             key={attachment.id}
-            className="flex items-center justify-between p-2 bg-primary-light rounded-lg hover:bg-primary-light/80 transition-all hover:scale-[1.02] group"
+            className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:border-primary/30 hover:bg-primary-light/10 transition-all hover:scale-[1.02] group"
           >
             <div className="flex items-center space-x-2">
-              {attachment.type === 'link' ? (
-                <ExternalLink className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
+              {attachment.type === "link" ? (
+                <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <ExternalLink className="h-4 w-4 text-primary" />
+                </div>
               ) : (
-                <Paperclip className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
+                <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Paperclip className="h-4 w-4 text-primary" />
+                </div>
               )}
-              <span className="text-sm font-medium text-gray-800">{attachment.name}</span>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-gray-800">
+                  {attachment.name}
+                </span>
+                <span className="text-xs text-gray-500">
+                  Added {new Date(attachment.createdAt).toLocaleDateString()}
+                </span>
+              </div>
               {attachment.size && (
                 <span className="text-xs text-gray-500">
                   ({Math.round(attachment.size / 1024)} KB)
@@ -160,7 +170,7 @@ export default function AttachmentSection({
                 className="p-1 text-primary hover:text-primary-hover transition-all hover:scale-110"
                 onClick={(e) => e.stopPropagation()}
               >
-                {attachment.type === 'link' ? (
+                {attachment.type === "link" ? (
                   <ExternalLink className="h-4 w-4" />
                 ) : (
                   <Download className="h-4 w-4" />
