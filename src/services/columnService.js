@@ -1,6 +1,7 @@
+
 import { supabase } from '../lib/supabase';
 
-export async function createColumn(boardId, title) {
+export async function createColumn(boardId, title, accountId) {
   // Get the highest position number for the current board
   const { data: columns, error: posError } = await supabase
     .from('columns')
@@ -18,6 +19,7 @@ export async function createColumn(boardId, title) {
     .insert([{
       board_id: boardId,
       title,
+      account_id: accountId,
       position
     }])
     .select()
@@ -32,11 +34,13 @@ export async function createColumn(boardId, title) {
   };
 }
 
-export async function deleteColumn(columnId) {
+export async function deleteColumn(columnId, accountId) {
+  console.log('deleteColumn:', columnId, accountId);
   const { error } = await supabase
     .from('columns')
     .delete()
-    .eq('id', columnId);
+    .eq('id', columnId)
+    .eq('account_id', accountId);
 
   if (error) throw error;
 }

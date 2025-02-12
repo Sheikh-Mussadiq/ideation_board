@@ -1,9 +1,11 @@
+
 import { supabase } from '../lib/supabase';
 
-export async function fetchBoards() {
+export async function fetchBoards(accountId) {
   const { data: boards, error: boardsError } = await supabase
     .from('boards')
     .select('*')
+    .eq('account_id', accountId)
     .order('created_at', { ascending: true });
 
   if (boardsError) throw boardsError;
@@ -78,19 +80,19 @@ export async function fetchBoards() {
   return boardsWithDetails;
 }
 
-export async function createBoard(title) {
+export async function createBoard(title , accountId) {
   const { data: board, error: boardError } = await supabase
     .from('boards')
-    .insert([{ title }])
+    .insert([{ title, account_id: accountId }])
     .select()
     .single();
 
   if (boardError) throw boardError;
 
   const defaultColumns = [
-    { title: 'To Do', position: 0 },
-    { title: 'In Progress', position: 1 },
-    { title: 'Done', position: 2 }
+    { title: 'To Do', position: 0,  account_id: accountId },
+    { title: 'In Progress', position: 1, account_id: accountId },
+    { title: 'Done', position: 2 , account_id: accountId },
   ];
 
   const { data: columns, error: columnsError } = await supabase
@@ -99,6 +101,7 @@ export async function createBoard(title) {
       defaultColumns.map(col => ({
         board_id: board.id,
         title: col.title,
+        account_id: col.account_id,
         position: col.position
       }))
     )
@@ -117,20 +120,23 @@ export async function createBoard(title) {
   };
 }
 
-export async function updateBoard(boardId, updates) {
+export async function updateBoard(boardId, updates , accountId) {
   const { error } = await supabase
     .from('boards')
     .update({ title: updates.title, updated_at: new Date().toISOString() })
-    .eq('id', boardId);
+    .eq('id', boardId)
+    .eq('account_id', accountId);
 
   if (error) throw error;
 }
 
-export async function deleteBoard(boardId) {
+export async function deleteBoard(boardId , accountId) {
+  console.log('deleteBoard:', boardId, accountId);
   const { error } = await supabase
     .from('boards')
     .delete()
-    .eq('id', boardId);
+    .eq('id', boardId)
+    .eq('account_id', accountId);
 
   if (error) throw error;
 }

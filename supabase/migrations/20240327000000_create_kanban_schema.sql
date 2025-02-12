@@ -103,22 +103,22 @@ INSERT INTO boards (title) VALUES ('My First Board')
 ON CONFLICT DO NOTHING;
 
 -- Get the board ID and insert default columns
-DO $$ 
-DECLARE
-    board_id UUID;
-BEGIN
-    SELECT id INTO board_id FROM boards LIMIT 1;
+-- DO $$ 
+-- DECLARE
+--     board_id UUID;
+-- BEGIN
+--     SELECT id INTO board_id FROM boards LIMIT 1;
 
-    -- Insert default columns if they don't exist
-    INSERT INTO columns (board_id, title, position)
-    SELECT board_id, col.title, col.position
-    FROM (
-        VALUES
-            ('To Do', 0),
-            ('In Progress', 1),
-            ('Done', 2)
-    ) AS col(title, position)
-    WHERE NOT EXISTS (
-        SELECT 1 FROM columns WHERE board_id = board_id
-    );
-END $$;
+--     -- Insert default columns if they don't exist
+--     INSERT INTO columns (board_id, title, position)
+--     SELECT board_id, col.title, col.position
+--     FROM (
+--         VALUES
+--             ('To Do', 0),
+--             ('In Progress', 1),
+--             ('Done', 2)
+--     ) AS col(title, position)
+--     WHERE NOT EXISTS (
+--         SELECT 1 FROM columns WHERE board_id = board_id
+--     );
+-- END $$;

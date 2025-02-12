@@ -8,11 +8,14 @@ import KanbanCard from '../components/KanbanCard';
 import ResetDataButton from '../components/ResetDataButton';
 import DeleteBoardModal from '../components/DeleteBoardModal';
 import { fetchBoards, createBoard, updateBoard, deleteBoard } from '../services/boardService';
-import { createCard, updateCard, deleteCard } from '../services/cardService';
+import { createCard, updateCard, deleteCard, moveCardToColumn, updateCardPositions } from '../services/cardService';
 import { createColumn, deleteColumn } from '../services/columnService';
 import { useRealtimeCards } from '../hooks/useRealtimeCards';
 import { useRealtimeColumns } from '../hooks/useRealtimeColumns';
 
+import { useAuth } from '../context/AuthContext';
+import { useRealtimeCardComments } from '../hooks/useRealtimeCardComments';
+import { useRealtimeBoards } from '../hooks/useRealtimeBoards';
 export default function IdeationPage() {
   const [boards, setBoards] = useState([]);
   const [selectedBoardId, setSelectedBoardId] = useState(null);
@@ -23,7 +26,7 @@ export default function IdeationPage() {
   const [newColumnTitle, setNewColumnTitle] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  
+  const {currentUser } = useAuth();
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -35,10 +38,10 @@ export default function IdeationPage() {
   useEffect(() => {
     loadBoards();
   }, []);
-
-  const loadBoards = async () => {
+  
+  const loadBoards = async (payload) => {
     try {
-      const loadedBoards = await fetchBoards();
+      const loadedBoards = await fetchBoards( currentUser.accountId );
       setBoards(loadedBoards);
       if (loadedBoards.length > 0 && !selectedBoardId) {
         setSelectedBoardId(loadedBoards[0].id);
@@ -51,35 +54,200 @@ export default function IdeationPage() {
     }
   };
 
-  const handleCardChange = (updatedCard) => {
+  // const handleCardChange = (updatedCard) => {
+  //   console.log('Card change received:', updatedCard);
+    
+  //   if (updatedCard.type === 'DELETE') {
+  //     setBoards(prev => prev.map(board => ({
+  //       ...board,
+  //       columns: board.columns.map(col => ({
+  //         ...col,
+  //         cards: col.cards.filter(card => card.id !== updatedCard.id)
+  //       }))
+  //     })));
+  //     return;
+  //   }
+
+  //   setBoards(prev => prev.map(board => ({
+  //     ...board,
+  //     columns: board.columns.map(col => {
+  //       if (col.id === updatedCard.column_id) {
+  //         const existingCardIndex = col.cards.findIndex(card => card.id === updatedCard.id);
+  //         const updatedCards = [...col.cards];
+
+  //         if (existingCardIndex === -1 && updatedCard.type === 'INSERT') {
+  //           // New card
+  //           updatedCards.push(updatedCard);
+  //         } else if (existingCardIndex !== -1) {
+  //           // Update existing card
+  //           updatedCards[existingCardIndex] = {
+  //             ...updatedCards[existingCardIndex],
+  //             ...updatedCard
+  //           };
+  //         }
+
+  //         return {
+  //           ...col,
+  //           cards: updatedCards
+  //         };
+  //       }
+  //       return col;
+  //     })
+  //   })));
+  // };
+
+  const handleCardChange = (updatedCard) => { 
+    console.log('Card change received:', updatedCard);
+
+    if (updatedCard.type === 'DELETE') {
+      setBoards(prev => prev.map(board => ({
+        ...board,
+        columns: board.columns.map(col => ({
+          ...col,
+          cards: col.cards.filter(card => card.id !== updatedCard.id)
+        }))
+      })));
+      return;
+    }
+
+    setBoards(prevBoards => {
+        // Clone the boards to ensure a new reference
+        const newBoards = prevBoards.map(board => ({
+            ...board,
+            columns: board.columns.map(col => {
+                if (col.id === updatedCard.column_id) {
+                    // Clone the cards array to ensure reactivity
+                    let updatedCards = [...col.cards];
+
+                    if (updatedCard.type === 'DELETE') {
+                        updatedCards = updatedCards.filter(card => card.id !== updatedCard.id);
+                    } else {
+                        const existingCardIndex = updatedCards.findIndex(card => card.id === updatedCard.id);
+                        if (existingCardIndex === -1 && updatedCard.type === 'INSERT') {
+                            updatedCards.push(updatedCard);
+                        } else if (existingCardIndex !== -1) {
+                            updatedCards[existingCardIndex] = {
+                                ...updatedCards[existingCardIndex],
+                                ...updatedCard
+                            };
+                        }
+                    }
+
+                    return { ...col, cards: updatedCards };
+                }
+                return col;
+            })
+        }));
+
+        return [...newBoards]; // Ensure a new array reference to trigger re-render
+    });
+};
+
+
+const handleColumnChange = (updatedColumn) => {
+  console.log('Column change received:', updatedColumn);
+  
+  if (updatedColumn.type === 'DELETE') {
+    // Simply remove the column from the board, cascade delete will handle the cards
     setBoards(prev => prev.map(board => ({
       ...board,
-      columns: board.columns.map(column => ({
-        ...column,
-        cards: column.cards.map(card => 
-          card.id === updatedCard.id ? updatedCard : card
-        )
+      columns: board.columns.filter(col => col.id !== updatedColumn.id)
+    })));
+    return;
+  }
+
+  setBoards(prev => prev.map(board => {
+    if (board.id === updatedColumn.board_id) {
+      const existingColumnIndex = board.columns.findIndex(col => col.id === updatedColumn.id);
+      const updatedColumns = [...board.columns];
+
+      // Ensure cards array exists
+      const columnWithCards = {
+        ...updatedColumn,
+        cards: updatedColumn.cards || []
+      };
+
+      if (existingColumnIndex === -1 && updatedColumn.type === 'INSERT') {
+        // New column
+        updatedColumns.push(columnWithCards);
+      } else if (existingColumnIndex !== -1) {
+        // Update existing column while preserving cards
+        updatedColumns[existingColumnIndex] = {
+          ...updatedColumns[existingColumnIndex],
+          ...columnWithCards,
+          cards: updatedColumns[existingColumnIndex].cards || []
+        };
+      }
+
+      return {
+        ...board,
+        columns: updatedColumns
+      };
+    }
+    return board;
+  }));
+};
+
+
+  const handleCommentChange = (updatedComment, eventType) => {
+    
+
+    if (eventType === 'DELETE') {
+   
+      setBoards(prev => prev.map(board => ({
+        ...board,
+        columns: board.columns.map(col => ({
+          ...col,
+          cards: col.cards.map(card => ({
+            ...card,
+            comments: card.comments.filter(comment => comment.id !== updatedComment)
+          }))
+        }))
+      })));
+      return;
+    }
+
+    setBoards(prev => prev.map(board => ({
+      ...board,
+      columns: board.columns.map(col => ({
+        ...col,
+        cards: col.cards.map(card => {
+          if (card.id === updatedComment.card_id) {
+            const existingCommentIndex = card.comments.findIndex(comment => comment.id === updatedComment.id);
+            const updatedComments = [...card.comments];
+
+            if (existingCommentIndex === -1 && eventType === 'INSERT') {
+              // New comment
+              updatedComments.push(updatedComment);
+            } else if (existingCommentIndex !== -1) {
+              // Update existing comment
+              updatedComments[existingCommentIndex] = {
+                ...updatedComments[existingCommentIndex],
+                ...updatedComment
+              };
+            }
+
+            return {
+              ...card,
+              comments: updatedComments
+            };
+          }
+          return card;
+        })
       }))
     })));
   };
 
-  const handleColumnChange = (updatedColumn) => {
-    setBoards(prev => prev.map(board => ({
-      ...board,
-      columns: board.columns.map(column => 
-        column.id === updatedColumn.id ? updatedColumn : column
-      )
-    })));
-  };
-
+    
   // Set up realtime subscriptions
   useRealtimeCards(selectedBoardId || '', handleCardChange);
   useRealtimeColumns(selectedBoardId || '', handleColumnChange);
-
+  useRealtimeCardComments(selectedBoardId ,handleCommentChange);
+  useRealtimeBoards(currentUser.accountId, loadBoards);
   const handleAddBoard = async () => {
     if (newBoardTitle.trim()) {
       try {
-        const newBoard = await createBoard(newBoardTitle.trim());
+        const newBoard = await createBoard(newBoardTitle.trim() , currentUser.accountId);
         setBoards(prev => [...prev, newBoard]);
         setSelectedBoardId(newBoard.id);
         setNewBoardTitle('');
@@ -96,7 +264,7 @@ export default function IdeationPage() {
     if (!selectedBoardId) return;
     
     try {
-      await deleteBoard(selectedBoardId);
+      await deleteBoard(selectedBoardId, currentUser.accountId);
       setBoards(prev => prev.filter(board => board.id !== selectedBoardId));
       setSelectedBoardId(boards.find(board => board.id !== selectedBoardId)?.id || null);
       toast.success('Board deleted successfully');
@@ -111,7 +279,7 @@ export default function IdeationPage() {
   const handleAddColumn = async () => {
     if (newColumnTitle.trim() && selectedBoardId) {
       try {
-        const newColumn = await createColumn(selectedBoardId, newColumnTitle.trim());
+        const newColumn = await createColumn(selectedBoardId, newColumnTitle.trim(), currentUser.accountId);
         setBoards(prev => prev.map(board => 
           board.id === selectedBoardId
             ? { ...board, columns: [...board.columns, newColumn] }
@@ -131,7 +299,8 @@ export default function IdeationPage() {
     if (!selectedBoardId) return;
     
     try {
-      await deleteColumn(columnId);
+      const response = await deleteColumn(columnId, currentUser.accountId);
+     
       setBoards(prev => prev.map(board => 
         board.id === selectedBoardId
           ? { ...board, columns: board.columns.filter(col => col.id !== columnId) }
@@ -152,18 +321,39 @@ export default function IdeationPage() {
         priority: 'medium',
         labels: [],
         attachments: [],
-        comments: []
-      });
-
-      setBoards(prev => prev.map(board => ({
+        comments: [],
+        position: 0 // Set initial position to 0
+      }, currentUser.accountId);
+  
+      // Update the frontend state
+      const updatedBoards = boards.map(board => ({
         ...board,
-        columns: board.columns.map(col => 
-          col.id === columnId
-            ? { ...col, cards: [...col.cards, newCard] }
-            : col
-        )
-      })));
-      
+        columns: board.columns.map(col => {
+          if (col.id === columnId) {
+            // Add new card at the beginning and shift other cards down
+            const updatedCards = [
+              newCard,
+              ...col.cards.map(card => ({
+                ...card,
+                position: card.position + 1
+              }))
+            ];
+  
+            // Update all card positions in the database
+            updateCardPositions(updatedCards).catch(error => {
+              console.error('Error updating card positions:', error);
+            });
+  
+            return {
+              ...col,
+              cards: updatedCards
+            };
+          }
+          return col;
+        })
+      }));
+  
+      setBoards(updatedBoards);
       toast.success('Card added successfully');
     } catch (error) {
       console.error('Error adding card:', error);
@@ -171,9 +361,11 @@ export default function IdeationPage() {
     }
   };
 
-  const handleUpdateCard = async (cardId, updates) => {
+
+
+  const handleUpdateCard = async (cardId, updates,  ) => {
     try {
-      await updateCard(cardId, updates);
+      await updateCard(cardId, updates, currentUser.accountId);
       setBoards(prev => prev.map(board => ({
         ...board,
         columns: board.columns.map(col => ({
@@ -191,7 +383,7 @@ export default function IdeationPage() {
 
   const handleDeleteCard = async (cardId) => {
     try {
-      await deleteCard(cardId);
+      await deleteCard(cardId, currentUser.accountId);
       setBoards(prev => prev.map(board => ({
         ...board,
         columns: board.columns.map(col => ({
@@ -206,9 +398,9 @@ export default function IdeationPage() {
     }
   };
 
-  const handleArchiveCard = async (cardId) => {
+  const handleArchiveCard = async (cardId,) => {
     try {
-      await updateCard(cardId, { archived: true });
+      await updateCard(cardId, { archived: true }, currentUser.accountId);
       setBoards(prev => prev.map(board => ({
         ...board,
         columns: board.columns.map(col => ({
@@ -237,49 +429,105 @@ export default function IdeationPage() {
     }
   };
 
-  const handleDragEnd = async (event) => {
+   const handleDragEnd = async (event) => {
     const { active, over } = event;
-    
+  
     if (!over) return;
-
+  
     const activeCard = boards
       .flatMap(board => board.columns)
       .flatMap(col => col.cards)
       .find(card => card.id === active.id);
-    
-    const overColumn = boards
+  
+    const sourceColumn = boards
       .flatMap(board => board.columns)
-      .find(col => col.id === over.id);
-
+      .find(col => col.cards.some(card => card.id === active.id));
+  
+    const overCard = boards
+      .flatMap(board => board.columns)
+      .flatMap(col => col.cards)
+      .find(card => card.id === over.id);
+  
+    const overColumn = overCard 
+      ? boards.flatMap(board => board.columns).find(col => col.cards.includes(overCard))
+      : boards.flatMap(board => board.columns).find(col => col.id === over.id);
+  
     if (!activeCard || !overColumn) return;
-
+  
+    const isSameColumn = sourceColumn.id === overColumn.id;
+    const newPosition = overCard
+      ? overColumn.cards.findIndex(card => card.id === over.id)
+      : overColumn.cards.length;
+  
     try {
-      await updateCard(activeCard.id, { column_id: overColumn.id });
-      setBoards(prev => prev.map(board => ({
+      const updatedBoards = boards.map(board => ({
         ...board,
         columns: board.columns.map(col => {
-          if (col.cards.some(card => card.id === active.id)) {
+          // Handle source column (remove card)
+          if (!isSameColumn && col.id === sourceColumn.id) {
             return {
               ...col,
               cards: col.cards.filter(card => card.id !== active.id)
             };
           }
+  
+          // Handle destination column (add/reorder card)
           if (col.id === overColumn.id) {
+            let updatedCards;
+            
+            if (isSameColumn) {
+              // For same column, reorder the cards
+              const cards = [...col.cards];
+              const oldIndex = cards.findIndex(card => card.id === active.id);
+              const [movedCard] = cards.splice(oldIndex, 1);
+              cards.splice(newPosition, 0, movedCard);
+              updatedCards = cards;
+            } else {
+              // For different columns, add to destination
+              updatedCards = [...col.cards, { ...activeCard, column_id: overColumn.id }];
+            }
+  
+            // Update positions for all cards
+            const finalCards = updatedCards.map((card, index) => ({
+              ...card,
+              position: index,
+              column_id: overColumn.id
+            }));
+  
             return {
               ...col,
-              cards: [...col.cards, activeCard]
+              cards: finalCards
             };
           }
+  
           return col;
         })
-      })));
+      }));
+  
+      setBoards(updatedBoards);
+  
+      // Get all cards that need position updates
+      const cardsToUpdate = updatedBoards
+        .flatMap(board => board.columns)
+        .find(col => col.id === overColumn.id)
+        .cards;
+  
+      if (isSameColumn) {
+        // Update positions for all cards in the same column
+        await updateCardPositions(cardsToUpdate, currentUser.accountId);
+      } else {
+        // First move the card to new column, then update positions for all affected cards
+        await moveCardToColumn(activeCard.id, overColumn.id, newPosition, currentUser.accountId);
+        await updateCardPositions(cardsToUpdate, currentUser.accountId);
+      }
     } catch (error) {
       console.error('Error moving card:', error);
       toast.error('Failed to move card');
     }
-
+  
     setActiveCard(null);
   };
+
 
   const selectedBoard = boards.find(board => board.id === selectedBoardId);
 

@@ -3,51 +3,37 @@ import { supabase } from '../lib/supabase';
 
 export function useRealtimeColumns(boardId, onColumnChange) {
   useEffect(() => {
+    if (!boardId) return;
+    console.log('useRealtimeColumns:', boardId);
     const channel = supabase
-      .channel(`board-columns-${boardId}`)
+      .channel(`public:columns:${boardId}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'columns',
-          filter: `board_id=eq.${boardId}`
+          // filter: `board_id=eq.${boardId}`
         },
-        async (payload) => {
-          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-            const { data: column } = await supabase
-              .from('columns')
-              .select(`
-                *,
-                cards (
-                  *,
-                  labels (name),
-                  comments (*),
-                  attachments (*)
-                )
-              `)
-              .eq('id', payload.new.id)
-              .single();
+        (payload) => {
+          console.log('Column change received:', payload);
 
-            if (column) {
-              const formattedColumn = {
-                id: column.id,
-                title: column.title,
-                cards: column.cards.map(card => ({
-                  id: card.id,
-                  title: card.title,
-                  description: card.description,
-                  priority: card.priority,
-                  assignee: card.assignee,
-                  dueDate: card.due_date,
-                  labels: card.labels?.map(l => l.name) || [],
-                  attachments: card.attachments || [],
-                  comments: card.comments || [],
-                  archived: card.archived
-                }))
-              };
-              onColumnChange(formattedColumn);
-            }
+          if (payload.eventType === 'DELETE') {
+            onColumnChange({ 
+              id: payload.old.id, 
+              board_id: payload.old.board_id,
+              type: 'DELETE' 
+            });
+            return;
+          }
+
+          const updatedColumn = payload.new;
+          if (updatedColumn) {
+            onColumnChange({
+              ...updatedColumn,
+              cards: [], // Initialize empty cards array for new columns
+              type: payload.eventType
+            });
           }
         }
       )

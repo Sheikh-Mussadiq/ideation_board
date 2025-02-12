@@ -28,7 +28,9 @@ export default function KanbanColumn({
     };
   }, [column.id, updatePresence]);
 
-  const visibleCards = column.cards.filter(card => !card.archived);
+  // Ensure cards array exists
+  const cards = column.cards || [];
+  const visibleCards = cards.filter(card => !card.archived);
 
   return (
     <div
