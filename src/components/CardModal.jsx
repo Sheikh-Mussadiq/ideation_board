@@ -381,9 +381,9 @@ import LabelManager from "./LabelManager";
 import AttachmentSection from "./AttachmentSection";
 import CommentSection from "./CommentSection";
 import ChecklistModal from "./ChecklistModal";
-import EditableText from "./EditableText"
-import { updateComment } from '../services/cardService';
-import { useAuth } from '../context/AuthContext';
+import EditableText from "./EditableText";
+import { updateComment } from "../services/cardService";
+import { useAuth } from "../context/AuthContext";
 export default function CardModal({
   isOpen,
   onClose,
@@ -394,8 +394,17 @@ export default function CardModal({
 }) {
   const [showChecklist, setShowChecklist] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [localTitle, setLocalTitle] = useState(card.title);
+  const [localDescription, setLocalDescription] = useState(card.description);
   const titleInputRef = useRef(null);
   const { currentUser } = useAuth();
+
+  // Update local state when card props change
+  useEffect(() => {
+    setLocalTitle(card.title);
+    setLocalDescription(card.description);
+  }, [card.title, card.description]);
+
   useEffect(() => {
     if (isEditingTitle && titleInputRef.current) {
       titleInputRef.current.focus();
@@ -408,11 +417,24 @@ export default function CardModal({
   };
 
   const handleTitleChange = (e) => {
-    onUpdate(card.id, { title: e.target.value });
+    setLocalTitle(e.target.value);
   };
 
   const handleTitleBlur = () => {
     setIsEditingTitle(false);
+    if (localTitle !== card.title) {
+      onUpdate(card.id, { title: localTitle });
+    }
+  };
+
+  const handleDescriptionChange = (e) => {
+    setLocalDescription(e.target.value);
+  };
+
+  const handleDescriptionBlur = () => {
+    if (localDescription !== card.description) {
+      onUpdate(card.id, { description: localDescription });
+    }
   };
 
   return (
@@ -494,7 +516,7 @@ export default function CardModal({
                         <input
                           ref={titleInputRef}
                           type="text"
-                          value={card.title}
+                          value={localTitle}
                           onChange={handleTitleChange}
                           onBlur={handleTitleBlur}
                           className="w-full max-w-full text-xl font-semibold text-gray-900 border-b-2 border-primary focus:ring-0 focus:outline-none bg-primary-light/30 px-3 py-2 rounded-lg transition-all"
@@ -502,7 +524,7 @@ export default function CardModal({
                         />
                       ) : (
                         <span className="text-xl font-semibold text-gray-900 truncate hover:text-primary transition-colors">
-                          {card.title}
+                          {localTitle}
                         </span>
                       )}
                     </Dialog.Title>
@@ -536,10 +558,9 @@ export default function CardModal({
                       Description
                     </label>
                     <textarea
-                      value={card.description}
-                      onChange={(e) =>
-                        onUpdate(card.id, { description: e.target.value })
-                      }
+                      value={localDescription}
+                      onChange={handleDescriptionChange}
+                      onBlur={handleDescriptionBlur}
                       rows={4}
                       className="w-full rounded-lg border border-gray-100 shadow-sm p-2 focus:border-primary focus:ring-primary resize-none transition-all hover:border-primary"
                       placeholder="Add a description..."
@@ -583,58 +604,61 @@ export default function CardModal({
 
                   {/* Comments */}
                   <CommentSection
-                      comments={card.comments || []}
-                      onAddComment={async (text) => {
-                        const newComment = {
-                          id: Date.now().toString(),
-                          text,
-                          author: currentUser.firstName,
+                    comments={card.comments || []}
+                    onAddComment={async (text) => {
+                      const newComment = {
+                        id: Date.now().toString(),
+                        text,
+                        author: currentUser.firstName,
+                        account_id: currentUser.accountId,
+                        created_at: new Date().toISOString(),
+                      };
+                      try {
+                        await updateComment("add", card.id, newComment);
+                        // onUpdate(card.id, {
+                        //   comments: [...(card.comments || []), newComment],
+                        // });
+                        console.log(card.comments, "new comment:", newComment);
+                      } catch (error) {
+                        console.error("Error adding comment:", error);
+                      }
+                    }}
+                    onEditComment={async (commentId, text) => {
+                      const updatedComment = {
+                        id: commentId,
+                        text,
+                        account_id: currentUser.accountId,
+                        editedAt: new Date().toISOString(),
+                      };
+                      try {
+                        await updateComment("edit", card.id, updatedComment);
+                        // onUpdate(card.id, {
+                        //   comments: (card.comments || []).map((c) =>
+                        //     c.id === commentId
+                        //       ? { ...c, text, editedAt: updatedComment.editedAt }
+                        //       : c
+                        //   ),
+                        // });
+                      } catch (error) {
+                        console.error("Error editing comment:", error);
+                      }
+                    }}
+                    onDeleteComment={async (comment_ID) => {
+                      try {
+                        await updateComment("delete", card.id, {
+                          commentId: comment_ID,
                           account_id: currentUser.accountId,
-                          created_at: new Date().toISOString(),
-                        };
-                        try {
-                          await updateComment("add", card.id, newComment);
-                          onUpdate(card.id, {
-                            comments: [...(card.comments || []), newComment],
-                          });
-                          console.log(card.comments , "new comment:", newComment)
-                        } catch (error) {
-                          console.error("Error adding comment:", error);
-                        }
-                      }}
-                      onEditComment={async (commentId, text,) => {
-                        const updatedComment = {
-                          id: commentId,
-                          text,
-                          account_id: currentUser.accountId,
-                          editedAt: new Date().toISOString(),
-                        };
-                        try {
-                          await updateComment("edit", card.id, updatedComment);
-                          onUpdate(card.id, {
-                            comments: (card.comments || []).map((c) =>
-                              c.id === commentId
-                                ? { ...c, text, editedAt: updatedComment.editedAt }
-                                : c
-                            ),
-                          });
-                        } catch (error) {
-                          console.error("Error editing comment:", error);
-                        }
-                      }}
-                      onDeleteComment={async (comment) => {
-                        try {
-                          await updateComment("delete", card.id, comment);
-                          onUpdate(card.id, {
-                            comments: (card.comments || []).filter(
-                              (c) => c.id !== comment.id
-                            ),
-                          });
-                        } catch (error) {
-                          console.error("Error deleting comment:", error);
-                        }
-                      }}
-                    />
+                        });
+                        // onUpdate(card.id, {
+                        //   comments: (card.comments || []).filter(
+                        //     (c) => c.id !== comment_ID
+                        //   ),
+                        // });
+                      } catch (error) {
+                        console.error("Error deleting comment:", error);
+                      }
+                    }}
+                  />
                 </div>
               </Dialog.Panel>
             </Transition.Child>

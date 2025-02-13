@@ -12,10 +12,12 @@ import { createCard, updateCard, deleteCard, moveCardToColumn, updateCardPositio
 import { createColumn, deleteColumn } from '../services/columnService';
 import { useRealtimeCards } from '../hooks/useRealtimeCards';
 import { useRealtimeColumns } from '../hooks/useRealtimeColumns';
-
+import { useLoadingCursor } from "../hooks/useLoadingCursor";
 import { useAuth } from '../context/AuthContext';
 import { useRealtimeCardComments } from '../hooks/useRealtimeCardComments';
 import { useRealtimeBoards } from '../hooks/useRealtimeBoards';
+import { useMouseRealtime } from '../hooks/useMouseRealtime';
+
 export default function IdeationPage() {
   const [boards, setBoards] = useState([]);
   const [selectedBoardId, setSelectedBoardId] = useState(null);
@@ -25,8 +27,13 @@ export default function IdeationPage() {
   const [isAddingColumn, setIsAddingColumn] = useState(false);
   const [newColumnTitle, setNewColumnTitle] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const {currentUser } = useAuth();
+  const username = "User1"; // Replace with actual username (e.g., from auth)
+  const users = useMouseRealtime(username);
+
+ 
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -97,7 +104,7 @@ export default function IdeationPage() {
   // };
 
   const handleCardChange = (updatedCard) => { 
-    console.log('Card change received:', updatedCard);
+    // console.log('Card change received:', updatedCard);
 
     if (updatedCard.type === 'DELETE') {
       setBoards(prev => prev.map(board => ({
@@ -145,7 +152,7 @@ export default function IdeationPage() {
 
 
 const handleColumnChange = (updatedColumn) => {
-  console.log('Column change received:', updatedColumn);
+  // console.log('Column change received:', updatedColumn);
   
   if (updatedColumn.type === 'DELETE') {
     // Simply remove the column from the board, cascade delete will handle the cards
@@ -200,7 +207,7 @@ const handleColumnChange = (updatedColumn) => {
           ...col,
           cards: col.cards.map(card => ({
             ...card,
-            comments: card.comments.filter(comment => comment.id !== updatedComment)
+            comments: card.comments ? card.comments.filter(comment => comment.id !== updatedComment) : []
           }))
         }))
       })));
@@ -238,15 +245,22 @@ const handleColumnChange = (updatedColumn) => {
     })));
   };
 
+  const handleLabelUpdate = (payload, payloadType) => {
+    console.log('Label change received:', payload, payloadType);
+  };
     
   // Set up realtime subscriptions
   useRealtimeCards(selectedBoardId || '', handleCardChange);
   useRealtimeColumns(selectedBoardId || '', handleColumnChange);
   useRealtimeCardComments(selectedBoardId ,handleCommentChange);
   useRealtimeBoards(currentUser.accountId, loadBoards);
+  useLoadingCursor(loading);
+
+
   const handleAddBoard = async () => {
     if (newBoardTitle.trim()) {
       try {
+        setLoading(true);
         const newBoard = await createBoard(newBoardTitle.trim() , currentUser.accountId);
         setBoards(prev => [...prev, newBoard]);
         setSelectedBoardId(newBoard.id);
@@ -256,6 +270,8 @@ const handleColumnChange = (updatedColumn) => {
       } catch (error) {
         console.error('Error creating board:', error);
         toast.error('Failed to create board');
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -264,6 +280,7 @@ const handleColumnChange = (updatedColumn) => {
     if (!selectedBoardId) return;
     
     try {
+      setLoading(true);
       await deleteBoard(selectedBoardId, currentUser.accountId);
       setBoards(prev => prev.filter(board => board.id !== selectedBoardId));
       setSelectedBoardId(boards.find(board => board.id !== selectedBoardId)?.id || null);
@@ -273,12 +290,16 @@ const handleColumnChange = (updatedColumn) => {
       toast.error('Failed to delete board');
     } finally {
       setIsDeleteModalOpen(false);
+     
+        setLoading(false);
+    
     }
   };
 
   const handleAddColumn = async () => {
     if (newColumnTitle.trim() && selectedBoardId) {
       try {
+        setLoading(true);
         const newColumn = await createColumn(selectedBoardId, newColumnTitle.trim(), currentUser.accountId);
         setBoards(prev => prev.map(board => 
           board.id === selectedBoardId
@@ -291,6 +312,8 @@ const handleColumnChange = (updatedColumn) => {
       } catch (error) {
         console.error('Error adding column:', error);
         toast.error('Failed to add column');
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -299,6 +322,7 @@ const handleColumnChange = (updatedColumn) => {
     if (!selectedBoardId) return;
     
     try {
+      setLoading(true);
       const response = await deleteColumn(columnId, currentUser.accountId);
      
       setBoards(prev => prev.map(board => 
@@ -310,11 +334,14 @@ const handleColumnChange = (updatedColumn) => {
     } catch (error) {
       console.error('Error deleting column:', error);
       toast.error('Failed to delete column');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleAddCard = async (columnId) => {
     try {
+      setLoading(true);
       const newCard = await createCard(columnId, {
         title: 'New Task',
         description: 'Add description here',
@@ -358,13 +385,17 @@ const handleColumnChange = (updatedColumn) => {
     } catch (error) {
       console.error('Error adding card:', error);
       toast.error('Failed to add card');
+    } finally {
+      setLoading(false);
     }
   };
 
 
 
+
   const handleUpdateCard = async (cardId, updates,  ) => {
     try {
+      setLoading(true);
       await updateCard(cardId, updates, currentUser.accountId);
       setBoards(prev => prev.map(board => ({
         ...board,
@@ -378,11 +409,14 @@ const handleColumnChange = (updatedColumn) => {
     } catch (error) {
       console.error('Error updating card:', error);
       toast.error('Failed to update card');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeleteCard = async (cardId) => {
     try {
+      setLoading(true);
       await deleteCard(cardId, currentUser.accountId);
       setBoards(prev => prev.map(board => ({
         ...board,
@@ -395,6 +429,8 @@ const handleColumnChange = (updatedColumn) => {
     } catch (error) {
       console.error('Error deleting card:', error);
       toast.error('Failed to delete card');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -544,6 +580,20 @@ const handleColumnChange = (updatedColumn) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-light to-white p-6">
+       {Object.values(users).map((user) => (
+        <div
+          key={user.username}
+          style={{
+            position: "absolute",
+            left: user.x,
+            top: user.y,
+            transform: "translate(-50%, -50%)",
+            pointerEvents: "none",
+          }}
+        >
+          🖱️ <span style={{ fontSize: 12, background: "black", color: "white", padding: "2px", borderRadius: "4px" }}>{user.username}</span>
+        </div>
+      ))}
       <div className="mx-auto">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-4">

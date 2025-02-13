@@ -4,12 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './components/Layout';
 import LoginPage from './pages/LoginPage';
-import PostFormPage from './pages/PostFormPage';
-import ContentListPage from './pages/ContentListPage';
-import ContentDetailsPage from './pages/ContentDetailsPage';
-import ContentSearchPage from './pages/ContentSearchPage';
 import IdeationPage from './pages/IdeationPage';
-import ApiPage from './pages/ApiPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const LoadingSpinner = () => (
@@ -39,12 +34,12 @@ const AuthenticatedRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/ideation" replace />} />
-      <Route path="/dashboard" element={<ProtectedLayout><PostFormPage /></ProtectedLayout>} />
-      <Route path="/content" element={<ProtectedLayout><ContentListPage /></ProtectedLayout>} />
-      <Route path="/content/:id" element={<ProtectedLayout><ContentDetailsPage /></ProtectedLayout>} />
-      <Route path="/content/search" element={<ProtectedLayout><ContentSearchPage /></ProtectedLayout>} />
+      {/* <Route path="/dashboard" element={<ProtectedLayout><PostFormPage /></ProtectedLayout>} /> */}
+      {/* <Route path="/content" element={<ProtectedLayout><ContentListPage /></ProtectedLayout>} /> */}
+      {/* <Route path="/content/:id" element={<ProtectedLayout><ContentDetailsPage /></ProtectedLayout>} /> */}
+      {/* <Route path="/content/search" element={<ProtectedLayout><ContentSearchPage /></ProtectedLayout>} /> */}
       <Route path="/ideation" element={<ProtectedLayout><IdeationPage /></ProtectedLayout>} />
-      <Route path="/api" element={<ProtectedLayout><ApiPage /></ProtectedLayout>} />
+      {/* <Route path="/api" element={<ProtectedLayout><ApiPage /></ProtectedLayout>} /> */}
     </Routes>
   );
 };

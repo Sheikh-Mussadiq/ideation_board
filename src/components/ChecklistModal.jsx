@@ -110,7 +110,7 @@
 
 "use client"
 
-import { useState, Fragment } from "react"
+import { useState, Fragment, useEffect } from "react"
 import { Dialog, Transition } from "@headlessui/react"
 import { X, Plus, CheckSquare, Square } from "lucide-react"
 
@@ -131,6 +131,9 @@ export default function ChecklistModal({ isOpen, onClose, checklist, onUpdate })
     }
   }
 
+  useEffect(() => {
+    console.log("checklist", checklist)
+  }, [checklist])
   const handleToggleItem = (itemId) => {
     onUpdate(checklist.map((item) => (item.id === itemId ? { ...item, checked: !item.checked } : item)))
   }

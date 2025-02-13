@@ -33,28 +33,29 @@ export async function fetchBoards(accountId) {
           const cardsWithDetails = await Promise.all(
             cards.map(async (card) => {
               const [
-                { data: labels, error: labelsError },
+                // { data: labels, error: labelsError },
                 { data: comments, error: commentsError },
-                { data: attachments, error: attachmentsError }
+                // { data: attachments, error: attachmentsError }
               ] = await Promise.all([
-                supabase.from('labels').select('*').eq('card_id', card.id),
+                // supabase.from('labels').select('*').eq('card_id', card.id),
                 supabase.from('comments').select('*').eq('card_id', card.id),
-                supabase.from('attachments').select('*').eq('card_id', card.id)
+                // supabase.from('attachments').select('*').eq('card_id', card.id)
               ]);
 
-              if (labelsError) throw labelsError;
+              // if (labelsError) throw labelsError;
               if (commentsError) throw commentsError;
-              if (attachmentsError) throw attachmentsError;
+              // if (attachmentsError) throw attachmentsError;
 
               return {
                 id: card.id,
                 title: card.title,
                 description: card.description,
                 priority: card.priority,
-                labels: labels?.map(l => l.name) || [],
+                // labels: labels?.map(l => l.name) || [],
+                labels: card.labels || [],
                 dueDate: card.due_date,
                 assignee: card.assignee,
-                attachments: attachments || [],
+                attachments: card.attachments || [],
                 comments: comments || [],
                 archived: card.archived
               };

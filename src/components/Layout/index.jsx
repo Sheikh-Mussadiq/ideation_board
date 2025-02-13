@@ -6,7 +6,7 @@ import MainContent from './MainContent';
 export default function Layout({ children }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-light to-white">
-      <Sidebar />
+      {/* <Sidebar /> */}
       <TopBar />
       <MainContent>
         {children}

@@ -54,7 +54,7 @@ export default function LabelManager({ labels, onUpdate }) {
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap gap-1">
-        {labels.map((label, index) => (
+        {labels && labels.map((label, index) => (
           <span
             key={index}
             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${LABEL_COLORS[label.color].bg} ${LABEL_COLORS[label.color].text}`}
@@ -93,9 +93,9 @@ export default function LabelManager({ labels, onUpdate }) {
                 <button
                   key={color}
                   onClick={() => setSelectedColor(color)}
-                  className={`w-6 h-6 rounded-full ${
-                    selectedColor === color ? 'ring-2 ring-offset-2 ring-gray-400' : ''
-                  }`}
+                  // className={`w-6 h-6 rounded-full ${
+                  //   selectedColor === color ? 'ring-2 ring-offset-2 ring-gray-400' : ''
+                  // }`}
                   className={`w-6 h-6 rounded-full ${LABEL_COLORS[color].button} ${LABEL_COLORS[color].text} ${
                     selectedColor === color ? 'ring-2 ring-offset-2 ring-gray-400' : ''
                   }`}

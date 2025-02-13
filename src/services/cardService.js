@@ -130,6 +130,8 @@ export async function createCard(columnId, card, accountId) {
       description: card.description,
       priority: card.priority,
       due_date: card.dueDate,
+      labels: card.labels || [],
+      attachments: card.attachments || [],
       assignee: card.assignee,
       position: card.position,
       archived: false,
@@ -162,44 +164,126 @@ export async function createCard(columnId, card, accountId) {
   };
 }
 
+
+async function uploadFile(file) {
+  const { data, error } = await supabase.storage
+    .from('attachments')
+    .upload(`cards/${file.name}`, file);
+
+  if (error) {
+    console.error('Upload failed:', error);
+    throw error;
+  }
+
+  return data.path; // This gives the file path
+}
+
+function getFileUrl(filePath) {
+  return supabase.storage.from('attachments').getPublicUrl(filePath).data.publicUrl;
+}
+
+
+// export async function updateCard(cardId, updates, accountId) {
+//   console.log("updates in card servies update card: ", updates);
+
+  
+
+//   const { error: cardError } = await supabase
+//     .from('cards')
+//     .update({
+//       title: updates.title,
+//       checklist : updates.checklist,
+//       description: updates.description,
+//       labels: updates.labels,
+//       priority: updates.priority,
+//       due_date: updates.dueDate,
+//       attachments: updates.attachments,
+//       assignee: updates.assignee,
+//       archived: updates.archived,
+//       updated_at: new Date().toISOString()
+//     })
+//     .eq('account_id', accountId)
+//     .eq('id', cardId);
+
+//   if (cardError) throw cardError;
+
+
+// }
+
 export async function updateCard(cardId, updates, accountId) {
-  console.log("updates in card servies update card: ", updates);
+  console.log("updates in card service updateCard: ", updates);
+
+  // 1️⃣ Fetch the existing attachments from the database
+
+  if(updates.attachments){
+  const { data: card, error: fetchError } = await supabase
+    .from("cards")
+    .select("attachments")
+    .eq("id", cardId)
+    .eq("account_id", accountId)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  const existingAttachments = card?.attachments || [];
+
+  // 2️⃣ Find Deleted Attachments
+  const deletedAttachments = existingAttachments.filter(
+    (oldAttachment) =>
+      !updates.attachments.some((newAttachment) => newAttachment.id === oldAttachment.id)
+  );
+
+  // 3️⃣ Delete Files from Supabase Storage if Removed
+  for (let attachment of deletedAttachments) {
+    if (attachment.type === "file") {
+      const filePath = `cards/${attachment.name}`;
+      await supabase.storage.from("attachments").remove([filePath]);
+    }
+  }
+
+  // 4️⃣ Find New Attachments (ones that are in updates but not in existing)
+  let newAttachments = updates.attachments.filter(
+    (newAttachment) =>
+      !existingAttachments.some((oldAttachment) => oldAttachment.id === newAttachment.id)
+  );
+
+  // 5️⃣ Handle File Uploads (for newly added files)
+  for (let attachment of newAttachments) {
+    if (attachment.type === "file" && attachment.url.startsWith("blob:")) {
+      try {
+        const file = await fetch(attachment.url).then((res) => res.blob()); // Convert blob URL to file
+        const filePath = `cards/${attachment.name}`;
+        const { data, error } = await supabase.storage.from("attachments").upload(filePath, file);
+
+        if (error) throw error;
+
+        attachment.url = supabase.storage.from("attachments").getPublicUrl(filePath).data.publicUrl;
+      } catch (err) {
+        console.error("File upload failed:", err);
+      }
+    }
+  }
+  }
   const { error: cardError } = await supabase
-    .from('cards')
+    .from("cards")
     .update({
       title: updates.title,
+      checklist: updates.checklist,
       description: updates.description,
+      labels: updates.labels,
       priority: updates.priority,
       due_date: updates.dueDate,
       assignee: updates.assignee,
       archived: updates.archived,
-      updated_at: new Date().toISOString()
+      attachments: updates.attachments,
+      updated_at: new Date().toISOString(),
     })
-    .eq('account_id', accountId)
-    .eq('id', cardId);
+    .eq("account_id", accountId)
+    .eq("id", cardId);
 
   if (cardError) throw cardError;
-
-  if (updates.labels) {
-    await supabase
-      .from('labels')
-      .delete()
-      .eq('card_id', cardId);
-
-    if (updates.labels.length > 0) {
-      const { error: labelsError } = await supabase
-        .from('labels')
-        .insert(
-          updates.labels.map(label => ({
-            card_id: cardId,
-            name: label
-          }))
-        );
-
-      if (labelsError) throw labelsError;
-    }
-  }
 }
+
 
 export async function deleteCard(cardId, accountId) {
   const { error } = await supabase
@@ -303,16 +387,18 @@ export const updateComment = async (action, cardId, comment) => {
           text: comment.text,
           updated_at: comment.editedAt
         })
-        .eq('id', comment.id))
-        .eq('account_id', comment.account_id);
+        .eq('id', comment.id)
+        .eq('card_id', cardId)
+        .eq('account_id', comment.account_id));
       break;
 
     case 'delete':
+      console.log("comment in updateComment: ", comment);
       ({ data, error } = await supabase
         .from('comments')
         .delete()
         .eq('account_id', comment.account_id)
-        .eq('id', comment.id));
+        .eq('id', comment.commentId));
       break;
 
     default:
