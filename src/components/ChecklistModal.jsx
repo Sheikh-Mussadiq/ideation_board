@@ -40,7 +40,7 @@
 //     <div className="fixed inset-0 z-50 overflow-y-auto">
 //       <div className="flex items-center justify-center min-h-screen px-4">
 //         <div className="fixed inset-0 bg-black opacity-30" onClick={onClose}></div>
-        
+
 //         <div className="relative bg-white rounded-lg shadow-xl max-w-lg w-full">
 //           <div className="p-6">
 //             <div className="flex justify-between items-center mb-4">
@@ -108,14 +108,19 @@
 //   );
 // }
 
-"use client"
+"use client";
 
-import { useState, Fragment, useEffect } from "react"
-import { Dialog, Transition } from "@headlessui/react"
-import { X, Plus, CheckSquare, Square } from "lucide-react"
+import { useState, Fragment, useEffect } from "react";
+import { Dialog, Transition } from "@headlessui/react";
+import { X, Plus, CheckSquare, Square } from "lucide-react";
 
-export default function ChecklistModal({ isOpen, onClose, checklist, onUpdate }) {
-  const [newItemText, setNewItemText] = useState("")
+export default function ChecklistModal({
+  isOpen,
+  onClose,
+  checklist,
+  onUpdate,
+}) {
+  const [newItemText, setNewItemText] = useState("");
 
   const handleAddItem = () => {
     if (newItemText.trim()) {
@@ -126,23 +131,27 @@ export default function ChecklistModal({ isOpen, onClose, checklist, onUpdate })
           text: newItemText.trim(),
           checked: false,
         },
-      ])
-      setNewItemText("")
+      ]);
+      setNewItemText("");
     }
-  }
+  };
 
   useEffect(() => {
-    console.log("checklist", checklist)
-  }, [checklist])
+    console.log("checklist", checklist);
+  }, [checklist]);
   const handleToggleItem = (itemId) => {
-    onUpdate(checklist.map((item) => (item.id === itemId ? { ...item, checked: !item.checked } : item)))
-  }
+    onUpdate(
+      checklist.map((item) =>
+        item.id === itemId ? { ...item, checked: !item.checked } : item
+      )
+    );
+  };
 
   const handleDeleteItem = (itemId) => {
-    onUpdate(checklist.filter((item) => item.id !== itemId))
-  }
+    onUpdate(checklist.filter((item) => item.id !== itemId));
+  };
 
-  const completedCount = checklist.filter((item) => item.checked).length
+  const completedCount = checklist.filter((item) => item.checked).length;
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -173,19 +182,25 @@ export default function ChecklistModal({ isOpen, onClose, checklist, onUpdate })
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-8 text-left align-middle shadow-xl transition-all border border-gray-100">
                 <Dialog.Title
                   as="h3"
-                  className="text-xl font-semibold text-gray-900 flex justify-between items-center mb-6"
+                  className="text-xl font-semibold text-design-black dark:text-design-white flex justify-between items-center mb-6"
                 >
                   <span>
                     Checklist ({completedCount}/{checklist.length})
                   </span>
-                  <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
+                  <button
+                    onClick={onClose}
+                    className="text-gray-400 hover:text-gray-500"
+                  >
                     <X className="h-5 w-5" />
                   </button>
                 </Dialog.Title>
 
                 <div className="space-y-4">
                   {checklist.map((item) => (
-                    <div key={item.id} className="flex items-center group hover:bg-primary-light/30 p-2 rounded-lg transition-all">
+                    <div
+                      key={item.id}
+                      className="flex items-center group hover:bg-primary-light/30 p-2 rounded-lg transition-all"
+                    >
                       <button
                         onClick={() => handleToggleItem(item.id)}
                         className="flex-shrink-0 mr-3 text-gray-400 hover:text-primary transition-colors"
@@ -196,7 +211,13 @@ export default function ChecklistModal({ isOpen, onClose, checklist, onUpdate })
                           <Square className="h-5 w-5" />
                         )}
                       </button>
-                      <span className={`flex-grow ${item.checked ? "line-through text-gray-400" : "text-gray-700"}`}>
+                      <span
+                        className={`flex-grow ${
+                          item.checked
+                            ? "line-through text-gray-400"
+                            : "text-gray-700 dark:text-design-white"
+                        }`}
+                      >
                         {item.text}
                       </span>
                       <button
@@ -216,10 +237,10 @@ export default function ChecklistModal({ isOpen, onClose, checklist, onUpdate })
                       value={newItemText}
                       onChange={(e) => setNewItemText(e.target.value)}
                       placeholder="Add new item..."
-                      className="flex-grow px-4 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                      className="flex-grow px-4 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all dark:bg-design-black/50 dark:border-design-greyOutlines/20"
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
-                          handleAddItem()
+                          handleAddItem();
                         }
                       }}
                     />
@@ -237,7 +258,5 @@ export default function ChecklistModal({ isOpen, onClose, checklist, onUpdate })
         </div>
       </Dialog>
     </Transition>
-  )
+  );
 }
-
-

@@ -2,12 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --primary: #6d28d9;
-  --primary-light: #f0eeff;
-  --primary-hover: #5b21b6;
-}
-
 @layer base {
   html {
     font-family: "Nunito", sans-serif;
@@ -16,7 +10,7 @@
   input[type="text"],
   input[type="url"],
   textarea {
-    @apply border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary;
+    @apply border-design-greyOutlines rounded-md shadow-sm focus:ring-button-primary-cta focus:border-button-primary-cta;
   }
 
   h1 {
@@ -44,7 +38,7 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-primary/20 hover:bg-primary/30 rounded-full transition-colors;
+    @apply bg-button-primary-cta/20 hover:bg-button-primary-cta/30 rounded-full transition-colors;
   }
 
   .btn {
@@ -52,15 +46,15 @@
   }
 
   .btn-primary {
-    @apply btn bg-primary text-white hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary;
+    @apply btn bg-button-primary-cta text-button-primary-text hover:bg-button-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-button-primary-cta dark:bg-button-primary-hover dark:hover:bg-button-primary-cta;
   }
 
   .btn-secondary {
-    @apply btn bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary;
+    @apply btn bg-button-secondary-fill text-button-secondary-text border border-button-secondary-outline hover:bg-design-greyBG focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-button-primary-cta dark:bg-button-secondary-fill/10 dark:border-design-greyOutlines/20;
   }
 
   .btn-ghost {
-    @apply btn text-gray-600 hover:text-gray-900 hover:bg-gray-100;
+    @apply btn text-design-primaryGrey hover:text-design-black hover:bg-design-greyBG dark:text-design-greyOutlines dark:hover:text-design-white;
   }
 
   .btn-sm {
@@ -72,15 +66,15 @@
   }
 
   .card {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200;
+    @apply bg-design-white rounded-lg shadow-sm border border-design-greyOutlines dark:bg-design-black/50 dark:border-design-greyOutlines/20;
   }
 
   .input {
-    @apply block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary sm:text-sm;
+    @apply block w-full rounded-md border-design-greyOutlines shadow-sm focus:ring-button-primary-cta focus:border-button-primary-cta sm:text-sm dark:bg-design-black/50 dark:border-design-greyOutlines/20;
   }
 
   .label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
+    @apply block text-sm font-medium text-design-primaryGrey mb-1 dark:text-design-greyOutlines;
   }
 }
 

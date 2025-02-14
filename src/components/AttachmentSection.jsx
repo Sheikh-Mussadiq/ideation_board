@@ -95,7 +95,7 @@ export default function AttachmentSection({
       </div>
 
       {isAddingLink && (
-        <div className="space-y-2 animate-in slide-in-from-top bg-white p-4 rounded-lg shadow-sm">
+        <div className="space-y-2 animate-in slide-in-from-top bg-white p-4 rounded-lg shadow-sm dark:bg-design-black/50">
           <div className="flex items-center gap-2">
             <input
               type="url"
@@ -136,7 +136,7 @@ export default function AttachmentSection({
         {attachments.map((attachment) => (
           <div
             key={attachment.id}
-            className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:border-primary/30 hover:bg-primary-light/10 transition-all hover:scale-[1.02] group"
+            className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:border-primary/30 hover:bg-primary-light/10 transition-all hover:scale-[1.02] group dark:bg-design-black/50 dark:border-design-greyOutlines/20"
           >
             <div className="flex items-center space-x-2">
               {attachment.type === "link" ? (
@@ -149,15 +149,15 @@ export default function AttachmentSection({
                 </div>
               )}
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-800">
+                <span className="text-sm font-medium text-gray-800 dark:text-design-white">
                   {attachment.name}
                 </span>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-design-primaryGrey dark:text-design-greyOutlines">
                   Added {new Date(attachment.createdAt).toLocaleDateString()}
                 </span>
               </div>
               {attachment.size && (
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-design-primaryGrey dark:text-design-greyOutlines">
                   ({Math.round(attachment.size / 1024)} KB)
                 </span>
               )}

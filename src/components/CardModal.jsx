@@ -449,7 +449,7 @@ export default function CardModal({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          <div className="fixed inset-0 bg-design-black/25 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -505,8 +505,7 @@ export default function CardModal({
 
                 <div className="space-y-6">
                   {/* Title Section */}
-                  <div className="flex items-center  bg-gray-50/50 border border-gray-100 mt-8 p-3 rounded-xl w-1/2">
-                    {" "}
+                  <div className="flex items-center bg-gray-50/50 border border-gray-100 mt-8 p-3 rounded-xl w-1/2">
                     <AlignLeft className="h-6 w-6 text-primary flex-shrink-0 mr-3" />
                     <Dialog.Title
                       as="h3"
@@ -530,7 +529,7 @@ export default function CardModal({
                     </Dialog.Title>
                     <button
                       onClick={() => setIsEditingTitle(true)}
-                      className="p-2 text-gray-400 hover:text-primary rounded-full hover:bg-primary-light transition-all hover:scale-110 flex-shrink-0 "
+                      className="p-2 text-gray-400 hover:text-primary rounded-full hover:bg-primary-light transition-all hover:scale-110 flex-shrink-0"
                       title="Edit Title"
                     >
                       <Edit2 className="h-4 w-4" />
@@ -552,7 +551,7 @@ export default function CardModal({
                   </div>
 
                   {/* Description */}
-                  <div>
+                  <div className="space-y-2">
                     <label className="flex text-sm font-medium text-gray-700 mb-3 items-center">
                       <AlignLeft className="h-4 w-4 mr-2 text-primary" />
                       Description
@@ -562,7 +561,7 @@ export default function CardModal({
                       onChange={handleDescriptionChange}
                       onBlur={handleDescriptionBlur}
                       rows={4}
-                      className="w-full rounded-lg border border-gray-100 shadow-sm p-2 focus:border-primary focus:ring-primary resize-none transition-all hover:border-primary"
+                      className="w-full rounded-lg border border-gray-100 shadow-sm p-2 focus:border-primary focus:ring-primary resize-none transition-all hover:border-primary dark:bg-design-black/50 dark:border-design-greyOutlines/20"
                       placeholder="Add a description..."
                     />
                   </div>

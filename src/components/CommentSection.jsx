@@ -41,7 +41,7 @@ export default function CommentSection({
 
       <form
         onSubmit={handleSubmit}
-        className="flex gap-2 bg-white p-3 rounded-lg shadow-sm"
+        className="flex gap-2 bg-white p-3 rounded-lg shadow-sm dark:bg-design-black/50"
       >
         <input
           type="text"
@@ -53,7 +53,7 @@ export default function CommentSection({
         <button
           type="submit"
           disabled={!newComment.trim()}
-          className="btn-primary disabled:opacity-50 hover:scale-105 transition-transform"
+          className="btn-primary disabled:opacity-50 hover:scale-105 transition-transform dark:disabled:bg-button-disabled-fill dark:disabled:text-button-disabled-text"
         >
           Add
         </button>
@@ -71,10 +71,10 @@ export default function CommentSection({
                   <User className="h-4 w-4 text-primary" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-gray-800">
+                  <span className="text-sm font-medium text-gray-800 dark:text-design-white">
                     {comment.author}
                   </span>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-design-primaryGrey dark:text-design-greyOutlines">
                     {format(new Date(comment.created_at), "MMM d, yyyy HH:mm")}
                   </span>
                 </div>
@@ -85,13 +85,13 @@ export default function CommentSection({
                     setEditingId(comment.id);
                     setEditText(comment.text);
                   }}
-                  className="btn-ghost p-1.5 rounded-lg hover:bg-white hover:scale-110 transition-transform"
+                  className="btn-ghost p-1.5 rounded-lg hover:bg-white hover:scale-110 transition-transform dark:hover:bg-design-black/50"
                 >
                   <Edit2 className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => onDeleteComment(comment.id)}
-                  className="btn-ghost p-1.5 rounded-lg hover:bg-white hover:text-semantic-error hover:scale-110 transition-transform"
+                  className="btn-ghost p-1.5 rounded-lg hover:bg-white hover:text-semantic-error hover:scale-110 transition-transform dark:hover:bg-design-black/50"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -102,7 +102,7 @@ export default function CommentSection({
                 <textarea
                   value={editText}
                   onChange={(e) => setEditText(e.target.value)}
-                  className="input w-full"
+                  className="input w-full dark:bg-design-black/50 dark:border-design-greyOutlines/20"
                   rows={2}
                 />
                 <div className="flex justify-end gap-2">
@@ -121,7 +121,7 @@ export default function CommentSection({
                 </div>
               </div>
             ) : (
-              <p className="mt-2 text-sm text-gray-700 leading-relaxed">
+              <p className="mt-2 text-sm text-gray-700 leading-relaxed dark:text-design-greyOutlines">
                 {comment.text}
               </p>
             )}

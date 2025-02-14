@@ -1,10 +1,15 @@
-"use client"
+"use client";
 
-import { Fragment } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
-import { X, AlertTriangle } from 'lucide-react';
+import { Fragment } from "react";
+import { Dialog, Transition } from "@headlessui/react";
+import { X, AlertTriangle } from "lucide-react";
 
-export default function DeleteBoardModal({ isOpen, onClose, onConfirm, boardTitle }) {
+export default function DeleteBoardModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  boardTitle,
+}) {
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -17,7 +22,7 @@ export default function DeleteBoardModal({ isOpen, onClose, onConfirm, boardTitl
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/25 backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-design-black/25 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -43,23 +48,24 @@ export default function DeleteBoardModal({ isOpen, onClose, onConfirm, boardTitl
 
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex-shrink-0">
-                    <AlertTriangle className="h-6 w-6 text-semantic-error" />
+                    <AlertTriangle className="h-6 w-6 text-semantic-error dark:text-semantic-error" />
                   </div>
                   <Dialog.Title
                     as="h3"
-                    className="text-lg font-semibold leading-6"
+                    className="text-lg font-semibold leading-6 text-design-black dark:text-design-white"
                   >
                     Delete Board
                   </Dialog.Title>
                 </div>
 
                 <div className="mt-3 text-center sm:mt-0 sm:text-left animate-in slide-in-from-top">
-                  <h3 className="text-lg font-semibold leading-6 text-gray-900 mb-4">
+                  <h3 className="text-lg font-semibold leading-6 text-design-black dark:text-design-white mb-4">
                     Delete Board
                   </h3>
                   <div className="mt-2">
-                    <p className="text-sm text-gray-600 leading-relaxed">
-                      Are you sure you want to delete the board "{boardTitle}"? This action cannot be undone.
+                    <p className="text-sm text-design-primaryGrey dark:text-design-greyOutlines leading-relaxed">
+                      Are you sure you want to delete the board "{boardTitle}"?
+                      This action cannot be undone.
                     </p>
                   </div>
                 </div>
@@ -75,7 +81,7 @@ export default function DeleteBoardModal({ isOpen, onClose, onConfirm, boardTitl
                   <button
                     type="button"
                     onClick={onConfirm}
-                    className="btn bg-semantic-error text-white hover:bg-semantic-error-hover focus:ring-semantic-error"
+                    className="btn bg-semantic-error text-button-primary-text hover:bg-semantic-error focus:ring-semantic-error dark:bg-semantic-error dark:hover:bg-semantic-error/80"
                   >
                     Delete
                   </button>
