@@ -393,7 +393,6 @@ export default function IdeationPage() {
         columnId,
         {
           title: "New Task",
-          description: "Add description here",
           priority: "medium",
           labels: [],
           attachments: [],
