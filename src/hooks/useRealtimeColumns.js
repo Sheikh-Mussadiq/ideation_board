@@ -16,7 +16,7 @@ export function useRealtimeColumns(boardId, onColumnChange) {
           // filter: `board_id=eq.${boardId}`
         },
         (payload) => {
-          console.log('Column change received:', payload);
+          // console.log('Column change received:', payload);
 
           if (payload.eventType === 'DELETE') {
             onColumnChange({ 

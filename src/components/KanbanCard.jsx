@@ -23,8 +23,8 @@ export default function KanbanCard({
   boardId,
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDescriptionDone, setIsDescriptionDone] = useState(
-    card.descriptionDone || false
+  const [isCompleted, setIsCompleted] = useState(
+    card.completed || false
   );
   const [isHovered, setIsHovered] = useState(false);
 
@@ -50,11 +50,10 @@ export default function KanbanCard({
 
   const handleCheckClick = (e) => {
     e.stopPropagation();
-    const newDoneState = !isDescriptionDone;
-    setIsDescriptionDone(newDoneState);
+    const newDoneState = !card.completed;
+    setIsCompleted(newDoneState);
     onUpdate(card.id, {
-      descriptionDone: newDoneState,
-      titleDone: newDoneState, // Also update the title strike-through state
+      completed: newDoneState,
     });
   };
 
@@ -82,7 +81,7 @@ export default function KanbanCard({
         <div className="flex items-center justify-between">
           <h3
             className={`text-sm font-semibold text-design-black truncate flex-1 group-hover:text-button-primary-cta transition-colors dark:text-design-white ${
-              card.titleDone ? "line-through" : ""
+              card.completed ? "line-through" : ""
             }`}
           >
             {card.title}
@@ -107,7 +106,7 @@ export default function KanbanCard({
                 isHovered ? "opacity-100" : "opacity-0"
               } group-hover:opacity-100`}
             >
-              {isDescriptionDone ? (
+              {card.completed ? (
                 <Check className="h-4 w-4 text-semantic-success" />
               ) : (
                 <CheckSquare className="h-4 w-4" />
@@ -116,7 +115,7 @@ export default function KanbanCard({
             <p
               onClick={handleDescriptionClick}
               className={`text-xs text-design-primaryGrey dark:text-design-greyOutlines cursor-pointer hover:text-button-primary-cta transition-colors ${
-                isDescriptionDone ? "line-through" : ""
+                card.completed  ? "line-through" : ""
               }`}
             >
               {truncateDescription(card.description)}
@@ -125,10 +124,10 @@ export default function KanbanCard({
         )}
 
         {/* Due Date */}
-        {card.dueDate && (
+        {card.due_date && (
           <div className="mt-2 flex items-center text-xs text-design-primaryGrey dark:text-design-greyOutlines bg-button-tertiary-fill/30 w-fit px-2 py-1 rounded-full hover:bg-button-tertiary-fill/50 transition-colors">
             <Calendar className="h-3 w-3 mr-1" />
-            <span>{format(new Date(card.dueDate), "MMM d, yyyy")}</span>
+            <span>{format(new Date(card.due_date), "MMM d, yyyy")}</span>
           </div>
         )}
 

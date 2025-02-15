@@ -53,8 +53,10 @@ export async function fetchBoards(accountId) {
                 priority: card.priority,
                 // labels: labels?.map(l => l.name) || [],
                 labels: card.labels || [],
-                dueDate: card.due_date,
+                due_date: card.due_date,
                 assignee: card.assignee,
+                checklist: card.checklist,
+                completed: card.completed,
                 attachments: card.attachments || [],
                 comments: comments || [],
                 archived: card.archived

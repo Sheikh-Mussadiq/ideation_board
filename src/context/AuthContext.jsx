@@ -106,7 +106,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     console.log("herherer")
     
-    setCurrentUser({firstName: "David Neuhaus", email: "asdasd@gma.com", accountId :"67a1fdfaff275daed5015bb4"  });
+    setCurrentUser({firstName: "Mukarram Nawaz", email: "asdasd@gma.com", accountId :"67a1fdfaff275daed5015bb4"  });
     setIsAuthenticated(true);
     setIsLoading(false);
       // getUserData();

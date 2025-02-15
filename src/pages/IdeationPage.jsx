@@ -33,7 +33,7 @@ import { useLoadingCursor } from "../hooks/useLoadingCursor";
 import { useAuth } from "../context/AuthContext";
 import { useRealtimeCardComments } from "../hooks/useRealtimeCardComments";
 import { useRealtimeBoards } from "../hooks/useRealtimeBoards";
-// import { useMouseRealtime } from '../hooks/useMouseRealtime';
+import { usePresenceBroadcast } from '../hooks/usePresenceBroadcast';
 
 export default function IdeationPage() {
   const [boards, setBoards] = useState([]);
@@ -47,8 +47,7 @@ export default function IdeationPage() {
   const [loading, setLoading] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { currentUser } = useAuth();
-  // const username = "User1"; // Replace with actual username (e.g., from auth)
-  // const users = useMouseRealtime(username);
+  const activeUsers = usePresenceBroadcast(selectedBoardId, currentUser);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -77,106 +76,60 @@ export default function IdeationPage() {
     }
   };
 
-  // const handleCardChange = (updatedCard) => {
-  //   console.log('Card change received:', updatedCard);
-
-  //   if (updatedCard.type === 'DELETE') {
-  //     setBoards(prev => prev.map(board => ({
-  //       ...board,
-  //       columns: board.columns.map(col => ({
-  //         ...col,
-  //         cards: col.cards.filter(card => card.id !== updatedCard.id)
-  //       }))
-  //     })));
-  //     return;
-  //   }
-
-  //   setBoards(prev => prev.map(board => ({
-  //     ...board,
-  //     columns: board.columns.map(col => {
-  //       if (col.id === updatedCard.column_id) {
-  //         const existingCardIndex = col.cards.findIndex(card => card.id === updatedCard.id);
-  //         const updatedCards = [...col.cards];
-
-  //         if (existingCardIndex === -1 && updatedCard.type === 'INSERT') {
-  //           // New card
-  //           updatedCards.push(updatedCard);
-  //         } else if (existingCardIndex !== -1) {
-  //           // Update existing card
-  //           updatedCards[existingCardIndex] = {
-  //             ...updatedCards[existingCardIndex],
-  //             ...updatedCard
-  //           };
-  //         }
-
-  //         return {
-  //           ...col,
-  //           cards: updatedCards
-  //         };
-  //       }
-  //       return col;
-  //     })
-  //   })));
-  // };
-
   const handleCardChange = (updatedCard) => {
-    // console.log('Card change received:', updatedCard);
-
-    if (updatedCard.type === "DELETE") {
-      setBoards((prev) =>
-        prev.map((board) => ({
-          ...board,
-          columns: board.columns.map((col) => ({
-            ...col,
-            cards: col.cards.filter((card) => card.id !== updatedCard.id),
-          })),
-        }))
-      );
-      return;
-    }
-
     setBoards((prevBoards) => {
-      // Clone the boards to ensure a new reference
+      // Find the card's current location in any column
+      let sourceColumnId;
+      let cardFound = false;
+
       const newBoards = prevBoards.map((board) => ({
         ...board,
         columns: board.columns.map((col) => {
-          if (col.id === updatedCard.column_id) {
-            // Clone the cards array to ensure reactivity
-            let updatedCards = [...col.cards];
+          // First, remove the card from its current position if it exists
+          const cardInThisColumn = col.cards.find(card => card.id === updatedCard.id);
+          if (cardInThisColumn) {
+            sourceColumnId = col.id;
+            cardFound = true;
+          }
 
-            if (updatedCard.type === "DELETE") {
-              updatedCards = updatedCards.filter(
-                (card) => card.id !== updatedCard.id
-              );
-            } else {
-              const existingCardIndex = updatedCards.findIndex(
-                (card) => card.id === updatedCard.id
-              );
-              if (existingCardIndex === -1 && updatedCard.type === "INSERT") {
-                updatedCards.push(updatedCard);
-              } else if (existingCardIndex !== -1) {
-                updatedCards[existingCardIndex] = {
-                  ...updatedCards[existingCardIndex],
-                  ...updatedCard,
-                };
-              }
+          // Remove card from current column
+          const filteredCards = col.cards.filter(card => card.id !== updatedCard.id);
+
+          // If this is the target column for the card
+          if (col.id === updatedCard.column_id) {
+            // Insert card at the correct position
+            const newCards = [...filteredCards];
+            if (updatedCard.type !== 'DELETE') {
+              // Create new card object with all necessary properties
+              const cardToInsert = {
+                ...cardFound ? prevBoards
+                  .flatMap(b => b.columns)
+                  .flatMap(c => c.cards)
+                  .find(c => c.id === updatedCard.id) : {},
+                ...updatedCard,
+                position: updatedCard.position || 0
+              };
+
+              // Insert card at the specified position
+              newCards.splice(updatedCard.position, 0, cardToInsert);
             }
 
-            return { ...col, cards: updatedCards };
+            // Sort cards by position
+            newCards.sort((a, b) => a.position - b.position);
+
+            return { ...col, cards: newCards };
           }
-          return col;
+
+          return { ...col, cards: filteredCards };
         }),
       }));
 
-      return [...newBoards]; // Ensure a new array reference to trigger re-render
+      return newBoards;
     });
   };
 
   const handleColumnChange = (updatedColumn) => {
-    // console.log('Column change received:', updatedColumn);
-
     if (updatedColumn.type === "DELETE") {
-      // Simply remove the column from the board, cascade delete will handle the cards
       setBoards((prev) =>
         prev.map((board) => ({
           ...board,
@@ -194,17 +147,14 @@ export default function IdeationPage() {
           );
           const updatedColumns = [...board.columns];
 
-          // Ensure cards array exists
           const columnWithCards = {
             ...updatedColumn,
             cards: updatedColumn.cards || [],
           };
 
           if (existingColumnIndex === -1 && updatedColumn.type === "INSERT") {
-            // New column
             updatedColumns.push(columnWithCards);
           } else if (existingColumnIndex !== -1) {
-            // Update existing column while preserving cards
             updatedColumns[existingColumnIndex] = {
               ...updatedColumns[existingColumnIndex],
               ...columnWithCards,
@@ -256,10 +206,8 @@ export default function IdeationPage() {
               const updatedComments = [...card.comments];
 
               if (existingCommentIndex === -1 && eventType === "INSERT") {
-                // New comment
                 updatedComments.push(updatedComment);
               } else if (existingCommentIndex !== -1) {
-                // Update existing comment
                 updatedComments[existingCommentIndex] = {
                   ...updatedComments[existingCommentIndex],
                   ...updatedComment,
@@ -282,7 +230,6 @@ export default function IdeationPage() {
     console.log("Label change received:", payload, payloadType);
   };
 
-  // Set up realtime subscriptions
   useRealtimeCards(selectedBoardId || "", handleCardChange);
   useRealtimeColumns(selectedBoardId || "", handleColumnChange);
   useRealtimeCardComments(selectedBoardId, handleCommentChange);
@@ -402,12 +349,10 @@ export default function IdeationPage() {
         currentUser.accountId
       );
 
-      // Update the frontend state
       const updatedBoards = boards.map((board) => ({
         ...board,
         columns: board.columns.map((col) => {
           if (col.id === columnId) {
-            // Add new card at the beginning and shift other cards down
             const updatedCards = [
               newCard,
               ...col.cards.map((card) => ({
@@ -416,7 +361,6 @@ export default function IdeationPage() {
               })),
             ];
 
-            // Update all card positions in the database
             updateCardPositions(updatedCards).catch((error) => {
               console.error("Error updating card positions:", error);
             });
@@ -556,7 +500,6 @@ export default function IdeationPage() {
       const updatedBoards = boards.map((board) => ({
         ...board,
         columns: board.columns.map((col) => {
-          // Handle source column (remove card)
           if (!isSameColumn && col.id === sourceColumn.id) {
             return {
               ...col,
@@ -564,26 +507,22 @@ export default function IdeationPage() {
             };
           }
 
-          // Handle destination column (add/reorder card)
           if (col.id === overColumn.id) {
             let updatedCards;
 
             if (isSameColumn) {
-              // For same column, reorder the cards
               const cards = [...col.cards];
               const oldIndex = cards.findIndex((card) => card.id === active.id);
               const [movedCard] = cards.splice(oldIndex, 1);
               cards.splice(newPosition, 0, movedCard);
               updatedCards = cards;
             } else {
-              // For different columns, add to destination
               updatedCards = [
                 ...col.cards,
                 { ...activeCard, column_id: overColumn.id },
               ];
             }
 
-            // Update positions for all cards
             const finalCards = updatedCards.map((card, index) => ({
               ...card,
               position: index,
@@ -602,16 +541,13 @@ export default function IdeationPage() {
 
       setBoards(updatedBoards);
 
-      // Get all cards that need position updates
       const cardsToUpdate = updatedBoards
         .flatMap((board) => board.columns)
         .find((col) => col.id === overColumn.id).cards;
 
       if (isSameColumn) {
-        // Update positions for all cards in the same column
         await updateCardPositions(cardsToUpdate, currentUser.accountId);
       } else {
-        // First move the card to new column, then update positions for all affected cards
         await moveCardToColumn(
           activeCard.id,
           overColumn.id,
@@ -643,23 +579,9 @@ export default function IdeationPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-button-tertiary-fill to-design-white p-6 dark:from-button-tertiary-fill/10 dark:to-design-black">
-      {/* {Object.values(users).map((user) => (
-        <div
-          key={user.username}
-          style={{
-            position: "absolute",
-            left: user.x,
-            top: user.y,
-            transform: "translate(-50%, -50%)",
-            pointerEvents: "none",
-          }}
-        >
-          🖱️ <span style={{ fontSize: 12, background: "black", color: "white", padding: "2px", borderRadius: "4px" }}>{user.username}</span>
-        </div>
-      ))} */}
       <div className="mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4"></div>
             <h1 className="text-2xl font-bold text-button-primary-cta dark:text-button-primary-text">
               Ideation Board
             </h1>
@@ -712,13 +634,25 @@ export default function IdeationPage() {
                   Add Board
                 </button>
                 {selectedBoardId && (
-                  <button
-                    onClick={() => setIsDeleteModalOpen(true)}
-                    className="btn-ghost p-2 hover:text-semantic-error hover:rotate-90 transition-all"
-                    title="Delete Board"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
+                  <>
+                    <button
+                      onClick={() => setIsDeleteModalOpen(true)}
+                      className="btn-ghost p-2 hover:text-semantic-error hover:rotate-90 transition-all"
+                      title="Delete Board"
+                    ></button>
+                      <Trash2 className="h-5 w-5" />
+                    
+                    <div className="flex items-center gap-2 ml-4">
+                      {activeUsers.map((user) => (
+                        <div
+                          key={user.accountId}
+                          className="px-3 py-1 rounded-full bg-primary-light/30 text-sm font-medium text-primary animate-in fade-in"
+                        >
+                          {user.firstName}
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
             )}
@@ -799,7 +733,7 @@ export default function IdeationPage() {
             </DragOverlay>
           </DndContext>
         )}
-      </div>
+      
       <ResetDataButton />
 
       <DeleteBoardModal

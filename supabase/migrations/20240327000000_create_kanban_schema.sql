@@ -4,6 +4,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Create boards table
 CREATE TABLE IF NOT EXISTS boards (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    account_id text NOT NULL,
     title TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -13,6 +14,7 @@ CREATE TABLE IF NOT EXISTS boards (
 CREATE TABLE IF NOT EXISTS columns (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     board_id UUID NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
+    account_id text NOT NULL,
     title TEXT NOT NULL,
     position INTEGER NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -28,19 +30,15 @@ CREATE TABLE IF NOT EXISTS cards (
     priority TEXT CHECK (priority IN ('low', 'medium', 'high')),
     due_date TIMESTAMPTZ,
     assignee TEXT,
+    labels jsonb NULL ,
+  checklist jsonb NULL DEFAULT '[]'::jsonb,
+  attachments jsonb NULL DEFAULT '[]'::jsonb,
     position INTEGER NOT NULL,
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Create labels table
-CREATE TABLE IF NOT EXISTS labels (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    card_id UUID NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
-    name TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
 
 -- Create comments table
 CREATE TABLE IF NOT EXISTS comments (
@@ -52,23 +50,13 @@ CREATE TABLE IF NOT EXISTS comments (
     updated_at TIMESTAMPTZ
 );
 
--- Create attachments table
-CREATE TABLE IF NOT EXISTS attachments (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    card_id UUID NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
-    type TEXT NOT NULL CHECK (type IN ('file', 'link')),
-    url TEXT NOT NULL,
-    name TEXT NOT NULL,
-    size BIGINT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+
 
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_columns_board_id ON columns(board_id);
 CREATE INDEX IF NOT EXISTS idx_cards_column_id ON cards(column_id);
-CREATE INDEX IF NOT EXISTS idx_labels_card_id ON labels(card_id);
 CREATE INDEX IF NOT EXISTS idx_comments_card_id ON comments(card_id);
-CREATE INDEX IF NOT EXISTS idx_attachments_card_id ON attachments(card_id);
+
 
 -- Create function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -98,9 +86,9 @@ CREATE TRIGGER update_cards_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
--- Insert initial demo data
-INSERT INTO boards (title) VALUES ('My First Board')
-ON CONFLICT DO NOTHING;
+-- -- Insert initial demo data
+-- INSERT INTO boards (title) VALUES ('My First Board')
+-- ON CONFLICT DO NOTHING;
 
 -- Get the board ID and insert default columns
 -- DO $$ 

@@ -308,6 +308,7 @@ import {
   Edit2,
   AlignLeft,
   Calendar,
+  CheckSquare
 } from "lucide-react";
 import toast from "react-hot-toast";
 import PrioritySelect from "./PrioritySelect";
@@ -374,7 +375,7 @@ export default function CardModal({
   };
 
   const handleDueDateChange = (date) => {
-    onUpdate(card.id, { dueDate: date });
+    onUpdate(card.id, { due_date: date });
   };
 
   return (
@@ -417,7 +418,7 @@ export default function CardModal({
                   </button>
                   <button
                     onClick={() => {
-                      onArchive();
+                      onArchive(card.id);
                       onClose();
                     }}
                     className="p-2 text-gray-400 hover:text-primary rounded-full hover:bg-primary-light transition-colors"
@@ -427,7 +428,7 @@ export default function CardModal({
                   </button>
                   <button
                     onClick={() => {
-                      onDelete();
+                      onDelete(card.id);
                       onClose();
                     }}
                     className="p-2 text-gray-400 hover:text-semantic-error rounded-full hover:bg-semantic-error-light transition-colors"
@@ -479,7 +480,7 @@ export default function CardModal({
                   {/* Due Date & Priority Row */}
                   <div className="flex items-center justify-between bg-gray-50/50 border border-gray-100 p-4 rounded-xl">
                     <DatePicker
-                      value={card.dueDate}
+                      value={card.due_date}
                       onChange={handleDueDateChange}
                     />
                     <PrioritySelect
@@ -523,12 +524,21 @@ export default function CardModal({
                       onUpdate={(checklist) => onUpdate(card.id, { checklist })}
                     />
                     {!showChecklist && (
+                      <div className="flex items-center justify-between">
                       <button
                         onClick={() => setShowChecklist(true)}
                         className="inline-flex items-center px-4 py-2 border border-primary/20 rounded-lg shadow-sm text-sm font-medium text-primary bg-white hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all hover:scale-105"
                       >
                         Show Checklist
                       </button>
+                      {card.checklist && card.checklist.length > 0 && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium bg-button-tertiary-fill text-button-primary-cta dark:bg-button-tertiary-fill/20">
+                          <CheckSquare className="h-4 w-4 mr-1" />
+                          {card.checklist.filter((item) => item.checked).length}/
+                          {card.checklist.length}
+                        </span>
+                      )}
+                      </div>
                     )}
                   </div>
 
