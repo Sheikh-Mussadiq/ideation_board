@@ -14,6 +14,21 @@ import { format } from "date-fns";
 import PrioritySelect from "./PrioritySelect";
 import CardModal from "./CardModal";
 
+// Shimmer loading component
+const ShimmerCard = () => (
+  <div className="card p-4 relative overflow-hidden">
+    <div className="animate-pulse">
+      <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+      <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+      <div className="flex gap-2 mt-3">
+        <div className="h-5 w-16 bg-gray-200 rounded-full"></div>
+        <div className="h-5 w-16 bg-gray-200 rounded-full"></div>
+      </div>
+    </div>
+    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent shimmer"></div>
+  </div>
+);
+
 export default function KanbanCard({
   card,
   isDragging = false,
@@ -23,15 +38,27 @@ export default function KanbanCard({
   boardId,
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(
-    card.completed || false
-  );
+  const [isCompleted, setIsCompleted] = useState(card.completed || false);
   const [isHovered, setIsHovered] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(true);
 
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
       id: card.id,
     });
+
+  // React.useEffect(() => {
+  //   // Simulate loading delay
+  //   const timer = setTimeout(() => {
+  //     setIsLoading(false);
+  //   }, 1000);
+  //   return () => clearTimeout(timer);
+  // }, []);
+
+  // if (isLoading) {
+  //   return <ShimmerCard />;
+  // }
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -115,7 +142,7 @@ export default function KanbanCard({
             <p
               onClick={handleDescriptionClick}
               className={`text-xs text-design-primaryGrey dark:text-design-greyOutlines cursor-pointer hover:text-button-primary-cta transition-colors ${
-                card.completed  ? "line-through" : ""
+                card.completed ? "line-through" : ""
               }`}
             >
               {truncateDescription(card.description)}

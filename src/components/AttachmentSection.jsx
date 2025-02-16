@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Paperclip, X, ExternalLink, Download, Plus } from "lucide-react";
+import {
+  Paperclip,
+  X,
+  ExternalLink,
+  Download,
+  Plus,
+  ChevronDown,
+} from "lucide-react";
 
 export default function AttachmentSection({
   attachments,
@@ -9,6 +16,7 @@ export default function AttachmentSection({
   const [isAddingLink, setIsAddingLink] = useState(false);
   const [newLink, setNewLink] = useState("");
   const [linkError, setLinkError] = useState(null);
+  const [showAllAttachments, setShowAllAttachments] = useState(false);
 
   const isValidUrl = (urlString) => {
     try {
@@ -70,6 +78,11 @@ export default function AttachmentSection({
       });
     }
   };
+
+  const visibleAttachments = showAllAttachments
+    ? attachments
+    : attachments.slice(0, 2);
+  const hasMoreAttachments = attachments.length > 2;
 
   return (
     <div className="space-y-4 animate-in fade-in-50 bg-gray-50/50 border border-gray-100 p-4 rounded-xl">
@@ -133,7 +146,7 @@ export default function AttachmentSection({
       )}
 
       <div className="space-y-2">
-        {attachments.map((attachment) => (
+        {visibleAttachments.map((attachment) => (
           <div
             key={attachment.id}
             className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:border-primary/30 hover:bg-primary-light/10 transition-all hover:scale-[1.02] group dark:bg-design-black/50 dark:border-design-greyOutlines/20"
@@ -185,6 +198,21 @@ export default function AttachmentSection({
             </div>
           </div>
         ))}
+        {hasMoreAttachments && (
+          <button
+            onClick={() => setShowAllAttachments(!showAllAttachments)}
+            className="w-full py-2 px-4 text-sm text-primary hover:text-primary-hover flex items-center justify-center gap-2 group"
+          >
+            <span>
+              {showAllAttachments ? "Show Less" : "View More Attachments"}
+            </span>
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-200 ${
+                showAllAttachments ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+        )}
       </div>
     </div>
   );

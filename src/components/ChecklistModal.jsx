@@ -246,7 +246,7 @@ export default function ChecklistModal({
                     />
                     <button
                       onClick={handleAddItem}
-                      className="px-4 py-2 bg-primary text-white rounded-r-lg hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary transition-all hover:scale-105"
+                      className="px-4 py-2 bg-design-primaryPurple text-white rounded-r-lg hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary transition-all hover:scale-105"
                     >
                       <Plus className="h-5 w-5" />
                     </button>
