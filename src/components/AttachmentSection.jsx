@@ -88,18 +88,18 @@ export default function AttachmentSection({
     <div className="space-y-4 animate-in fade-in-50 bg-gray-50/50 border border-gray-100 p-4 rounded-xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center text-sm font-medium text-gray-700">
-          <Paperclip className="h-4 w-4 mr-2" />
+          <Paperclip className="h-5 w-5 mr-2" />
           Attachments
         </div>
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setIsAddingLink(true)}
-            className="text-sm text-primary hover:text-primary-hover transition-all hover:scale-105 px-3 py-1 rounded-lg hover:bg-primary-light"
+            className="text-sm text-button-primary-cta hover:text-button-primary-hover transition-all hover:scale-105 px-3 py-1 rounded-lg bg-design-primaryPurple/10"
           >
             <Plus className="h-4 w-4 inline-block mr-1" />
             Add Link
           </button>
-          <label className="cursor-pointer text-sm text-primary hover:text-primary-hover transition-all hover:scale-105 px-3 py-1 rounded-lg hover:bg-primary-light">
+          <label className="cursor-pointer text-sm text-button-primary-cta hover:text-button-primary-hover transition-all hover:scale-105 px-3 py-1 rounded-lg bg-design-primaryPurple/10">
             <Plus className="h-4 w-4 inline-block mr-1" />
             Upload File
             <input type="file" className="hidden" onChange={handleFileUpload} />
@@ -115,7 +115,7 @@ export default function AttachmentSection({
               value={newLink}
               onChange={(e) => setNewLink(e.target.value)}
               placeholder="Enter URL..."
-              className={`input flex-1 ${
+              className={`input flex-1 p-2 ${
                 linkError ? "border-semantic-error" : ""
               }`}
               onKeyDown={(e) => {
@@ -134,7 +134,7 @@ export default function AttachmentSection({
                 setNewLink("");
                 setLinkError(null);
               }}
-              className="btn-ghost p-2 hover:rotate-90 transition-transform"
+              className="btn-ghost p-2 hover:scale-110 transition-transform"
             >
               <X className="h-5 w-5" />
             </button>

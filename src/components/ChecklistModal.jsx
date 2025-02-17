@@ -189,7 +189,7 @@ export default function ChecklistModal({
                   </span>
                   <button
                     onClick={onClose}
-                    className="text-gray-400 hover:text-gray-500"
+                    className="text-gray-400 hover:text-semantic-error rounded-full hover:bg-semantic-error-light transition-colors p-1"
                   >
                     <X className="h-5 w-5" />
                   </button>

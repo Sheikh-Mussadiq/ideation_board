@@ -40,7 +40,7 @@ export default function DeleteBoardModal({
                 <div className="absolute top-4 right-4 flex items-center gap-2">
                   <button
                     onClick={onClose}
-                    className="btn-ghost p-2 rounded-full hover:rotate-90 transition-transform"
+                    className="btn-ghost hover:bg-semantic-error-light p-2 rounded-full hover:rotate-90 transition-transform"
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -59,9 +59,6 @@ export default function DeleteBoardModal({
                 </div>
 
                 <div className="mt-3 text-center sm:mt-0 sm:text-left animate-in slide-in-from-top">
-                  <h3 className="text-lg font-semibold leading-6 text-design-black dark:text-design-white mb-4">
-                    Delete Board
-                  </h3>
                   <div className="mt-2">
                     <p className="text-sm text-design-primaryGrey dark:text-design-greyOutlines leading-relaxed">
                       Are you sure you want to delete the board "{boardTitle}"?

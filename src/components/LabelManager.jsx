@@ -141,32 +141,32 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const LABEL_COLORS = {
   red: {
-    bg: "bg-button-outline-fill",
+    bg: "bg-semantic-error/20",
     text: "text-semantic-error",
-    button: "bg-semantic-error/20",
+    button: "bg-semantic-error",
   },
   blue: {
-    bg: "bg-button-outline-fill",
-    text: "text-button-primary-cta",
-    button: "bg-button-primary-cta/20",
+    bg: "bg-blue-500/20",
+    text: "text-blue-500",
+    button: "bg-blue-500",
   },
   green: {
-    bg: "bg-button-outline-fill",
+    bg: "bg-semantic-success/20",
     text: "text-semantic-success",
-    button: "bg-semantic-success/20",
+    button: "bg-semantic-success",
   },
   yellow: {
-    bg: "bg-button-tertiary-fill",
-    text: "text-button-primary-cta",
-    button: "bg-button-primary-cta/20",
+    bg: "bg-yellow-500/20",
+    text: "text-yellow-500",
+    button: "bg-yellow-500",
   },
   purple: {
-    bg: "bg-button-outline-fill",
+    bg: "bg-button-primary-cta/20",
     text: "text-button-primary-cta",
-    button: "bg-button-primary-cta/20",
+    button: "bg-button-primary-cta",
   },
   gray: {
-    bg: "bg-button-secondary-fill",
+    bg: "bg-design-greyBG/20",
     text: "text-design-black",
     button: "bg-design-greyBG",
   },
@@ -224,7 +224,7 @@ export default function LabelManager({ labels, onUpdate }) {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsAdding(true)}
-          className="btn-ghost btn-sm rounded-full"
+          className="btn-ghost hover:text-design-primaryPurple  btn-sm rounded-full"
         >
           <Plus className="h-3 w-3 mr-1" />
           Add Label

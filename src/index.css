@@ -54,7 +54,7 @@
   }
 
   .btn-ghost {
-    @apply btn text-design-primaryGrey hover:text-design-black hover:bg-design-greyBG dark:text-design-greyOutlines dark:hover:text-design-white;
+    @apply btn text-design-primaryGrey hover:text-semantic-error hover:bg-design-primaryPurple/20 dark:text-design-greyOutlines dark:hover:text-design-white;
   }
 
   .btn-sm {

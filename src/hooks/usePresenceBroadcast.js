@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabase";
 
 export function usePresenceBroadcast(boardId, currentUser) {
   const [activeUsers, setActiveUsers] = useState([]);
@@ -17,20 +17,25 @@ export function usePresenceBroadcast(boardId, currentUser) {
     });
 
     // Handle presence changes
-    channel.on('presence', { event: 'sync' }, () => {
+    channel.on("presence", { event: "sync" }, () => {
       const presenceState = channel.presenceState();
-      const users = Object.values(presenceState).flat().map(presence => ({
-        accountId: presence.key,
-        firstName: presence.firstName
-      }));
+      const users = Object.values(presenceState)
+        .flat()
+        .map((presence) => ({
+          accountId: presence.key,
+          firstName: presence.firstName,
+          avatarUrl: presence.avatarUrl,
+        }));
       setActiveUsers(users);
     });
 
     // Subscribe and send initial presence state
     channel.subscribe(async (status) => {
-      if (status === 'SUBSCRIBED') {
+      if (status === "SUBSCRIBED") {
         await channel.track({
           firstName: currentUser.firstName,
+          accountId: currentUser.accountId,
+          avatarUrl: currentUser.avatarUrl,
         });
       }
     });

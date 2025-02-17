@@ -572,6 +572,10 @@ export default function IdeationPage() {
 
   const selectedBoard = boards.find((board) => board.id === selectedBoardId);
 
+  useEffect(() => {
+    console.log(currentUser);
+  }, [currentUser]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-light to-white dark:from-design-black dark:to-design-black p-6">
@@ -619,7 +623,7 @@ export default function IdeationPage() {
                 value={newBoardTitle}
                 onChange={(e) => setNewBoardTitle(e.target.value)}
                 placeholder="Board title..."
-                className="input"
+                className="input p-2"
                 autoFocus
               />
               <button onClick={handleAddBoard} className="btn-primary">
@@ -648,18 +652,27 @@ export default function IdeationPage() {
                 <>
                   <button
                     onClick={() => setIsDeleteModalOpen(true)}
-                    className="btn-ghost p-2 hover:text-semantic-error hover:rotate-90 transition-all"
+                    className="btn-ghost p-2 hover:text-semantic-error transition-all"
                     title="Delete Board"
-                  ></button>
-                  <Trash2 className="h-5 w-5" />
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
 
                   <div className="flex items-center gap-2 ml-4">
                     {activeUsers.map((user) => (
                       <div
                         key={user.accountId}
-                        className="px-3 py-1 rounded-full bg-primary-light/30 text-sm font-medium text-primary animate-in fade-in"
+                        className="flex items-center justify-center w-8 h-8 rounded-full bg-primary-light/30 text-sm font-medium text-primary animate-in fade-in"
                       >
-                        {user.firstName}
+                        {user.avatarUrl ? (
+                          <img
+                            src={user.avatarUrl}
+                            alt={user.firstName}
+                            className="w-full h-full rounded-full object-cover"
+                          />
+                        ) : (
+                          user.firstName.charAt(0)
+                        )}
                       </div>
                     ))}
                   </div>

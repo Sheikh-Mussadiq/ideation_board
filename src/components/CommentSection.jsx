@@ -34,7 +34,7 @@ export default function CommentSection({
   return (
     <div className="space-y-4 animate-in fade-in-50 bg-gray-50/50 border border-gray-100 p-4 rounded-xl">
       <div className="flex items-center text-sm text-gray-700">
-        <MessageSquare className="h-4 w-4 mr-2" />
+        <MessageSquare className="h-5 w-5 mr-2" />
         <span className="font-medium">Comments</span>
         {comments.length > 0 && (
           <span className="ml-2 px-2 py-0.5 rounded-full text-xs bg-primary-light text-primary">
@@ -52,7 +52,7 @@ export default function CommentSection({
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Add a comment..."
-          className="input flex-1 min-w-0 border-gray-200 focus:border-primary focus:ring-primary"
+          className="input flex-1 min-w-0 border-gray-200 focus:border-primary focus:ring-primary p-2"
         />
         <button
           type="submit"

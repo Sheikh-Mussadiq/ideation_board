@@ -308,7 +308,7 @@ import {
   Edit2,
   AlignLeft,
   Calendar,
-  CheckSquare
+  CheckSquare,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import PrioritySelect from "./PrioritySelect";
@@ -447,7 +447,7 @@ export default function CardModal({
                 <div className="space-y-6">
                   {/* Title Section */}
                   <div className="flex items-center bg-gray-50/50 border border-gray-100 mt-8 p-3 rounded-xl w-1/2">
-                    <AlignLeft className="h-6 w-6 text-primary flex-shrink-0 mr-3" />
+                    <AlignLeft className="h-6 w-6 text-design-primaryPurple flex-shrink-0 mr-3" />
                     <Dialog.Title
                       as="h3"
                       className="text-lg font-medium leading-6 text-gray-900 flex-grow mr-2"
@@ -470,7 +470,7 @@ export default function CardModal({
                     </Dialog.Title>
                     <button
                       onClick={() => setIsEditingTitle(true)}
-                      className="p-2 text-gray-400 hover:text-primary rounded-full hover:bg-primary-light transition-all hover:scale-110 flex-shrink-0"
+                      className="p-2 text-gray-400 hover:text-design-primaryPurple  rounded-full hover:bg-design-primaryPurple/20 transition-all hover:scale-110 flex-shrink-0"
                       title="Edit Title"
                     >
                       <Edit2 className="h-4 w-4" />
@@ -502,7 +502,7 @@ export default function CardModal({
                   {/* Description */}
                   <div className="space-y-2">
                     <label className="flex text-sm font-medium text-gray-700 mb-3 items-center">
-                      <AlignLeft className="h-4 w-4 mr-2 text-primary" />
+                      <AlignLeft className="h-4 w-4 mr-2 text-design-primaryPurple" />
                       Description
                     </label>
                     <textarea
@@ -517,29 +517,57 @@ export default function CardModal({
 
                   {/* Checklist */}
                   <div className="bg-gray-50/50 border border-gray-100 p-4 rounded-xl">
-                    <ChecklistModal
-                      isOpen={showChecklist}
-                      onClose={() => setShowChecklist(false)}
-                      checklist={card.checklist || []}
-                      onUpdate={(checklist) => onUpdate(card.id, { checklist })}
-                    />
-                    {!showChecklist && (
-                      <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-4">
                       <button
-                        onClick={() => setShowChecklist(true)}
-                        className="inline-flex items-center px-4 py-2 border border-primary/20 rounded-lg shadow-sm text-sm font-medium text-primary bg-white hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all hover:scale-105"
+                        onClick={() => setShowChecklist(!showChecklist)}
+                        className="inline-flex items-center px-4 py-2 border border-design-greyOutlines rounded-lg shadow-sm text-sm font-medium text-primary bg-white transition-all hover:scale-105"
                       >
-                        Show Checklist
+                        {showChecklist ? "Hide Checklist" : "Show Checklist"}
                       </button>
                       {card.checklist && card.checklist.length > 0 && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium bg-button-tertiary-fill text-button-primary-cta dark:bg-button-tertiary-fill/20">
                           <CheckSquare className="h-4 w-4 mr-1" />
-                          {card.checklist.filter((item) => item.checked).length}/
-                          {card.checklist.length}
+                          {card.checklist.filter((item) => item.checked).length}
+                          /{card.checklist.length}
                         </span>
                       )}
-                      </div>
+                    </div>
+                    {showChecklist && (
+                      <ChecklistModal
+                        isOpen={showChecklist}
+                        onClose={() => setShowChecklist(false)}
+                        checklist={card.checklist || []}
+                        onUpdate={(checklist) =>
+                          onUpdate(card.id, { checklist })
+                        }
+                      />
                     )}
+                    {/* <ChecklistModal
+                      isOpen={showChecklist}
+                      onClose={() => setShowChecklist(false)}
+                      checklist={card.checklist || []}
+                      onUpdate={(checklist) => onUpdate(card.id, { checklist })}
+                    /> */}
+                    {/* {!showChecklist && (
+                      <div className="flex items-center justify-between">
+                        <button
+                          onClick={() => setShowChecklist(true)}
+                          className="inline-flex items-center px-4 py-2 border border-design-greyOutlines rounded-lg shadow-sm text-sm font-medium text-primary bg-white transition-all hover:scale-105"
+                        >
+                          Show Checklist
+                        </button>
+                        {card.checklist && card.checklist.length > 0 && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium bg-button-tertiary-fill text-button-primary-cta dark:bg-button-tertiary-fill/20">
+                            <CheckSquare className="h-4 w-4 mr-1" />
+                            {
+                              card.checklist.filter((item) => item.checked)
+                                .length
+                            }
+                            /{card.checklist.length}
+                          </span>
+                        )} */}
+                    {/* </div> */}
+                    {/* )} */}
                   </div>
 
                   {/* Attachments */}

@@ -60,80 +60,93 @@
 //   return context;
 // }
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { loginToSocialHub } from '../services/socialhubAuth';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
+import { loginToSocialHub } from "../services/socialhubAuth";
 
 const VALID_USERS = [
-  { email: 'david.neuhaus@maloon.de', password: 'rtecPPp337!' },
-  { email: 'matthias.gerer@maloon.de', password: 'rtecPPp337!' }
+  { email: "david.neuhaus@maloon.de", password: "rtecPPp337!" },
+  { email: "matthias.gerer@maloon.de", password: "rtecPPp337!" },
 ];
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState({
+    firstName: "Mukarram Nawaz",
+    email: "asdasd@gma.com",
+    accountId: "67a1fdfaff275daed5015bb4",
+    avatarUrl: "https://i.pravatar.cc/150",
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   const getUserData = async () => {
-    const accessToken = localStorage.getItem('accessToken');
-    const cookies = localStorage.getItem('cookies');
-    
-    if(!localStorage.getItem('accessToken')) return;
-      try {
-       const response = await fetch('http://localhost:5000/api/user/userDataSocialHub', {
-  method: 'POST', // Change this to 'GET' if it's a GET request
-  headers: {
-    'Content-Type': 'application/json', // Ensure proper content type
-    'Accept': 'application/json',
-  },
-  body: JSON.stringify({ accessToken, cookieHeader:cookies }) // Remove if using GET request
-});
+    const accessToken = localStorage.getItem("accessToken");
+    const cookies = localStorage.getItem("cookies");
 
-      
-        console.log("from auth context for userData: ", response);
-        if (response.ok) {
-          const userData = await response.json();
-          setCurrentUser(userData);
-          setIsAuthenticated(true);
+    if (!localStorage.getItem("accessToken")) return;
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/user/userDataSocialHub",
+        {
+          method: "POST", // Change this to 'GET' if it's a GET request
+          headers: {
+            "Content-Type": "application/json", // Ensure proper content type
+            Accept: "application/json",
+          },
+          body: JSON.stringify({ accessToken, cookieHeader: cookies }), // Remove if using GET request
         }
-      } catch (error) {
-        console.error('Failed to fetch user data:', error);
+      );
+
+      console.log("from auth context for userData: ", response);
+      if (response.ok) {
+        const userData = await response.json();
+        setCurrentUser(userData);
+        setIsAuthenticated(true);
       }
-    
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
+    }
+
     setIsLoading(false);
-  }
+  };
   useEffect(() => {
-    console.log("herherer")
-    
-    setCurrentUser({firstName: "Mukarram Nawaz", email: "asdasd@gma.com", accountId :"67a1fdfaff275daed5015bb4"  });
+    console.log(currentUser);
+
+    // setCurrentUser({
+    //   firstName: "Mukarram Nawaz",
+    //   email: "asdasd@gma.com",
+    //   accountId: "67a1fdfaff275daed5015bb4",
+    //   avatar: "https://avatar.iran.liara.run/public",
+    // });
     setIsAuthenticated(true);
     setIsLoading(false);
-      // getUserData();
-    
+    // getUserData();
   }, []);
-
-
 
   const login = useCallback(async (email, password) => {
     try {
-    
       const response = await loginToSocialHub(email, password);
       if (response?.accessToken) {
-
         console.log("from auth context: ", response);
-        setCurrentUser(response.userData );
+        setCurrentUser(response.userData);
         setIsAuthenticated(true);
         return true;
-      } 
-      
-    return false;
-  } catch (error) {
-    console.error('Login error:', error);
-    throw error;
-  } finally {
-    setIsLoading(false);
-  }
+      }
+
+      return false;
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const logout = useCallback(() => {
@@ -143,7 +156,9 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, currentUser, login, logout, isLoading }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, currentUser, login, logout, isLoading }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -152,7 +167,7 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
