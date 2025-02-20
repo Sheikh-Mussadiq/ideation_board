@@ -29,6 +29,7 @@ export default function KanbanColumn({
   onArchiveCard,
   onDeleteColumn,
   boardId,
+  boardTitle,
 }) {
   const { setNodeRef } = useDroppable({
     id: column.id,
@@ -67,7 +68,7 @@ export default function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className="flex-shrink-0 w-80 bg-design-greyBG/50 rounded-lg p-4 dark:bg-button-tertiary-fill/10"
+      className="flex-shrink-0 w-80 bg-design-greyBG/50 rounded-xl p-4 dark:bg-button-tertiary-fill/10"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -96,6 +97,7 @@ export default function KanbanColumn({
               onDelete={onDeleteCard}
               onArchive={onArchiveCard}
               boardId={boardId}
+              boardTitle={boardTitle}
             />
           ))}
         </SortableContext>

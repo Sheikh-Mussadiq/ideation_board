@@ -347,6 +347,7 @@ export default function IdeationPage() {
         {
           title: "New Task",
           priority: "medium",
+          description: "Add a description...",
           labels: [],
           attachments: [],
           comments: [],

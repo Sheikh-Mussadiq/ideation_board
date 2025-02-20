@@ -36,6 +36,7 @@ export default function KanbanCard({
   onDelete,
   onArchive,
   boardId,
+  boardTitle,
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCompleted, setIsCompleted] = useState(card.completed || false);
@@ -67,7 +68,7 @@ export default function KanbanCard({
 
   const truncateDescription = (text) => {
     if (!text) return "";
-    return text.length > 30 ? text.substring(0, 27) + "..." : text;
+    return text.length > 30 ? text.substring(0, 20) + "..." : text;
   };
 
   const handleDescriptionClick = (e) => {
@@ -83,7 +84,7 @@ export default function KanbanCard({
       completed: newDoneState,
     });
   };
-
+  const plainText = card.description.replace(/<\/?[^>]+>/g, ""); ///<\/?[^>]+>/g, ''
   return (
     <>
       <div
@@ -145,7 +146,7 @@ export default function KanbanCard({
                 card.completed ? "line-through" : ""
               }`}
             >
-              {truncateDescription(card.description)}
+              {truncateDescription(card.description.replace(/<\/?[^>]+>/g, ""))}
             </p>
           </div>
         )}
@@ -206,6 +207,8 @@ export default function KanbanCard({
         onUpdate={onUpdate}
         onDelete={onDelete}
         onArchive={onArchive}
+        boardId={boardId}
+        boardTitle={boardTitle}
       />
     </>
   );

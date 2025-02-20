@@ -93,7 +93,7 @@ export default function PrioritySelect({ value, onChange }) {
     <div className="relative">
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium transition-colors ${priorityColors[value].bg} ${priorityColors[value].text}`}
+        className={`inline-flex items-center px-4 py-1 rounded-full text-sm font-medium transition-colors ${priorityColors[value].bg} ${priorityColors[value].text}`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.98 }}
       >
@@ -113,7 +113,7 @@ export default function PrioritySelect({ value, onChange }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute z-10 mt-1 w-24 rounded-md shadow-lg right-0 bg-white border border-design-greyOutlines overflow-hidden"
+            className="absolute z-10 mt-1 w-24 rounded-md shadow-lg bg-white border border-design-greyOutlines overflow-hidden"
           >
             <div className="py-1" role="menu">
               {Object.entries(priorityColors).map(([priority, colorClass]) => (

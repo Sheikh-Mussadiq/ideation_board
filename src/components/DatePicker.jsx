@@ -131,7 +131,13 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarIcon, ChevronLeft, ChevronRight, X } from "lucide-react";
+import {
+  CalendarIcon,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  X,
+} from "lucide-react";
 import {
   format,
   addMonths,
@@ -184,13 +190,12 @@ export default function DatePicker({ value, onChange, className = "" }) {
     <div className={`relative ${className}`}>
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center px-4 py-2 text-sm text-gray-700 bg-white rounded-full transition-all shadow-sm hover:shadow-md hover:shadow-design-primaryPurple/50 border border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-design-primaryPurple/50 focus:border-transparent"
+        className="inline-flex items-center text-base text-design-black border-none transition-all  "
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        <CalendarIcon className="h-4 w-4 mr-2 text-design-primaryPurple/60" />
         {formattedDate}
-        <ChevronLeft
+        <ChevronDown
           className={`h-4 w-4 ml-2 text-gray-400 transition-transform duration-300 ${
             isOpen ? "rotate-180" : ""
           }`}
@@ -204,7 +209,7 @@ export default function DatePicker({ value, onChange, className = "" }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute z-10 mt-2 p-4 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 w-72"
+            className="absolute right-0 z-10 mt-2 p-4 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 w-72"
           >
             <div className="flex justify-between items-center mb-4">
               <button

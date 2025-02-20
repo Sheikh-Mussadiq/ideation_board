@@ -79,8 +79,8 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [currentUser, setCurrentUser] = useState({
-    firstName: "Mukarram Nawaz",
-    email: "asdasd@gma.com",
+    firstName: "Mussadiq",
+    email: "asdas131d@gmail.com",
     accountId: "67a1fdfaff275daed5015bb4",
     avatarUrl: "https://i.pravatar.cc/150",
   });
