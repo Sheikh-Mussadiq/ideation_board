@@ -18,6 +18,8 @@ import {
   createBoard,
   updateBoard,
   deleteBoard,
+  assignBoardToTeam,
+  unassignBoardFromTeam,
 } from "../services/boardService";
 import {
   createCard,
@@ -35,6 +37,7 @@ import { useRealtimeCardComments } from "../hooks/useRealtimeCardComments";
 import { useRealtimeBoards } from "../hooks/useRealtimeBoards";
 import { usePresenceBroadcast } from "../hooks/usePresenceBroadcast";
 import LoadingShimmer from "../components/LoadingShimmer";
+import Tooltip from "../components/Tooltip";
 export default function IdeationPage() {
   const [boards, setBoards] = useState([]);
   const [selectedBoardId, setSelectedBoardId] = useState(null);
@@ -46,7 +49,9 @@ export default function IdeationPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const { currentUser } = useAuth();
+  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState(null);
+  const { currentUser, currentUserUsers, currentUserTeams } = useAuth();
   const activeUsers = usePresenceBroadcast(selectedBoardId, currentUser);
 
   const sensors = useSensors(
@@ -264,6 +269,59 @@ export default function IdeationPage() {
     }
   };
 
+  const handleAssignBoardToTeam = async (teamId) => {
+    console.log("Assigning board to team:", selectedBoardId, teamId);
+    try {
+      setLoading(true);
+      const response  = await assignBoardToTeam(selectedBoardId, teamId);
+      console.log("response: ", response);
+      if(!response) {
+        toast.error("Failed to unassign board from team");
+        return;
+      }
+
+      setBoards((prev) =>
+        prev.map((board) =>
+          board.id === selectedBoardId ? { ...board, team_id: teamId } : board
+        )
+      );
+
+      toast.success("Board assigned to team successfully");
+      setIsTeamModalOpen(false);
+      setSelectedTeam(null);
+    } catch (error) {
+      console.error("Error assigning board to team:", error);
+      toast.error("Failed to assign board to team");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUnassignBoardFromTeam = async (teamId) => {
+    console.log("Unassigning board from team:", selectedBoardId, teamId);
+    try {
+      setLoading(true);
+      const response  = await unassignBoardFromTeam(selectedBoardId);
+      console.log("response: ", response);
+      if(!response) {
+        toast.error("Failed to unassign board from team");
+        return;
+      }
+      setBoards((prev) =>
+        prev.map((board) =>
+          board.id === selectedBoardId ? { ...board, team_id: null } : board
+        )
+      );
+      toast.success("Board unassigned from team successfully");
+      setIsTeamModalOpen(false);
+      setSelectedTeam(null);
+    } catch (error) {
+      console.error("Error unassigning board from team:", error);
+      toast.error("Failed to unassign board from team");
+    } finally {
+      setLoading(false);
+    }
+  }; 
   const handleDeleteBoard = async () => {
     if (!selectedBoardId) return;
 
@@ -350,7 +408,6 @@ export default function IdeationPage() {
           description: "Add a description...",
           labels: [],
           attachments: [],
-          comments: [],
           position: 0, // Set initial position to 0
         },
         currentUser.accountId
@@ -574,8 +631,9 @@ export default function IdeationPage() {
   const selectedBoard = boards.find((board) => board.id === selectedBoardId);
 
   useEffect(() => {
-    console.log(currentUser);
-  }, [currentUser]);
+    console.log(currentUser, "board: ", selectedBoard);
+    
+  }, [currentUser,selectedBoard]);
 
   if (isLoading) {
     return (
@@ -594,26 +652,38 @@ export default function IdeationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-design-white border border-design-greyOutlines rounded-xl dark:bg-design-black p-6">
+    <div className=" bg-design-white border border-design-greyOutlines rounded-xl dark:bg-design-black p-6">
       <div className="mx-auto">
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center gap-4"></div>
           <h1 className="text-2xl font-bold text-button-primary-cta dark:text-button-primary-text">
             Ideation Board
           </h1>
-          <div className="relative">
-            <select
-              value={selectedBoardId || ""}
-              onChange={(e) => setSelectedBoardId(e.target.value)}
-              className="appearance-none bg-design-white/80 backdrop-blur-sm border border-button-primary-cta/20 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-button-primary-cta transition-all hover:border-button-primary-cta dark:bg-design-black/50 dark:border-button-primary-cta/10"
+          <div className="flex items-center gap-4">
+           
+            <button
+              onClick={() => setIsTeamModalOpen(true)}
+              className="btn-secondary text-sm"
             >
-              {boards.map((board) => (
-                <option key={board.id} value={board.id}>
-                  {board.title}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-button-primary-cta pointer-events-none" />
+              <span  className={`h-1 w-1 mr-2  ${selectedBoard.team_id ? "bg-green-300" : "bg-red-300"} rounded-full`}></span>
+              Assign to Team
+            </button>
+            
+            
+            <div className="relative">
+              <select
+                value={selectedBoardId || ""}
+                onChange={(e) => setSelectedBoardId(e.target.value)}
+                className="appearance-none bg-design-white/80 backdrop-blur-sm border border-button-primary-cta/20 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-button-primary-cta transition-all hover:border-button-primary-cta dark:bg-design-black/50 dark:border-button-primary-cta/10"
+              >
+                {boards.map((board) => (
+                  <option key={board.id} value={board.id}>
+                    {board.title}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-button-primary-cta pointer-events-none" />
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -658,23 +728,22 @@ export default function IdeationPage() {
                   >
                     <Trash2 className="h-5 w-5" />
                   </button>
-
-                  <div className="flex items-center gap-2 ml-4">
-                    {activeUsers.map((user) => (
-                      <div
-                        key={user.accountId}
-                        className="flex items-center justify-center w-8 h-8 rounded-full bg-primary-light/30 text-sm font-medium text-primary animate-in fade-in"
-                      >
-                        {user.avatarUrl ? (
-                          <img
-                            src={user.avatarUrl}
-                            alt={user.firstName}
-                            className="w-full h-full rounded-full object-cover"
-                          />
-                        ) : (
-                          user.firstName.charAt(0)
-                        )}
-                      </div>
+                  
+              
+                  <div className="flex -space-x-3 p-4">
+                    {activeUsers.map((user, index) => (
+                          <>
+                              <Tooltip text= {user.firstName} >
+                               <img
+                               src={user.avatarUrl}
+                               alt={user.firstName}
+                               className="w-8 h-8 rounded-full cursor-pointer border-2 border-white shadow-lg"
+                               style={{ zIndex: activeUsers.length - index }} // Ensures correct stacking order
+                             />
+                              </Tooltip>
+                          </>
+                           
+                         
                     ))}
                   </div>
                 </>
@@ -702,6 +771,7 @@ export default function IdeationPage() {
                   onArchiveCard={handleArchiveCard}
                   onDeleteColumn={() => handleDeleteColumn(column.id)}
                   boardId={selectedBoard.id}
+                  boardTitle={selectedBoard.title}
                 />
               ))}
             </SortableContext>
@@ -765,6 +835,58 @@ export default function IdeationPage() {
         onConfirm={handleDeleteBoard}
         boardTitle={selectedBoard?.title || ""}
       />
+      {isTeamModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-design-black rounded-lg p-6 w-96 max-w-[90%] shadow-xl">
+            <h3 className="text-lg font-semibold mb-4">Assign Board to Team</h3>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {currentUserTeams.map((team) => (
+                <button
+                  key={team.id}
+                  onClick={() => setSelectedTeam(team)}
+                  className={`w-full text-left px-4 py-2 rounded-md transition-colors ${
+                    selectedTeam?.id === team.id
+                      ? "bg-primary-light dark:bg-primary-dark"
+                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
+                >
+                  {team.name}
+                </button>
+              ))}
+            </div>
+
+            {selectedTeam && (
+              <div className="mt-4 p-3 border border-gray-200 dark:border-gray-700 rounded-md">
+                <p className="text-sm mb-2">
+                  Assign board to team:{" "}
+                  <span className="font-semibold">{selectedTeam.name}</span>?
+                </p>
+                <button
+                  onClick={() => {selectedBoard.team_id === selectedTeam._id ? handleUnassignBoardFromTeam(selectedBoard.id) : handleAssignBoardToTeam(selectedTeam._id)}}
+                  // disabled={selectedBoard.team_id === selectedTeam._id}
+                  className="btn-primary text-sm"
+                >
+                { selectedBoard.team_id === selectedTeam._id ? "Unassign" : "  Yes, Assign" //
+                
+                }
+                </button>
+              </div>
+            )}
+
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={() => {
+                  setIsTeamModalOpen(false);
+                  setSelectedTeam(null);
+                }}
+                className="btn-ghost text-sm"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
