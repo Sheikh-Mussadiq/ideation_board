@@ -323,12 +323,14 @@ export default function IdeationPage() {
     console.log("Assigning board to team:", selectedBoardId, teamId);
     try {
       setLoading(true);
-      const response = await assignBoardToTeam(selectedBoardId, teamId);
-      console.log("response: ", response);
-      if (!response) {
-        toast.error("Failed to unassign board from team");
-        return;
-      }
+      await assignBoardToTeam(selectedBoardId, teamId);
+      // const response = await assignBoardToTeam(selectedBoardId, teamId);
+
+      // console.log("response: ", response);
+      // if (!response) {
+      //   toast.error("Failed to unassign board from team");
+      //   return;
+      // }
 
       setBoards((prev) =>
         prev.map((board) =>
@@ -351,12 +353,14 @@ export default function IdeationPage() {
     console.log("Unassigning board from team:", selectedBoardId, teamId);
     try {
       setLoading(true);
-      const response = await unassignBoardFromTeam(selectedBoardId);
-      console.log("response: ", response);
-      if (!response) {
-        toast.error("Failed to unassign board from team");
-        return;
-      }
+      // const response = await unassignBoardFromTeam(selectedBoardId);
+       await unassignBoardFromTeam(selectedBoardId);
+
+      // console.log("response: ", response);
+      // if (!response) {
+      //   toast.error("Failed to unassign board from team");
+      //   return;
+      // }
       setBoards((prev) =>
         prev.map((board) =>
           board.id === selectedBoardId ? { ...board, team_id: null } : board

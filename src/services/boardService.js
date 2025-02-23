@@ -282,7 +282,7 @@ export async function assignBoardToTeam(boardId, teamId) {
 
   if (error) throw error;
 
-  return count;
+  // return count;
 }
 
 export async function unassignBoardFromTeam(boardId) {
@@ -292,11 +292,11 @@ export async function unassignBoardFromTeam(boardId) {
     .eq("id", boardId)
     .select("*", { count: "exact" });
 
-  console.log("data:", data, "error:", error, "count:", count);
+  // console.log("data:", data, "error:", error, "count:", count);
 
   if (error) throw error;
 
-  return count;
+  // return count;
 }
 
 export async function updateBoard(boardId, updates) {
