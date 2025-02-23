@@ -72,17 +72,19 @@ export default function IdeationPage() {
   const loadBoards = async (payload) => {
     try {
       // If it's a delete event, just remove the board from state
-      if (payload?.type === 'DELETE') {
-        setBoards(prev => prev.filter(board => board.id !== payload.id));
+      if (payload?.type === "DELETE") {
+        setBoards((prev) => prev.filter((board) => board.id !== payload.id));
         // If the deleted board was selected, select another board
         if (selectedBoardId === payload.id) {
-          const remainingBoards = boards.filter(board => board.id !== payload.id);
+          const remainingBoards = boards.filter(
+            (board) => board.id !== payload.id
+          );
           if (remainingBoards.length > 0) {
             setSelectedBoardId(remainingBoards[0].id);
             navigate(`/ideation/${remainingBoards[0].id}`);
           } else {
             setSelectedBoardId(null);
-            navigate('/ideation');
+            navigate("/ideation");
           }
         }
         return;
@@ -279,8 +281,6 @@ export default function IdeationPage() {
     );
   };
 
-
-
   useRealtimeCards(selectedBoardId || "", handleCardChange);
   useRealtimeColumns(selectedBoardId || "", handleColumnChange);
   useRealtimeCardComments(selectedBoardId, handleCommentChange);
@@ -366,12 +366,12 @@ export default function IdeationPage() {
 
   const handleDeleteBoard = async () => {
     if (!selectedBoardId) return;
-  
+
     try {
       setLoading(true);
       await deleteBoard(selectedBoardId, currentUser.accountId);
       setBoards((prev) => prev.filter((board) => board.id !== selectedBoardId));
-      
+
       // Find next available board
       const nextBoard = boards.find((board) => board.id !== selectedBoardId);
       if (nextBoard) {
@@ -379,9 +379,9 @@ export default function IdeationPage() {
         navigate(`/ideation/${nextBoard.id}`);
       } else {
         setSelectedBoardId(null);
-        navigate('/ideation');
+        navigate("/ideation");
       }
-      
+
       toast.success("Board deleted successfully");
     } catch (error) {
       console.error("Error deleting board:", error);
@@ -699,8 +699,8 @@ export default function IdeationPage() {
   }
 
   return (
-    <div className=" bg-design-white border border-design-greyOutlines rounded-xl dark:bg-design-black p-6">
-      <div className="mx-auto">
+    <div className="h-[100vh] bg-design-white border border-design-greyOutlines rounded-xl dark:bg-design-black p-6 flex flex-col">
+      <div className="flex-none">
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center gap-4"></div>
           <h1 className="text-2xl font-bold text-button-primary-cta dark:text-button-primary-text">
@@ -776,7 +776,7 @@ export default function IdeationPage() {
                 onClick={() => setIsAddingBoard(true)}
                 className="btn-primary group hover:scale-105 transition-transform"
               >
-                <Plus className="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform" />
+                <Plus className="h-4 w-4  group-hover:rotate-90 transition-transform" />
                 Add Board
               </button>
               {selectedBoardId && (
@@ -789,7 +789,7 @@ export default function IdeationPage() {
                     <Trash2 className="h-5 w-5" />
                   </button>
 
-                  <div className="flex -space-x-3 p-4">
+                  <div className="flex -space-x-3">
                     {activeUsers.map((user, index) => (
                       <>
                         <Tooltip text={user.firstName}>
@@ -816,7 +816,7 @@ export default function IdeationPage() {
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <div className="flex gap-6 overflow-x-auto pb-4 min-h-[calc(100vh-12rem)]">
+          <div className="flex gap-6 overflow-x-auto flex-1 scrollbar-hide">
             <SortableContext items={selectedBoard.columns.map((col) => col.id)}>
               {selectedBoard.columns.map((column) => (
                 <KanbanColumn

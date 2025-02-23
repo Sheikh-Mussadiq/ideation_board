@@ -1,11 +1,11 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import Layout from './components/Layout';
-import LoginPage from './pages/LoginPage';
-import IdeationPage from './pages/IdeationPage';
-import ProtectedRoute from './components/ProtectedRoute';
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import Layout from "./components/Layout";
+import LoginPage from "./pages/LoginPage";
+import IdeationPage from "./pages/IdeationPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const LoadingSpinner = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -18,7 +18,6 @@ const ProtectedLayout = ({ children }) => (
     <Layout>{children}</Layout>
   </ProtectedRoute>
 );
-
 
 const AuthenticatedRoutes = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -40,8 +39,22 @@ const AuthenticatedRoutes = () => {
       {/* <Route path="/content/search" element={<ProtectedLayout><ContentSearchPage /></ProtectedLayout>} /> */}
       {/* <Route path="/ideation" element={<ProtectedLayout><IdeationPage /></ProtectedLayout>} /> */}
       <Route path="/" element={<Navigate to="/ideation" replace />} />
-      <Route path="/ideation" element={<ProtectedLayout><IdeationPage /></ProtectedLayout>} />
-      <Route path="/ideation/:boardId" element={<ProtectedLayout><IdeationPage /></ProtectedLayout>} />
+      <Route
+        path="/ideation"
+        element={
+          <ProtectedLayout>
+            <IdeationPage />
+          </ProtectedLayout>
+        }
+      />
+      <Route
+        path="/ideation/:boardId"
+        element={
+          <ProtectedLayout>
+            <IdeationPage />
+          </ProtectedLayout>
+        }
+      />
       {/* <Route path="/api" element={<ProtectedLayout><ApiPage /></ProtectedLayout>} /> */}
     </Routes>
   );

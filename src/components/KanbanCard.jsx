@@ -84,7 +84,7 @@ export default function KanbanCard({
       completed: newDoneState,
     });
   };
-  // const plainText = card.description.replace(/<\/?[^>]+>/g, ""); ///<\/?[^>]+>/g, ''
+  const plainText = card.description.replace(/<\/?[^>]+>/g, ""); ///<\/?[^>]+>/g, ''
   return (
     <>
       <div
@@ -146,7 +146,7 @@ export default function KanbanCard({
                 card.completed ? "line-through" : ""
               }`}
             >
-              {card?.description && truncateDescription(card.description.replace(/<\/?[^>]+>/g, ""))}
+              {truncateDescription(card.description.replace(/<\/?[^>]+>/g, ""))}
             </p>
           </div>
         )}
