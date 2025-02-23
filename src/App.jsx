@@ -33,12 +33,15 @@ const AuthenticatedRoutes = () => {
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/ideation" replace />} />
+      {/* <Route path="/" element={<Navigate to="/ideation" replace />} /> */}
       {/* <Route path="/dashboard" element={<ProtectedLayout><PostFormPage /></ProtectedLayout>} /> */}
       {/* <Route path="/content" element={<ProtectedLayout><ContentListPage /></ProtectedLayout>} /> */}
       {/* <Route path="/content/:id" element={<ProtectedLayout><ContentDetailsPage /></ProtectedLayout>} /> */}
       {/* <Route path="/content/search" element={<ProtectedLayout><ContentSearchPage /></ProtectedLayout>} /> */}
+      {/* <Route path="/ideation" element={<ProtectedLayout><IdeationPage /></ProtectedLayout>} /> */}
+      <Route path="/" element={<Navigate to="/ideation" replace />} />
       <Route path="/ideation" element={<ProtectedLayout><IdeationPage /></ProtectedLayout>} />
+      <Route path="/ideation/:boardId" element={<ProtectedLayout><IdeationPage /></ProtectedLayout>} />
       {/* <Route path="/api" element={<ProtectedLayout><ApiPage /></ProtectedLayout>} /> */}
     </Routes>
   );

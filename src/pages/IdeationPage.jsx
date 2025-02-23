@@ -36,6 +36,7 @@ import { useAuth } from "../context/AuthContext";
 import { useRealtimeCardComments } from "../hooks/useRealtimeCardComments";
 import { useRealtimeBoards } from "../hooks/useRealtimeBoards";
 import { usePresenceBroadcast } from "../hooks/usePresenceBroadcast";
+import { useNavigate, useParams } from "react-router-dom";
 import LoadingShimmer from "../components/LoadingShimmer";
 import Tooltip from "../components/Tooltip";
 export default function IdeationPage() {
@@ -53,6 +54,8 @@ export default function IdeationPage() {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const { currentUser, currentUserUsers, currentUserTeams } = useAuth();
   const activeUsers = usePresenceBroadcast(selectedBoardId, currentUser);
+  const navigate = useNavigate();
+  const { boardId } = useParams();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -68,10 +71,45 @@ export default function IdeationPage() {
 
   const loadBoards = async (payload) => {
     try {
+      // If it's a delete event, just remove the board from state
+      if (payload?.type === 'DELETE') {
+        setBoards(prev => prev.filter(board => board.id !== payload.id));
+        // If the deleted board was selected, select another board
+        if (selectedBoardId === payload.id) {
+          const remainingBoards = boards.filter(board => board.id !== payload.id);
+          if (remainingBoards.length > 0) {
+            setSelectedBoardId(remainingBoards[0].id);
+            navigate(`/ideation/${remainingBoards[0].id}`);
+          } else {
+            setSelectedBoardId(null);
+            navigate('/ideation');
+          }
+        }
+        return;
+      }
+
+      // Otherwise load all boards
       const loadedBoards = await fetchBoards(currentUser.accountId);
       setBoards(loadedBoards);
-      if (loadedBoards.length > 0 && !selectedBoardId) {
-        setSelectedBoardId(loadedBoards[0].id);
+
+      if (loadedBoards.length > 0) {
+        if (boardId) {
+          // If URL has boardId, verify it exists and select it
+          const boardExists = loadedBoards.some(
+            (board) => board.id === boardId
+          );
+          if (boardExists) {
+            setSelectedBoardId(boardId);
+          } else {
+            // If board doesn't exist, select first board and update URL
+            setSelectedBoardId(loadedBoards[0].id);
+            navigate(`/ideation/${loadedBoards[0].id}`);
+          }
+        } else {
+          // No boardId in URL, select first board and update URL
+          setSelectedBoardId(loadedBoards[0].id);
+          navigate(`/ideation/${loadedBoards[0].id}`);
+        }
       }
       setIsLoading(false);
     } catch (error) {
@@ -79,6 +117,10 @@ export default function IdeationPage() {
       toast.error("Failed to load boards");
       setIsLoading(false);
     }
+  };
+  const handleBoardSelect = (boardId) => {
+    setSelectedBoardId(boardId);
+    navigate(`/ideation/${boardId}`);
   };
 
   const handleCardChange = (updatedCard) => {
@@ -237,9 +279,7 @@ export default function IdeationPage() {
     );
   };
 
-  const handleLabelUpdate = (payload, payloadType) => {
-    console.log("Label change received:", payload, payloadType);
-  };
+
 
   useRealtimeCards(selectedBoardId || "", handleCardChange);
   useRealtimeColumns(selectedBoardId || "", handleColumnChange);
@@ -257,6 +297,7 @@ export default function IdeationPage() {
         );
         setBoards((prev) => [...prev, newBoard]);
         setSelectedBoardId(newBoard.id);
+        navigate(`/ideation/${newBoard.id}`);
         setNewBoardTitle("");
         setIsAddingBoard(false);
         toast.success("Board created successfully");
@@ -273,9 +314,9 @@ export default function IdeationPage() {
     console.log("Assigning board to team:", selectedBoardId, teamId);
     try {
       setLoading(true);
-      const response  = await assignBoardToTeam(selectedBoardId, teamId);
+      const response = await assignBoardToTeam(selectedBoardId, teamId);
       console.log("response: ", response);
-      if(!response) {
+      if (!response) {
         toast.error("Failed to unassign board from team");
         return;
       }
@@ -301,9 +342,9 @@ export default function IdeationPage() {
     console.log("Unassigning board from team:", selectedBoardId, teamId);
     try {
       setLoading(true);
-      const response  = await unassignBoardFromTeam(selectedBoardId);
+      const response = await unassignBoardFromTeam(selectedBoardId);
       console.log("response: ", response);
-      if(!response) {
+      if (!response) {
         toast.error("Failed to unassign board from team");
         return;
       }
@@ -321,28 +362,35 @@ export default function IdeationPage() {
     } finally {
       setLoading(false);
     }
-  }; 
+  };
+
   const handleDeleteBoard = async () => {
     if (!selectedBoardId) return;
-
+  
     try {
       setLoading(true);
       await deleteBoard(selectedBoardId, currentUser.accountId);
       setBoards((prev) => prev.filter((board) => board.id !== selectedBoardId));
-      setSelectedBoardId(
-        boards.find((board) => board.id !== selectedBoardId)?.id || null
-      );
+      
+      // Find next available board
+      const nextBoard = boards.find((board) => board.id !== selectedBoardId);
+      if (nextBoard) {
+        setSelectedBoardId(nextBoard.id);
+        navigate(`/ideation/${nextBoard.id}`);
+      } else {
+        setSelectedBoardId(null);
+        navigate('/ideation');
+      }
+      
       toast.success("Board deleted successfully");
     } catch (error) {
       console.error("Error deleting board:", error);
       toast.error("Failed to delete board");
     } finally {
       setIsDeleteModalOpen(false);
-
       setLoading(false);
     }
   };
-
   const handleAddColumn = async () => {
     if (newColumnTitle.trim() && selectedBoardId) {
       try {
@@ -632,8 +680,7 @@ export default function IdeationPage() {
 
   useEffect(() => {
     console.log(currentUser, "board: ", selectedBoard);
-    
-  }, [currentUser,selectedBoard]);
+  }, [currentUser, selectedBoard]);
 
   if (isLoading) {
     return (
@@ -660,20 +707,33 @@ export default function IdeationPage() {
             Ideation Board
           </h1>
           <div className="flex items-center gap-4">
-           
             <button
               onClick={() => setIsTeamModalOpen(true)}
               className="btn-secondary text-sm"
             >
-              <span  className={`h-1 w-1 mr-2  ${selectedBoard.team_id ? "bg-green-300" : "bg-red-300"} rounded-full`}></span>
+              <span
+                className={`h-1 w-1 mr-2  ${
+                  selectedBoard.team_id ? "bg-green-300" : "bg-red-300"
+                } rounded-full`}
+              ></span>
               Assign to Team
             </button>
-            
-            
+
             <div className="relative">
-              <select
+              {/* <select
                 value={selectedBoardId || ""}
                 onChange={(e) => setSelectedBoardId(e.target.value)}
+                className="appearance-none bg-design-white/80 backdrop-blur-sm border border-button-primary-cta/20 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-button-primary-cta transition-all hover:border-button-primary-cta dark:bg-design-black/50 dark:border-button-primary-cta/10"
+              >
+                {boards.map((board) => (
+                  <option key={board.id} value={board.id}>
+                    {board.title}
+                  </option>
+                ))}
+              </select> */}
+              <select
+                value={selectedBoardId || ""}
+                onChange={(e) => handleBoardSelect(e.target.value)}
                 className="appearance-none bg-design-white/80 backdrop-blur-sm border border-button-primary-cta/20 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-button-primary-cta transition-all hover:border-button-primary-cta dark:bg-design-black/50 dark:border-button-primary-cta/10"
               >
                 {boards.map((board) => (
@@ -728,22 +788,19 @@ export default function IdeationPage() {
                   >
                     <Trash2 className="h-5 w-5" />
                   </button>
-                  
-              
+
                   <div className="flex -space-x-3 p-4">
                     {activeUsers.map((user, index) => (
-                          <>
-                              <Tooltip text= {user.firstName} >
-                               <img
-                               src={user.avatarUrl}
-                               alt={user.firstName}
-                               className="w-8 h-8 rounded-full cursor-pointer border-2 border-white shadow-lg"
-                               style={{ zIndex: activeUsers.length - index }} // Ensures correct stacking order
-                             />
-                              </Tooltip>
-                          </>
-                           
-                         
+                      <>
+                        <Tooltip text={user.firstName}>
+                          <img
+                            src={user.avatarUrl}
+                            alt={user.firstName}
+                            className="w-8 h-8 rounded-full cursor-pointer border-2 border-white shadow-lg"
+                            style={{ zIndex: activeUsers.length - index }} // Ensures correct stacking order
+                          />
+                        </Tooltip>
+                      </>
                     ))}
                   </div>
                 </>
@@ -862,13 +919,19 @@ export default function IdeationPage() {
                   <span className="font-semibold">{selectedTeam.name}</span>?
                 </p>
                 <button
-                  onClick={() => {selectedBoard.team_id === selectedTeam._id ? handleUnassignBoardFromTeam(selectedBoard.id) : handleAssignBoardToTeam(selectedTeam._id)}}
+                  onClick={() => {
+                    selectedBoard.team_id === selectedTeam._id
+                      ? handleUnassignBoardFromTeam(selectedBoard.id)
+                      : handleAssignBoardToTeam(selectedTeam._id);
+                  }}
                   // disabled={selectedBoard.team_id === selectedTeam._id}
                   className="btn-primary text-sm"
                 >
-                { selectedBoard.team_id === selectedTeam._id ? "Unassign" : "  Yes, Assign" //
-                
-                }
+                  {
+                    selectedBoard.team_id === selectedTeam._id
+                      ? "Unassign"
+                      : "  Yes, Assign" //
+                  }
                 </button>
               </div>
             )}

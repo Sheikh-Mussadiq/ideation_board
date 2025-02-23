@@ -10,14 +10,19 @@ export function useRealtimeBoards(accountId, onBoardChange) {
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: '*', 
           schema: 'public',
           table: 'boards',
-          filter: `account_id=eq.${accountId}`
+      
         },
         (payload) => {
           console.log('Board change received:', payload);
-          onBoardChange(payload);
+          if (payload.eventType === 'DELETE') {
+            // For DELETE events, payload.old contains the deleted record
+            onBoardChange({ id: payload.old.id, type: 'DELETE' });
+          } else {
+            onBoardChange(payload.new);
+          }
         }
       )
       .subscribe();

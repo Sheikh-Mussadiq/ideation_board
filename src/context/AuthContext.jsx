@@ -2,10 +2,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { loginToSocialHub } from '../services/socialhubAuth';
 import { supabase } from '../lib/supabase';
-const VALID_USERS = [
-  { email: 'david.neuhaus@maloon.de', password: 'rtecPPp337!' },
-  { email: 'matthias.gerer@maloon.de', password: 'rtecPPp337!' }
-];
+
 
 const AuthContext = createContext(null);
 
