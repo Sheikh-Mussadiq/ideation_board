@@ -1,12 +1,10 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { FileText, LayoutGrid, Lightbulb, Code2 } from 'lucide-react';
+import React from "react";
+import { NavLink } from "react-router-dom";
+import { FileText, LayoutGrid, Lightbulb, Code2 } from "lucide-react";
 
 const navItems = [
-  { name: 'Ideation', path: '/ideation', icon: Lightbulb },
-  { name: 'Posts', path: '/dashboard', icon: FileText },
-  { name: 'Content', path: '/content', icon: LayoutGrid },
-  { name: 'API', path: '/api', icon: Code2 },
+  { name: "Ideation", path: "/ideation", icon: Lightbulb },
+  { name: "Home", path: "/dashboard", icon: FileText },
 ];
 
 export default function Sidebar() {
@@ -22,8 +20,8 @@ export default function Sidebar() {
               className={({ isActive }) =>
                 `p-2 rounded-lg transition-colors duration-150 group relative ${
                   isActive
-                    ? 'text-primary bg-primary-light scale-110'
-                    : 'text-gray-500 hover:text-primary hover:bg-primary-light hover:scale-110'
+                    ? "text-primary bg-primary-light scale-110"
+                    : "text-gray-500 hover:text-primary hover:bg-primary-light hover:scale-110"
                 }`
               }
               title={item.name}
