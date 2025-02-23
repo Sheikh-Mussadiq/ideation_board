@@ -262,13 +262,14 @@ export default function IdeationPage() {
           ...col,
           cards: col.cards.map((card) => {
             if (card.id === updatedComment.card_id) {
-              const existingCommentIndex = card.comments.findIndex(
+              const currentComments = card.comments || [];
+              const existingCommentIndex = currentComments.findIndex(
                 (comment) => comment.id === updatedComment.id
               );
-              const updatedComments = [...card.comments];
+              const updatedComments = [...currentComments];
 
               if (existingCommentIndex === -1 && eventType === "INSERT") {
-                updatedComments.push(updatedComment);
+                updatedComments.unshift(updatedComment);
               } else if (existingCommentIndex !== -1) {
                 updatedComments[existingCommentIndex] = {
                   ...updatedComments[existingCommentIndex],

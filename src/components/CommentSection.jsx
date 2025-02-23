@@ -4,6 +4,7 @@ import { User, Edit2, Trash2, MessageSquare, ChevronDown } from "lucide-react";
 
 export default function CommentSection({
   comments,
+  userAccountId,
   onAddComment,
   onEditComment,
   onDeleteComment,
@@ -79,11 +80,11 @@ export default function CommentSection({
                     {comment.author}
                   </span>
                   <span className="text-xs text-design-primaryGrey dark:text-design-greyOutlines">
-                    {format(new Date(comment.created_at), "MMM d, yyyy HH:mm")}
+                   { comment.updated_at ?   format(new Date(comment.updated_at), "MMM d, yyyy HH:mm") : format(new Date(comment.created_at), "MMM d, yyyy HH:mm") }
                   </span>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className={`flex items-center space-x-2 ${comment.account_id === userAccountId ? "" : "hidden"}`}>
                 <button
                   onClick={() => {
                     setEditingId(comment.id);
@@ -126,7 +127,7 @@ export default function CommentSection({
               </div>
             ) : (
               <p className="mt-2 text-sm text-gray-700 leading-relaxed dark:text-design-greyOutlines">
-                {comment.text}
+                {comment.text} {comment.updated_at ? " (edited)" : ""}
               </p>
             )}
           </div>

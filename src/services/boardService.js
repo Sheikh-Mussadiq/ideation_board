@@ -180,7 +180,7 @@ export async function fetchBoards(accountId) {
             cards.map(async (card) => {
               const [{ data: comments, error: commentsError }] =
                 await Promise.all([
-                  supabase.from("comments").select("*").eq("card_id", card.id),
+                  supabase.from("comments").select("*").eq("card_id", card.id).order("created_at", { ascending: false }),
                 ]);
 
               if (commentsError) throw commentsError;

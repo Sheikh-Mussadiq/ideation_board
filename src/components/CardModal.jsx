@@ -350,6 +350,7 @@ export default function CardModal({
                   {/* Comments */}
                   <CommentSection
                     comments={card.comments || []}
+                    userAccountId={currentUser.accountId}
                     onAddComment={async (text) => {
                       const newComment = {
                         id: Date.now().toString(),
