@@ -6,6 +6,9 @@ import Layout from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
 import IdeationPage from "./pages/IdeationPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { BoardProvider } from "./context/BoardContext";
+
+import HomePage from "./pages/HomePage";
 
 const LoadingSpinner = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -55,6 +58,14 @@ const AuthenticatedRoutes = () => {
           </ProtectedLayout>
         }
       />
+      <Route
+        path="/home"
+        element={
+          <ProtectedLayout>
+            <HomePage />
+          </ProtectedLayout>
+        }
+      />{" "}
       {/* <Route path="/api" element={<ProtectedLayout><ApiPage /></ProtectedLayout>} /> */}
     </Routes>
   );
@@ -63,13 +74,15 @@ const AuthenticatedRoutes = () => {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/*" element={<AuthenticatedRoutes />} />
-        </Routes>
-        <Toaster position="top-right" />
-      </BrowserRouter>
+      <BoardProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/*" element={<AuthenticatedRoutes />} />
+          </Routes>
+          <Toaster position="top-right" />
+        </BrowserRouter>
+      </BoardProvider>
     </AuthProvider>
   );
 }

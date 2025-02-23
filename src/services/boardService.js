@@ -1,4 +1,3 @@
-
 // import { supabase } from '../lib/supabase';
 
 // export async function fetchBoards(accountId) {
@@ -144,56 +143,47 @@
 //   if (error) throw error;
 // }
 
-
-
-import { supabase } from '../lib/supabase';
-const userData = await supabase.auth.getUser(); 
+import { supabase } from "../lib/supabase";
+const userData = await supabase.auth.getUser();
 const user = userData.data.user;
 
 export async function fetchBoards(accountId) {
   const { data: boards, error: boardsError } = await supabase
-    .from('boards')
-    .select('*')
+    .from("boards")
+    .select("*")
     // .eq('account_id', accountId)
-    .order('created_at', { ascending: true });
+    .order("created_at", { ascending: true });
 
   if (boardsError) throw boardsError;
 
   const boardsWithDetails = await Promise.all(
     boards.map(async (board) => {
       const { data: columns, error: columnsError } = await supabase
-        .from('columns')
-        .select('*')
-        .eq('board_id', board.id)
-        .order('position', { ascending: true });
+        .from("columns")
+        .select("*")
+        .eq("board_id", board.id)
+        .order("position", { ascending: true });
 
       if (columnsError) throw columnsError;
 
       const columnsWithCards = await Promise.all(
         columns.map(async (column) => {
           const { data: cards, error: cardsError } = await supabase
-            .from('cards')
-            .select('*')
-            .eq('column_id', column.id)
-            .order('position', { ascending: true });
+            .from("cards")
+            .select("*")
+            .eq("column_id", column.id)
+            .order("position", { ascending: true });
 
           if (cardsError) throw cardsError;
 
           const cardsWithDetails = await Promise.all(
             cards.map(async (card) => {
-              const [
-           
-                { data: comments, error: commentsError },
-               
-              ] = await Promise.all([
-               
-                supabase.from('comments').select('*').eq('card_id', card.id),
-               
-              ]);
+              const [{ data: comments, error: commentsError }] =
+                await Promise.all([
+                  supabase.from("comments").select("*").eq("card_id", card.id),
+                ]);
 
-              
               if (commentsError) throw commentsError;
-              
 
               return {
                 id: card.id,
@@ -207,7 +197,7 @@ export async function fetchBoards(accountId) {
                 completed: card.completed,
                 attachments: card.attachments || [],
                 comments: comments || [],
-                archived: card.archived
+                archived: card.archived,
               };
             })
           );
@@ -215,7 +205,7 @@ export async function fetchBoards(accountId) {
           return {
             id: column.id,
             title: column.title,
-            cards: cardsWithDetails
+            cards: cardsWithDetails,
           };
         })
       );
@@ -224,7 +214,7 @@ export async function fetchBoards(accountId) {
         id: board.id,
         title: board.title,
         columns: columnsWithCards,
-        team_id : board.team_id
+        team_id: board.team_id,
       };
     })
   );
@@ -232,10 +222,20 @@ export async function fetchBoards(accountId) {
   return boardsWithDetails;
 }
 
-export async function createBoard(title , accountId) {
-  
+export async function fetchBoardsList() {
+  const { data: boards, error: boardsError } = await supabase
+    .from("boards")
+    .select("*")
+    .order("created_at", { ascending: true });
+
+  if (boardsError) throw boardsError;
+
+  return boards;
+}
+
+export async function createBoard(title, accountId) {
   const { data: board, error: boardError } = await supabase
-    .from('boards')
+    .from("boards")
     .insert([{ title, account_id: accountId, created_by: user.id }])
     .select()
     .single();
@@ -243,19 +243,19 @@ export async function createBoard(title , accountId) {
   if (boardError) throw boardError;
 
   const defaultColumns = [
-    { title: 'To Do', position: 0,  account_id: accountId },
-    { title: 'In Progress', position: 1, account_id: accountId },
-    { title: 'Done', position: 2 , account_id: accountId },
+    { title: "To Do", position: 0, account_id: accountId },
+    { title: "In Progress", position: 1, account_id: accountId },
+    { title: "Done", position: 2, account_id: accountId },
   ];
 
   const { data: columns, error: columnsError } = await supabase
-    .from('columns')
+    .from("columns")
     .insert(
-      defaultColumns.map(col => ({
+      defaultColumns.map((col) => ({
         board_id: board.id,
         title: col.title,
         account_id: col.account_id,
-        position: col.position
+        position: col.position,
       }))
     )
     .select();
@@ -265,22 +265,20 @@ export async function createBoard(title , accountId) {
   return {
     id: board.id,
     title: board.title,
-    columns: columns.map(col => ({
+    columns: columns.map((col) => ({
       id: col.id,
       title: col.title,
-      cards: []
-    }))
+      cards: [],
+    })),
   };
 }
 export async function assignBoardToTeam(boardId, teamId) {
-  console.log("boardId: ", boardId, teamId)
-  const { data , error } = await supabase
-    .from('boards')
+  console.log("boardId: ", boardId, teamId);
+  const { data, error } = await supabase
+    .from("boards")
     .update({ team_id: teamId })
-    .eq('id', boardId)
-    .select('*', { count: 'exact' }); 
-
- 
+    .eq("id", boardId)
+    .select("*", { count: "exact" });
 
   if (error) throw error;
 
@@ -292,7 +290,7 @@ export async function unassignBoardFromTeam(boardId) {
     .from("boards")
     .update({ team_id: null })
     .eq("id", boardId)
-    .select('*', { count: 'exact' }); 
+    .select("*", { count: "exact" });
 
   console.log("data:", data, "error:", error, "count:", count);
 
@@ -303,19 +301,15 @@ export async function unassignBoardFromTeam(boardId) {
 
 export async function updateBoard(boardId, updates) {
   const { error } = await supabase
-    .from('boards')
+    .from("boards")
     .update({ title: updates.title, updated_at: new Date().toISOString() })
-    .eq('id', boardId);
+    .eq("id", boardId);
 
   if (error) throw error;
 }
 
-
 export async function deleteBoard(boardId) {
-  const { error } = await supabase
-    .from('boards')
-    .delete()
-    .eq('id', boardId);
+  const { error } = await supabase.from("boards").delete().eq("id", boardId);
 
   if (error) throw error;
 }

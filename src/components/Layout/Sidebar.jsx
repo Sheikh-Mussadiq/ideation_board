@@ -1,39 +1,220 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
-import { FileText, LayoutGrid, Lightbulb, Code2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import {
+  Home,
+  Search,
+  Lightbulb,
+  ChevronDown,
+  Plus,
+  Layout,
+  ChevronLeft,
+  ChevronRight,
+  Kanban,
+  SquareKanban,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import Tooltip from "../Tooltip";
+import { useBoards } from "../../context/BoardContext";
 
 const navItems = [
+  { name: "Home", path: "/home", icon: Home },
   { name: "Ideation", path: "/ideation", icon: Lightbulb },
-  { name: "Home", path: "/dashboard", icon: FileText },
 ];
 
 export default function Sidebar() {
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isBoardsOpen, setIsBoardsOpen] = useState(false);
+  const { boardsList } = useBoards(); // Use boards from context instead of local state
+  const navigate = useNavigate();
+
+  // Remove fetchBoardsList and related useEffect since we're now using context
+
+  const filteredBoards = boardsList.filter((board) =>
+    board.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleBoardClickNoSidebar = () => {
+    setIsExpanded(true);
+    setIsBoardsOpen(true);
+  };
+
   return (
-    <div className="fixed inset-y-0 left-0 w-16 bg-white/80 backdrop-blur-sm border-r border-gray-200 shadow-sm z-50">
-      <div className="flex flex-col items-center py-4 space-y-4">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <NavLink
-              key={item.name}
-              to={item.path}
-              className={({ isActive }) =>
-                `p-2 rounded-lg transition-colors duration-150 group relative ${
-                  isActive
-                    ? "text-primary bg-primary-light scale-110"
-                    : "text-gray-500 hover:text-primary hover:bg-primary-light hover:scale-110"
-                }`
-              }
-              title={item.name}
-            >
-              <Icon className="h-6 w-6" />
-              <span className="absolute left-full ml-2 px-2 py-1 text-sm font-medium text-primary bg-white/90 backdrop-blur-sm rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-150 whitespace-nowrap transform scale-95 group-hover:scale-100">
-                {item.name}
-              </span>
-            </NavLink>
-          );
-        })}
-      </div>
-    </div>
+    <>
+      <motion.div
+        className="fixed inset-y-0 left-0 bg-white/80 backdrop-blur-sm border-r border-gray-200 shadow-sm z-50 flex flex-col"
+        animate={{
+          width: isExpanded ? "16rem" : "4.5rem",
+        }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+      >
+        <div className="flex flex-col h-full relative">
+          {/* Toggle Button */}
+
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="absolute -right-3 top-6 bg-white rounded-full p-1.5 border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors"
+          >
+            {isExpanded ? (
+              <ChevronLeft className="h-4 w-4 text-gray-600" />
+            ) : (
+              <ChevronRight className="h-4 w-4 text-gray-600" />
+            )}
+          </button>
+
+          {/* Navigation Items */}
+          <nav className="flex-1 p-4 space-y-2">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Tooltip
+                  key={item.name}
+                  text={!isExpanded ? item.name : undefined}
+                  position="right"
+                >
+                  <NavLink
+                    to={item.path}
+                    className={({ isActive }) =>
+                      `flex items-center px-3 py-2 rounded-lg transition-all duration-200 group ${
+                        isActive
+                          ? "bg-button-primary-cta text-white"
+                          : "text-gray-600 hover:bg-button-primary-cta/10 hover:text-button-primary-cta"
+                      }`
+                    }
+                  >
+                    <Icon className="h-5 w-5 flex-shrink-0" />
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.span
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: "auto" }}
+                          exit={{ opacity: 0, width: 0 }}
+                          className="ml-3 font-medium overflow-hidden whitespace-nowrap"
+                        >
+                          {item.name}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </NavLink>
+                </Tooltip>
+              );
+            })}
+
+            {/* Boards Section */}
+            <div className="mt-6">
+              <Tooltip
+                text={!isExpanded ? "Boards" : undefined}
+                position="right"
+              >
+                <button
+                  onClick={() => {
+                    isExpanded
+                      ? setIsBoardsOpen(!isBoardsOpen)
+                      : handleBoardClickNoSidebar();
+                  }}
+                  className="flex items-center justify-between w-full px-3 py-2 text-gray-600 hover:bg-button-primary-cta/10 hover:text-button-primary-cta rounded-lg transition-all duration-200"
+                >
+                  <div className="flex items-center">
+                    <SquareKanban className="h-5 w-5 flex-shrink-0" />
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.span
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: "auto" }}
+                          exit={{ opacity: 0, width: 0 }}
+                          className="ml-3 font-medium overflow-hidden whitespace-nowrap"
+                        >
+                          Boards
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                  {isExpanded && (
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform duration-200 ${
+                        isBoardsOpen ? "transform rotate-180" : ""
+                      }`}
+                    />
+                  )}
+                </button>
+              </Tooltip>
+
+              <AnimatePresence>
+                {isBoardsOpen && isExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="mt-2 space-y-2"
+                  >
+                    {/* Search Bar inside Boards dropdown */}
+                    <div className="px-3">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="Search boards..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-full px-4 py-1.5 pl-8 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-button-primary-cta focus:border-transparent transition-all"
+                        />
+                        <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+                      </div>
+                    </div>
+
+                    {filteredBoards.map((board) => (
+                      <motion.button
+                        key={board.id}
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        className="flex items-center w-full px-3 py-1.5 text-sm text-gray-600 hover:bg-button-primary-cta/10 hover:text-button-primary-cta rounded-lg transition-all duration-200 ml-3"
+                        onClick={() => navigate(`/ideation/${board.id}`)}
+                      >
+                        {board.title}
+                      </motion.button>
+                    ))}
+
+                    {/* <motion.button
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      className="flex items-center w-full px-3 py-1.5 text-sm text-button-primary-cta hover:bg-button-primary-cta/10 rounded-lg transition-all duration-200 ml-3"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      New Board
+                    </motion.button> */}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </nav>
+
+          {/* User Profile Section */}
+          <div className="p-4 border-t border-gray-200">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-full bg-button-primary-cta/20 flex items-center justify-center flex-shrink-0">
+                <span className="text-button-primary-cta font-medium">JD</span>
+              </div>
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="flex-1 overflow-hidden"
+                  >
+                    <p className="text-sm font-medium text-gray-700 truncate">
+                      John Doe
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      john@example.com
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </>
   );
 }

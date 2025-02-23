@@ -68,7 +68,7 @@ export default function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className="flex-shrink-0 w-80 bg-design-greyBG/50 rounded-xl p-4 dark:bg-button-tertiary-fill/10 flex flex-col max-h-full"
+      className="flex-shrink-0 w-80 bg-design-greyBG/50 rounded-xl p-4 dark:bg-button-tertiary-fill/10 flex flex-col max-h-[calc(100vh-15rem)]"
     >
       <div className="flex-none mb-4">
         <div className="flex items-center justify-between mb-4 flex-none">

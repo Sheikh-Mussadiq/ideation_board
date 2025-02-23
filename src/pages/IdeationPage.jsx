@@ -39,6 +39,8 @@ import { usePresenceBroadcast } from "../hooks/usePresenceBroadcast";
 import { useNavigate, useParams } from "react-router-dom";
 import LoadingShimmer from "../components/LoadingShimmer";
 import Tooltip from "../components/Tooltip";
+import { useBoards } from "../context/BoardContext";
+
 export default function IdeationPage() {
   const [boards, setBoards] = useState([]);
   const [selectedBoardId, setSelectedBoardId] = useState(null);
@@ -56,6 +58,7 @@ export default function IdeationPage() {
   const activeUsers = usePresenceBroadcast(selectedBoardId, currentUser);
   const navigate = useNavigate();
   const { boardId } = useParams();
+  const { updateBoardsList } = useBoards();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -69,6 +72,9 @@ export default function IdeationPage() {
     loadBoards();
   }, []);
 
+  useEffect(() => {
+    setSelectedBoardId(boardId);
+  }, [boardId]);
   const loadBoards = async (payload) => {
     try {
       // If it's a delete event, just remove the board from state
@@ -93,6 +99,7 @@ export default function IdeationPage() {
       // Otherwise load all boards
       const loadedBoards = await fetchBoards(currentUser.accountId);
       setBoards(loadedBoards);
+      updateBoardsList(loadedBoards); // Update the global boards list
 
       if (loadedBoards.length > 0) {
         if (boardId) {
@@ -295,7 +302,9 @@ export default function IdeationPage() {
           newBoardTitle.trim(),
           currentUser.accountId
         );
-        setBoards((prev) => [...prev, newBoard]);
+        const updatedBoards = [...boards, newBoard];
+        setBoards(updatedBoards);
+        updateBoardsList(updatedBoards); // Update global boards list
         setSelectedBoardId(newBoard.id);
         navigate(`/ideation/${newBoard.id}`);
         setNewBoardTitle("");
@@ -370,7 +379,11 @@ export default function IdeationPage() {
     try {
       setLoading(true);
       await deleteBoard(selectedBoardId, currentUser.accountId);
-      setBoards((prev) => prev.filter((board) => board.id !== selectedBoardId));
+      const updatedBoards = boards.filter(
+        (board) => board.id !== selectedBoardId
+      );
+      setBoards(updatedBoards);
+      updateBoardsList(updatedBoards); // Update global boards list
 
       // Find next available board
       const nextBoard = boards.find((board) => board.id !== selectedBoardId);
@@ -699,13 +712,12 @@ export default function IdeationPage() {
   }
 
   return (
-    <div className="h-[100vh] bg-design-white border border-design-greyOutlines rounded-xl dark:bg-design-black p-6 flex flex-col">
+    <div className=" bg-design-white border border-design-greyOutlines rounded-3xl dark:bg-design-black p-6 flex flex-col mt-8">
       <div className="flex-none">
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex items-center gap-4"></div>
-          <h1 className="text-2xl font-bold text-button-primary-cta dark:text-button-primary-text">
-            Ideation Board
-          </h1>
+        <div>
+          <h1 className="text-2xl font-semibold">{selectedBoard.title}</h1>
+        </div>
+        <div className="flex items-center justify-between gap-4 mt-4">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsTeamModalOpen(true)}
@@ -718,95 +730,68 @@ export default function IdeationPage() {
               ></span>
               Assign to Team
             </button>
-
-            <div className="relative">
-              {/* <select
-                value={selectedBoardId || ""}
-                onChange={(e) => setSelectedBoardId(e.target.value)}
-                className="appearance-none bg-design-white/80 backdrop-blur-sm border border-button-primary-cta/20 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-button-primary-cta transition-all hover:border-button-primary-cta dark:bg-design-black/50 dark:border-button-primary-cta/10"
-              >
-                {boards.map((board) => (
-                  <option key={board.id} value={board.id}>
-                    {board.title}
-                  </option>
-                ))}
-              </select> */}
-              <select
-                value={selectedBoardId || ""}
-                onChange={(e) => handleBoardSelect(e.target.value)}
-                className="appearance-none bg-design-white/80 backdrop-blur-sm border border-button-primary-cta/20 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-button-primary-cta transition-all hover:border-button-primary-cta dark:bg-design-black/50 dark:border-button-primary-cta/10"
-              >
-                {boards.map((board) => (
-                  <option key={board.id} value={board.id}>
-                    {board.title}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-button-primary-cta pointer-events-none" />
+            <div className="flex -space-x-3">
+              {activeUsers.map((user, index) => (
+                <>
+                  <Tooltip text={user.firstName}>
+                    <img
+                      src={user.avatarUrl}
+                      alt={user.firstName}
+                      className="w-8 h-8 rounded-full cursor-pointer border-2 border-white shadow-lg"
+                      style={{ zIndex: activeUsers.length - index }} // Ensures correct stacking order
+                    />
+                  </Tooltip>
+                </>
+              ))}
             </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {isAddingBoard ? (
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={newBoardTitle}
-                onChange={(e) => setNewBoardTitle(e.target.value)}
-                placeholder="Board title..."
-                className="input p-2"
-                autoFocus
-              />
-              <button onClick={handleAddBoard} className="btn-primary">
-                Add
-              </button>
-              <button
-                onClick={() => {
-                  setIsAddingBoard(false);
-                  setNewBoardTitle("");
-                }}
-                className="btn-ghost"
-              >
-                Cancel
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 m-2">
-              <button
-                onClick={() => setIsAddingBoard(true)}
-                className="btn-primary group hover:scale-105 transition-transform"
-              >
-                <Plus className="h-4 w-4  group-hover:rotate-90 transition-transform" />
-                Add Board
-              </button>
-              {selectedBoardId && (
-                <>
-                  <button
-                    onClick={() => setIsDeleteModalOpen(true)}
-                    className="btn-ghost p-2 hover:text-semantic-error transition-all"
-                    title="Delete Board"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
-
-                  <div className="flex -space-x-3">
-                    {activeUsers.map((user, index) => (
-                      <>
-                        <Tooltip text={user.firstName}>
-                          <img
-                            src={user.avatarUrl}
-                            alt={user.firstName}
-                            className="w-8 h-8 rounded-full cursor-pointer border-2 border-white shadow-lg"
-                            style={{ zIndex: activeUsers.length - index }} // Ensures correct stacking order
-                          />
-                        </Tooltip>
-                      </>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {isAddingBoard ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newBoardTitle}
+                  onChange={(e) => setNewBoardTitle(e.target.value)}
+                  placeholder="Board title..."
+                  className="input p-2"
+                  autoFocus
+                />
+                <button onClick={handleAddBoard} className="btn-primary">
+                  Add
+                </button>
+                <button
+                  onClick={() => {
+                    setIsAddingBoard(false);
+                    setNewBoardTitle("");
+                  }}
+                  className="btn-ghost"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 m-2">
+                <button
+                  onClick={() => setIsAddingBoard(true)}
+                  className="btn-primary group hover:scale-105 transition-transform"
+                >
+                  <Plus className="h-4 w-4  group-hover:rotate-90 transition-transform" />
+                  Add Board
+                </button>
+                {selectedBoardId && (
+                  <>
+                    <button
+                      onClick={() => setIsDeleteModalOpen(true)}
+                      className="btn-ghost p-2 hover:text-semantic-error transition-all"
+                      title="Delete Board"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
