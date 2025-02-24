@@ -95,7 +95,7 @@ export default function KanbanCard({
         onClick={() => setIsModalOpen(true)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`card p-4 cursor-grab hover:shadow-md transition-all hover:scale-[1.02] dark:hover:bg-design-black/70 ${
+        className={`card p-4 cursor-grab hover:shadow-md transition-all  dark:hover:bg-design-black/70 ${
           isDragging ? "opacity-50" : ""
         } relative group ${
           card.priority === "high"

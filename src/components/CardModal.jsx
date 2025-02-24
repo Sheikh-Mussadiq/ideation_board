@@ -121,7 +121,7 @@ export default function CardModal({
                   </p>
 
                   <div className="flex items-center space-x-2">
-                    <Tooltip text="Share Link">
+                    <Tooltip text="Share Link" position="left">
                       <button
                         onClick={() => {
                           navigator.clipboard.writeText(window.location.href);
@@ -134,7 +134,7 @@ export default function CardModal({
                       </button>
                     </Tooltip>
 
-                    <Tooltip text="Archive Card">
+                    <Tooltip text="Archive Card" position="left">
                       <button
                         onClick={() => {
                           onArchive(card.id);
@@ -147,7 +147,7 @@ export default function CardModal({
                       </button>
                     </Tooltip>
 
-                    <Tooltip text="Delete Card">
+                    <Tooltip text="Delete Card" position="left">
                       <button
                         onClick={() => {
                           onDelete(card.id);
@@ -160,7 +160,7 @@ export default function CardModal({
                       </button>
                     </Tooltip>
 
-                    <Tooltip text="Close">
+                    <Tooltip text="Close" position="left">
                       <button
                         onClick={handleClose}
                         className="p-2 text-gray-400 hover:text-primary rounded-full 

@@ -422,8 +422,7 @@ export const moveCardToColumn = async (
   const { data, error } = await supabase
     .from("cards")
     .update({ column_id: columnId, position: newPosition })
-    .eq("id", cardId)
-    .eq("account_id", accountId);
+    .eq("id", cardId);
 
   if (error) {
     throw error;
@@ -438,7 +437,6 @@ export const updateCardPositions = async (cards, accountId) => {
       .from("cards")
       .update({ position: card.position, column_id: card.column_id })
       .eq("id", card.id)
-      .eq("account_id", accountId)
   );
 
   // Run all updates in parallel for better performance

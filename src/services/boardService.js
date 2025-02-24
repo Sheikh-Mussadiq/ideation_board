@@ -180,7 +180,11 @@ export async function fetchBoards(accountId) {
             cards.map(async (card) => {
               const [{ data: comments, error: commentsError }] =
                 await Promise.all([
-                  supabase.from("comments").select("*").eq("card_id", card.id).order("created_at", { ascending: false }),
+                  supabase
+                    .from("comments")
+                    .select("*")
+                    .eq("card_id", card.id)
+                    .order("created_at", { ascending: false }),
                 ]);
 
               if (commentsError) throw commentsError;
@@ -215,6 +219,8 @@ export async function fetchBoards(accountId) {
         title: board.title,
         columns: columnsWithCards,
         team_id: board.team_id,
+        account_id: board.account_id,
+        created_by: board.created_by,
       };
     })
   );
@@ -226,7 +232,7 @@ export async function fetchBoardsList() {
   const { data: boards, error: boardsError } = await supabase
     .from("boards")
     .select("*")
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: false });
 
   if (boardsError) throw boardsError;
 

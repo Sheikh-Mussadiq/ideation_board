@@ -25,7 +25,7 @@ export default function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isBoardsOpen, setIsBoardsOpen] = useState(false);
-  const { boardsList } = useBoards(); // Use boards from context instead of local state
+  const { boardsList, isLoading } = useBoards(); // Use boards from context instead of local state
   const navigate = useNavigate();
 
   // Remove fetchBoardsList and related useEffect since we're now using context
@@ -162,26 +162,33 @@ export default function Sidebar() {
                       </div>
                     </div>
 
-                    {filteredBoards.map((board) => (
-                      <motion.button
-                        key={board.id}
-                        initial={{ x: -20, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        className="flex items-center w-full px-3 py-1.5 text-sm text-gray-600 hover:bg-button-primary-cta/10 hover:text-button-primary-cta rounded-lg transition-all duration-200 ml-3"
-                        onClick={() => navigate(`/ideation/${board.id}`)}
-                      >
-                        {board.title}
-                      </motion.button>
-                    ))}
-
-                    {/* <motion.button
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      className="flex items-center w-full px-3 py-1.5 text-sm text-button-primary-cta hover:bg-button-primary-cta/10 rounded-lg transition-all duration-200 ml-3"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      New Board
-                    </motion.button> */}
+                    <div className="space-y-2 max-h-60 overflow-y-auto scrollbar-hide">
+                      {isLoading ? (
+                        <div className="px-3 py-2">
+                          <div className="animate-pulse space-y-2">
+                            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+                          </div>
+                        </div>
+                      ) : filteredBoards.length > 0 ? (
+                        filteredBoards.map((board) => (
+                          <motion.button
+                            key={board.id}
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            className="flex items-center w-full px-3 py-1.5 text-sm text-gray-600 hover:bg-button-primary-cta/10 hover:text-button-primary-cta rounded-lg transition-all duration-200 ml-3"
+                            onClick={() => navigate(`/ideation/${board.id}`)}
+                          >
+                            {board.title}
+                          </motion.button>
+                        ))
+                      ) : (
+                        <p className="text-sm text-gray-500 dark:text-gray-400 px-3 py-2">
+                          No boards found
+                        </p>
+                      )}
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>

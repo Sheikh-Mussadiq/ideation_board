@@ -13,6 +13,7 @@ import KanbanColumn from "../components/KanbanColumn";
 import KanbanCard from "../components/KanbanCard";
 import ResetDataButton from "../components/ResetDataButton";
 import DeleteBoardModal from "../components/DeleteBoardModal";
+import TeamAssignmentModal from "../components/TeamAssignmentModal";
 import {
   fetchBoards,
   createBoard,
@@ -54,6 +55,7 @@ export default function IdeationPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { currentUser, currentUserUsers, currentUserTeams } = useAuth();
   const activeUsers = usePresenceBroadcast(selectedBoardId, currentUser);
   const navigate = useNavigate();
@@ -119,6 +121,10 @@ export default function IdeationPage() {
           setSelectedBoardId(loadedBoards[0].id);
           navigate(`/ideation/${loadedBoards[0].id}`);
         }
+      } else {
+        setIsLoading(false);
+        setSelectedBoardId(null);
+        navigate("/ideation");
       }
       setIsLoading(false);
     } catch (error) {
@@ -355,7 +361,7 @@ export default function IdeationPage() {
     try {
       setLoading(true);
       // const response = await unassignBoardFromTeam(selectedBoardId);
-       await unassignBoardFromTeam(selectedBoardId);
+      await unassignBoardFromTeam(selectedBoardId);
 
       // console.log("response: ", response);
       // if (!response) {
@@ -716,21 +722,44 @@ export default function IdeationPage() {
     );
   }
 
+  // Verify teams have unique IDs before filtering
+  const filteredTeams = currentUserTeams
+    ? currentUserTeams
+        .filter((team) => team && (team._id || team.id)) // Ensure team and ID exists
+        .filter((team) =>
+          team.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+    : [];
+
   return (
-    <div className=" bg-design-white border border-design-greyOutlines rounded-3xl dark:bg-design-black p-6 flex flex-col mt-8">
+    <div className="h-[calc(100vh-8rem)] bg-design-white border border-design-greyOutlines rounded-3xl dark:bg-design-black p-6 flex flex-col mt-8">
       <div className="flex-none">
         <div>
-          <h1 className="text-2xl font-semibold">{selectedBoard.title}</h1>
+          <h1 className="text-2xl font-semibold">
+            {selectedBoard && selectedBoard.title}
+          </h1>
         </div>
+
         <div className="flex items-center justify-between gap-4 mt-4">
+          {" "}
+          {/* Main Div */}
           <div className="flex items-center gap-4">
+            {" "}
+            {/*Team and user Div*/}
             <button
               onClick={() => setIsTeamModalOpen(true)}
-              className="btn-secondary text-sm"
+              className={`btn-secondary text-sm ${
+                selectedBoard &&
+                selectedBoard.account_id === currentUser.accountId
+                  ? ""
+                  : "hidden"
+              }`}
             >
               <span
                 className={`h-1 w-1 mr-2  ${
-                  selectedBoard.team_id ? "bg-green-300" : "bg-red-300"
+                  selectedBoard && selectedBoard.team_id
+                    ? "bg-green-300"
+                    : "bg-red-300"
                 } rounded-full`}
               ></span>
               Assign to Team
@@ -783,17 +812,19 @@ export default function IdeationPage() {
                   <Plus className="h-4 w-4  group-hover:rotate-90 transition-transform" />
                   Add Board
                 </button>
-                {selectedBoardId && (
-                  <>
-                    <button
-                      onClick={() => setIsDeleteModalOpen(true)}
-                      className="btn-ghost p-2 hover:text-semantic-error transition-all"
-                      title="Delete Board"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </>
-                )}
+                {selectedBoard.account_id === currentUser.accountId &&
+                  selectedBoardId && (
+                    <>
+                      <Tooltip text={"Delete Board"}>
+                        <button
+                          onClick={() => setIsDeleteModalOpen(true)}
+                          className="btn-ghost p-2 hover:text-semantic-error transition-all"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                      </Tooltip>
+                    </>
+                  )}
               </div>
             )}
           </div>
@@ -806,7 +837,7 @@ export default function IdeationPage() {
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <div className="flex gap-6 overflow-x-auto flex-1 scrollbar-hide">
+          <div className="flex gap-6 overflow-x-auto flex-1 min-h-0">
             <SortableContext items={selectedBoard.columns.map((col) => col.id)}>
               {selectedBoard.columns.map((column) => (
                 <KanbanColumn
@@ -851,7 +882,7 @@ export default function IdeationPage() {
             ) : (
               <button
                 onClick={() => setIsAddingColumn(true)}
-                className="flex-shrink-0 w-80 bg-primary-light/30 backdrop-blur-sm rounded-lg p-4 flex items-center justify-center text-primary hover:text-primary-hover hover:bg-primary-light/50 transition-all hover:scale-105 snap-start group"
+                className="flex-shrink-0 w-80 bg-design-greyBG/50 backdrop-blur-sm rounded-2xl p-4 flex items-center justify-center text-primary hover:text-primary-hover hover:bg-primary-light/50 transition-all  snap-start group"
               >
                 <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform" />
                 Add Column
@@ -882,64 +913,22 @@ export default function IdeationPage() {
         onConfirm={handleDeleteBoard}
         boardTitle={selectedBoard?.title || ""}
       />
-      {isTeamModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-design-black rounded-lg p-6 w-96 max-w-[90%] shadow-xl">
-            <h3 className="text-lg font-semibold mb-4">Assign Board to Team</h3>
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {currentUserTeams.map((team) => (
-                <button
-                  key={team.id}
-                  onClick={() => setSelectedTeam(team)}
-                  className={`w-full text-left px-4 py-2 rounded-md transition-colors ${
-                    selectedTeam?.id === team.id
-                      ? "bg-primary-light dark:bg-primary-dark"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
-                >
-                  {team.name}
-                </button>
-              ))}
-            </div>
-
-            {selectedTeam && (
-              <div className="mt-4 p-3 border border-gray-200 dark:border-gray-700 rounded-md">
-                <p className="text-sm mb-2">
-                  Assign board to team:{" "}
-                  <span className="font-semibold">{selectedTeam.name}</span>?
-                </p>
-                <button
-                  onClick={() => {
-                    selectedBoard.team_id === selectedTeam._id
-                      ? handleUnassignBoardFromTeam(selectedBoard.id)
-                      : handleAssignBoardToTeam(selectedTeam._id);
-                  }}
-                  // disabled={selectedBoard.team_id === selectedTeam._id}
-                  className="btn-primary text-sm"
-                >
-                  {
-                    selectedBoard.team_id === selectedTeam._id
-                      ? "Unassign"
-                      : "  Yes, Assign" //
-                  }
-                </button>
-              </div>
-            )}
-
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={() => {
-                  setIsTeamModalOpen(false);
-                  setSelectedTeam(null);
-                }}
-                className="btn-ghost text-sm"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <TeamAssignmentModal
+        isOpen={isTeamModalOpen}
+        onClose={() => {
+          setIsTeamModalOpen(false);
+          setSelectedTeam(null);
+          setSearchQuery("");
+        }}
+        teams={filteredTeams}
+        selectedTeam={selectedTeam}
+        onSelectTeam={setSelectedTeam}
+        onAssign={handleAssignBoardToTeam}
+        onUnassign={handleUnassignBoardFromTeam}
+        currentTeamId={selectedBoard?.team_id}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+      />
     </div>
   );
 }

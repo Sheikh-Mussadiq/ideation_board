@@ -4,6 +4,9 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
+      backdropBlur: {
+        sm: "2px",
+      },
       colors: {
         // General Design Tokens
         design: {
