@@ -26,7 +26,6 @@ import EditableText from "./EditableText";
 import DatePicker from "./DatePicker";
 import { updateComment } from "../services/cardService";
 import { useAuth } from "../context/AuthContext";
-import { Label, PriorityHigh, Tag } from "@mui/icons-material";
 import RichTextEditor from "./RichTextEditor";
 import Tooltip from "./Tooltip";
 
