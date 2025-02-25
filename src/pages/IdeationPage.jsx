@@ -30,7 +30,11 @@ import {
   moveCardToColumn,
   updateCardPositions,
 } from "../services/cardService";
-import { createColumn, deleteColumn } from "../services/columnService";
+import {
+  createColumn,
+  deleteColumn,
+  updateColumn,
+} from "../services/columnService";
 import { useRealtimeCards } from "../hooks/useRealtimeCards";
 import { useRealtimeColumns } from "../hooks/useRealtimeColumns";
 import { useLoadingCursor } from "../hooks/useLoadingCursor";
@@ -471,6 +475,27 @@ export default function IdeationPage() {
     }
   };
 
+  const handleUpdateColumn = async (columnId, updates) => {
+    try {
+      setLoading(true);
+      await updateColumn(columnId, updates, currentUser.accountId);
+      setBoards((prev) =>
+        prev.map((board) => ({
+          ...board,
+          columns: board.columns.map((col) =>
+            col.id === columnId ? { ...col, ...updates } : col
+          ),
+        }))
+      );
+      toast.success("Column updated successfully");
+    } catch (error) {
+      console.error("Error updating column:", error);
+      toast.error("Failed to update column");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleAddCard = async (columnId) => {
     try {
       setLoading(true);
@@ -773,7 +798,6 @@ export default function IdeationPage() {
                   <Plus className="h-4 w-4  group-hover:rotate-90 transition-transform" />
                   Add Board
                 </button>
-               
               </div>
             )}
           </div>
@@ -818,28 +842,28 @@ export default function IdeationPage() {
               ))}
             </div>
           </div>
-          {selectedBoardId && selectedBoard.account_id === currentUser.accountId &&
-                   (
-                    <div>
-                      <Tooltip text={"Delete Board"}>
-                        <button
-                          onClick={() => setIsDeleteModalOpen(true)}
-                          className="btn-ghost p-2 hover:text-semantic-error transition-all"
-                        >
-                          <Trash2 className="h-6 w-6" />
-                        </button>
-                      </Tooltip>
+          {selectedBoardId &&
+            selectedBoard.account_id === currentUser.accountId && (
+              <div>
+                <Tooltip text={"Delete Board"}>
+                  <button
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    className="btn-ghost p-2 hover:text-semantic-error transition-all"
+                  >
+                    <Trash2 className="h-6 w-6" />
+                  </button>
+                </Tooltip>
 
-                      <Tooltip text={"Board Logs"}>
-                        <button
-                          onClick={() => setIsLogsOpen(true)}
-                          className="btn-ghost p-2 hover:text-semantic-error transition-all"
-                        >
-                          <Clock className="h-6 w-6" />
-                        </button>
-                      </Tooltip>
-                    </div>
-                  )}
+                <Tooltip text={"Board Logs"}>
+                  <button
+                    onClick={() => setIsLogsOpen(true)}
+                    className="btn-ghost p-2 hover:text-semantic-error transition-all"
+                  >
+                    <Clock className="h-6 w-6" />
+                  </button>
+                </Tooltip>
+              </div>
+            )}
         </div>
       </div>
 
@@ -860,6 +884,7 @@ export default function IdeationPage() {
                   onDeleteCard={handleDeleteCard}
                   onArchiveCard={handleArchiveCard}
                   onDeleteColumn={() => handleDeleteColumn(column.id)}
+                  onUpdateColumn={handleUpdateColumn}
                   boardId={selectedBoard.id}
                   boardTitle={selectedBoard.title}
                 />
@@ -941,10 +966,9 @@ export default function IdeationPage() {
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
       />
-      <BoardLogs 
+      <BoardLogs
         isOpen={isLogsOpen}
         setIsOpen={setIsLogsOpen}
-        
         board={selectedBoard}
       />
     </div>

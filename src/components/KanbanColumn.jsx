@@ -30,6 +30,7 @@ export default function KanbanColumn({
   onDeleteCard,
   onArchiveCard,
   onDeleteColumn,
+  onUpdateColumn,
   boardId,
   boardTitle,
 }) {
@@ -40,22 +41,23 @@ export default function KanbanColumn({
   const { updatePresence } = usePresence(boardId);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(column.title);
 
-  // React.useEffect(() => {
-  //   updatePresence({ currentColumn: column.id });
-  //   // Simulate loading delay
-  //   const timer = setTimeout(() => {
-  //     setIsLoading(false);
-  //   }, 1000);
-  //   return () => {
-  //     updatePresence({ currentColumn: undefined });
-  //     clearTimeout(timer);
-  //   };
-  // }, [column.id, updatePresence]);
+  const handleTitleSubmit = (e) => {
+    e.preventDefault();
+    if (editTitle.trim() && editTitle !== column.title) {
+      onUpdateColumn(column.id, { title: editTitle.trim() });
+    }
+    setIsEditing(false);
+  };
 
-  // if (isLoading) {
-  //   return <ShimmerColumn />;
-  // }
+  const handleTitleKeyDown = (e) => {
+    if (e.key === "Escape") {
+      setEditTitle(column.title);
+      setIsEditing(false);
+    }
+  };
 
   React.useEffect(() => {
     updatePresence({ currentColumn: column.id });
@@ -77,9 +79,26 @@ export default function KanbanColumn({
         <div className="flex-none mb-4">
           <div className="flex items-center justify-between mb-4 flex-none">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-semibold text-button-primary-cta dark:text-button-primary-text">
-                {column.title}
-              </h3>
+              {isEditing ? (
+                <form onSubmit={handleTitleSubmit} className="flex-1">
+                  <input
+                    type="text"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    onBlur={handleTitleSubmit}
+                    onKeyDown={handleTitleKeyDown}
+                    className="text-sm font-semibold bg-design-white dark:bg-design-black px-2 py-1 rounded w-full focus:outline-none focus:ring-2 focus:ring-button-primary-cta"
+                    autoFocus
+                  />
+                </form>
+              ) : (
+                <h3
+                  className="text-sm font-semibold text-button-primary-cta dark:text-button-primary-text cursor-pointer hover:text-button-primary-hover"
+                  onClick={() => setIsEditing(true)}
+                >
+                  {column.title}
+                </h3>
+              )}
               <PresenceIndicator location="column" id={column.id} />
             </div>
             <div className="flex items-center gap-2">

@@ -70,7 +70,7 @@
   }
 
   .input {
-    @apply block w-full rounded-md border-design-greyOutlines shadow-sm focus:ring-button-primary-cta focus:border-button-primary-cta sm:text-sm dark:bg-design-black/50 dark:border-design-greyOutlines/20;
+    @apply block w-full rounded-md p-2 border-design-greyOutlines shadow-sm focus:ring-button-primary-cta focus:border-button-primary-cta sm:text-sm dark:bg-design-black/50 dark:border-design-greyOutlines/20;
   }
 
   .label {

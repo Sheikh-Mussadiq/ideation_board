@@ -130,10 +130,10 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     setCurrentUser({
-      firstName: "Mukarram Nawaz",
-      email: "mukarram@gmail.com",
-      accountId: "67a1fdfaff275daed5015bb4",
-      userId: "5cc1b08ad62ec72e8378dd3",
+      firstName: "Mussadiq Mehmoood",
+      email: "Mussadiq@gmail.com",
+      accountId: "67a1fdfaff275daed5017dc7",
+      userId: "5cc1b08ad62ec72e8378dd4",
       avatarUrl:
         "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50",
     });
