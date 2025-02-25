@@ -201,9 +201,14 @@ export default function Sidebar() {
           <div className="p-4 border-t border-gray-200">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 rounded-full bg-button-primary-cta/20 flex items-center justify-center flex-shrink-0">
+              { currentUser.avatarUrl ? 
+                <img src={currentUser.avatarUrl} className="w-8 h-8 rounded-full" alt="User Avatar" />
+                :
                 <span className="text-button-primary-cta font-medium">
-                  {currentUser.firstName.slice(0, 1)}
+                  { currentUser.firstName.slice(0, 1)}
                 </span>
+
+              }
               </div>
               <AnimatePresence>
                 {isExpanded && (

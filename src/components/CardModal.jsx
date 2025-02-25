@@ -116,7 +116,7 @@ export default function CardModal({
               <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white p-8 mt-8 text-left align-middle shadow-xl transition-all border border-gray-100 ">
                 <div className="flex justify-between ">
                   <p className="text-xl sm:text-2xl font-medium text-design-primaryGrey">
-                    Board: {boardTitle}
+                    {boardTitle}
                   </p>
 
                   <div className="flex items-center space-x-2">

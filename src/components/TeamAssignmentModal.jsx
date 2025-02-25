@@ -44,7 +44,7 @@ export default function TeamAssignmentModal({
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-design-black p-6 shadow-xl transition-all">
                 <Dialog.Title className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
                   <Users className="h-5 w-5 text-button-primary-cta" />
-                  Assign Board to Team
+                  Share Board with a Team
                 </Dialog.Title>
 
                 {/* Search Bar */}

@@ -5,12 +5,10 @@ import { useAuth } from "../../context/AuthContext";
 import NotificationBell from "../NotificationBell";
 
 export default function TopBar() {
-  const { logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
+  const handleToSocialHub = () => {
+    window.location.href = "https://socialhub.io/";
   };
 
   return (
@@ -19,9 +17,9 @@ export default function TopBar() {
         <h1 className="text-xl font-bold text-primary">Ideation Board</h1>
         <div className="flex items-center space-x-4">
           <NotificationBell />
-          <button onClick={handleLogout} className="btn-primary ">
+          <button onClick={handleToSocialHub} className="btn-primary ">
             <LogOut className="h-4 w-4 mr-2" />
-            Sign Out
+            Social Hub
           </button>
         </div>
       </div>

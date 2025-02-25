@@ -762,7 +762,7 @@ export default function IdeationPage() {
                     : "bg-red-300"
                 } rounded-full`}
               ></span>
-              Assign to Team
+              Share with a Team
             </button>
             <div className="flex -space-x-3">
               {activeUsers.map((user, index) => (

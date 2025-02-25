@@ -124,6 +124,7 @@ export function AuthProvider({ children }) {
       setIsLoading(false);
     } else {
       console.error("Failed to generate JWT");
+      setIsLoading(false);
     }
   };
 

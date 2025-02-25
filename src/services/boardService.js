@@ -271,6 +271,8 @@ export async function createBoard(title, accountId) {
   return {
     id: board.id,
     title: board.title,
+    account_id: board.account_id,
+    created_by: board.created_by,
     columns: columns.map((col) => ({
       id: col.id,
       title: col.title,

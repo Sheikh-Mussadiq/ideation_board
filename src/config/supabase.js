@@ -9,3 +9,5 @@ export const SUPABASE_CONFIG = {
   url: 'https://zukbmlultmaffdfqidbw.supabase.co',
   anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1a2JtbHVsdG1hZmZkZnFpZGJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk3MzQwNTIsImV4cCI6MjA1NTMxMDA1Mn0.GxcqKCzrRd37GMVbRBtHgFjd-JURi40KoiGnk9cvZd4'
 };
+
+// project with auth and team things and Board Logs
