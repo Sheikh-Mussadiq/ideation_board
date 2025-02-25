@@ -7,13 +7,14 @@ import {
   PointerSensor,
 } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
-import { Plus, ChevronDown, Trash2 } from "lucide-react";
+import { Plus, ChevronDown, Trash2, Clock } from "lucide-react";
 import toast from "react-hot-toast";
 import KanbanColumn from "../components/KanbanColumn";
 import KanbanCard from "../components/KanbanCard";
 import ResetDataButton from "../components/ResetDataButton";
 import DeleteBoardModal from "../components/DeleteBoardModal";
 import TeamAssignmentModal from "../components/TeamAssignmentModal";
+import BoardLogs from "../components/BoardLogs";
 import {
   fetchBoards,
   createBoard,
@@ -56,6 +57,7 @@ export default function IdeationPage() {
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLogsOpen, setIsLogsOpen] = useState(false);
   const { currentUser, currentUserUsers, currentUserTeams } = useAuth();
   const activeUsers = usePresenceBroadcast(selectedBoardId, currentUser);
   const navigate = useNavigate();
@@ -733,11 +735,48 @@ export default function IdeationPage() {
 
   return (
     <div className="h-[calc(100vh-8rem)] bg-design-white border border-design-greyOutlines rounded-3xl dark:bg-design-black p-6 flex flex-col mt-8">
-      <div className="flex-none">
-        <div>
+      <div className="flex-none mb-4">
+        <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold">
             {selectedBoard && selectedBoard.title}
           </h1>
+          <div className="flex items-center gap-2">
+            {isAddingBoard ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newBoardTitle}
+                  onChange={(e) => setNewBoardTitle(e.target.value)}
+                  placeholder="Board title..."
+                  className="input p-2"
+                  autoFocus
+                />
+                <button onClick={handleAddBoard} className="btn-primary">
+                  Add
+                </button>
+                <button
+                  onClick={() => {
+                    setIsAddingBoard(false);
+                    setNewBoardTitle("");
+                  }}
+                  className="btn-ghost"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 m-2">
+                <button
+                  onClick={() => setIsAddingBoard(true)}
+                  className="btn-primary group hover:scale-105 transition-transform"
+                >
+                  <Plus className="h-4 w-4  group-hover:rotate-90 transition-transform" />
+                  Add Board
+                </button>
+               
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center justify-between gap-4 mt-4">
@@ -779,55 +818,28 @@ export default function IdeationPage() {
               ))}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {isAddingBoard ? (
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={newBoardTitle}
-                  onChange={(e) => setNewBoardTitle(e.target.value)}
-                  placeholder="Board title..."
-                  className="input p-2"
-                  autoFocus
-                />
-                <button onClick={handleAddBoard} className="btn-primary">
-                  Add
-                </button>
-                <button
-                  onClick={() => {
-                    setIsAddingBoard(false);
-                    setNewBoardTitle("");
-                  }}
-                  className="btn-ghost"
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 m-2">
-                <button
-                  onClick={() => setIsAddingBoard(true)}
-                  className="btn-primary group hover:scale-105 transition-transform"
-                >
-                  <Plus className="h-4 w-4  group-hover:rotate-90 transition-transform" />
-                  Add Board
-                </button>
-                {selectedBoard.account_id === currentUser.accountId &&
-                  selectedBoardId && (
-                    <>
+          {selectedBoardId && selectedBoard.account_id === currentUser.accountId &&
+                   (
+                    <div>
                       <Tooltip text={"Delete Board"}>
                         <button
                           onClick={() => setIsDeleteModalOpen(true)}
                           className="btn-ghost p-2 hover:text-semantic-error transition-all"
                         >
-                          <Trash2 className="h-5 w-5" />
+                          <Trash2 className="h-6 w-6" />
                         </button>
                       </Tooltip>
-                    </>
+
+                      <Tooltip text={"Board Logs"}>
+                        <button
+                          onClick={() => setIsLogsOpen(true)}
+                          className="btn-ghost p-2 hover:text-semantic-error transition-all"
+                        >
+                          <Clock className="h-6 w-6" />
+                        </button>
+                      </Tooltip>
+                    </div>
                   )}
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
@@ -928,6 +940,11 @@ export default function IdeationPage() {
         currentTeamId={selectedBoard?.team_id}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
+      />
+      <BoardLogs 
+        isOpen={isLogsOpen}
+        setIsOpen={setIsLogsOpen}
+        boardId={selectedBoardId}
       />
     </div>
   );

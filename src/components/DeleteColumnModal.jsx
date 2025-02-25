@@ -8,7 +8,7 @@ export default function DeleteColumnModal({
   onConfirm,
   columnTitle,
 }) {
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(1);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function DeleteColumnModal({
     }
     return () => {
       clearInterval(timer);
-      setCountdown(3);
+      setCountdown(1);
     };
   }, [isOpen]);
 

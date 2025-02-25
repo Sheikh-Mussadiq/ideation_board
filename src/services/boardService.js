@@ -317,7 +317,30 @@ export async function updateBoard(boardId, updates) {
 }
 
 export async function deleteBoard(boardId) {
-  const { error } = await supabase.from("boards").delete().eq("id", boardId);
+  // Delete the board
+  const { error: boardError } = await supabase
+    .from("boards")
+    .delete()
+    .eq("id", boardId);
+  if (boardError) throw boardError;
+
+  // Wait a moment for cascading to finish
+  // setTimeout(async () => {
+  //   const { error: logsError } = await supabase
+  //     .from("board_logs")
+  //     .delete()
+  //     .eq("board_id", boardId);
+  //   if (logsError) console.error("Failed to delete logs:", logsError);
+  // }, 5000); // 500ms delay (adjust if needed)
+}
+
+export async function fetchBoardLogs(boardId) {
+  const { data: logs, error } = await supabase
+    .from('board_logs')
+    .select('*')
+    .eq('board_id', boardId)
+    .order('created_at', { ascending: false });
 
   if (error) throw error;
+  return logs;
 }
