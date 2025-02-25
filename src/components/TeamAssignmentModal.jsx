@@ -72,7 +72,7 @@ export default function TeamAssignmentModal({
                         onClick={() => onSelectTeam(team)}
                         className={`w-full text-left px-4 py-3 rounded-lg transition-all flex items-center justify-between group ${
                           selectedTeam?.id === team.id
-                            ? "bg-button-primary-cta/10 dark:bg-button-primary-cta/20"
+                            ? "hover:bg-button-primary-cta/10 hover:text-button-primary-cta dark:bg-button-primary-cta/20"
                             : "hover:bg-gray-50 dark:hover:bg-gray-800"
                         }`}
                       >

@@ -6,6 +6,7 @@ import KanbanCard from "./KanbanCard";
 import PresenceIndicator from "./PresenceIndicator";
 import { usePresence } from "../hooks/usePresence";
 import DeleteColumnModal from "./DeleteColumnModal";
+import Tooltip from "./Tooltip";
 
 // Shimmer loading component
 const ShimmerColumn = () => (
@@ -85,12 +86,14 @@ export default function KanbanColumn({
               <span className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-button-primary-hover bg-design-white rounded-full dark:bg-design-black dark:text-button-primary-text">
                 {visibleCards.length}
               </span>
-              <button
-                onClick={() => setIsDeleteModalOpen(true)}
-                className="btn-ghost p-1"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+              <Tooltip text={`Delete "${column.title}"`} position="bottom">
+                <button
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  className="btn-ghost p-1"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </Tooltip>
             </div>
           </div>
         </div>
