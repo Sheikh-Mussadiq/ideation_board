@@ -100,7 +100,7 @@ export default function TeamAssignmentModal({
                       {currentTeamId === selectedTeam._id ? (
                         <span className="flex items-center gap-2">
                           <UserMinus className="h-4 w-4 text-semantic-error" />
-                          Unassign from team{" "}
+                          Stop Sharing with team:{" "}
                           <span className="font-semibold">
                             {selectedTeam.name}
                           </span>
@@ -109,7 +109,7 @@ export default function TeamAssignmentModal({
                       ) : (
                         <span className="flex items-center gap-2">
                           <UserCheck className="h-4 w-4 text-semantic-success" />
-                          Assign to team{" "}
+                           Share with team:{" "}
                           <span className="font-semibold">
                             {selectedTeam.name}
                           </span>
@@ -132,12 +132,12 @@ export default function TeamAssignmentModal({
                       {currentTeamId === selectedTeam._id ? (
                         <>
                           <UserMinus className="h-4 w-4 mr-2" />
-                          Unassign
+                          Stop Sharing
                         </>
                       ) : (
                         <>
                           <UserCheck className="h-4 w-4 mr-2" />
-                          Assign
+                          Share
                         </>
                       )}
                     </button>

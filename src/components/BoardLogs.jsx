@@ -43,16 +43,16 @@ const processLogMessage = (log) => {
   return log;
 };
 
-export default function BoardLogs({ isOpen, setIsOpen, boardId }) {
+export default function BoardLogs({ isOpen, setIsOpen, board }) {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadLogs() {
-      if (isOpen && boardId) {
+      if (isOpen && board.id) {
         setLoading(true);
         try {
-          const boardLogs = await fetchBoardLogs(boardId);
+          const boardLogs = await fetchBoardLogs(board.id);
           // Process logs before setting them
           const processedLogs = boardLogs
             .map(processLogMessage)
@@ -66,7 +66,7 @@ export default function BoardLogs({ isOpen, setIsOpen, boardId }) {
       }
     }
     loadLogs();
-  }, [isOpen, boardId]);
+  }, [isOpen, board]);
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -103,7 +103,7 @@ export default function BoardLogs({ isOpen, setIsOpen, boardId }) {
                   <div className="flex h-full flex-col overflow-y-scroll bg-white dark:bg-design-black shadow-xl">
                     <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-white dark:bg-design-black border-b border-gray-200 dark:border-gray-800">
                       <Dialog.Title className="text-lg font-semibold">
-                        Board Activity Log
+                        {board.title ? `${board.title}'s Activity Log` : "Board Activity Log"}
                       </Dialog.Title>
                       <button
                         type="button"

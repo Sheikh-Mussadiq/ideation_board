@@ -795,10 +795,10 @@ export default function IdeationPage() {
               }`}
             >
               <span
-                className={`h-1 w-1 mr-2  ${
+                className={`h-1.5 w-1.5 mr-2  ${
                   selectedBoard && selectedBoard.team_id
-                    ? "bg-green-300"
-                    : "bg-red-300"
+                    ? "bg-green-400"
+                    : "bg-red-400"
                 } rounded-full`}
               ></span>
               Share with a Team
@@ -944,7 +944,8 @@ export default function IdeationPage() {
       <BoardLogs 
         isOpen={isLogsOpen}
         setIsOpen={setIsLogsOpen}
-        boardId={selectedBoardId}
+        
+        board={selectedBoard}
       />
     </div>
   );
