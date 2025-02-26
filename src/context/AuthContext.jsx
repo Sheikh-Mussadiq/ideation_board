@@ -13,6 +13,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
+  const [authUser, setAuthUser] = useState(null);
   const [currentUserUsers, setCurrentUserUsers] = useState([
     {
       _id: "5cc1b08ad62ec72e8388cb47",
@@ -44,6 +45,16 @@ export function AuthProvider({ children }) {
       createdTime: "2021-07-20T14:45:50.456Z",
       updatedTime: "2021-07-20T14:45:50.456Z",
     },
+    {
+      _id: "5cc1b08ad62ec72e8388cb50",
+      email: "user2@example.com",
+      userName: "userThree",
+      firstName: "Mussadiq",
+      lastName: "Mehmood",
+      role: "ADMIN",
+      createdTime: "2021-07-20T14:45:50.456Z",
+      updatedTime: "2021-07-20T14:45:50.456Z",
+    },
   ]);
   const [currentUserTeams, setCurrentUserTeams] = useState([
     {
@@ -59,7 +70,7 @@ export function AuthProvider({ children }) {
       users: [
         "5cc1b08ad62ec72e8388cb47",
         "5cc1b08ad62ec72e8388cb48",
-        "5cc1b08ad62ec72e8388cb49",
+        "5cc1b08ad62ec72e8388cb50",
       ],
       channels: ["5cc1b08ad62ec72e8388cb53", "5cc1b08ad62ec72e8388cb54"],
       createdTime: "2023-06-15T08:30:00.000Z",
@@ -113,13 +124,16 @@ export function AuthProvider({ children }) {
 
     if (jwtResponse.ok) {
       const { token } = await jwtResponse.json();
-      localStorage.setItem("supabase_jwt", token);
+      // localStorage.setItem("supabase_jwt", token);
 
       // **Set the token in Supabase auth**
       await supabase.auth.setSession({
         access_token: token,
         refresh_token: token,
       });
+
+      const userData = await supabase.auth.getUser();
+      setAuthUser(userData.data.user)
       setIsAuthenticated(true);
       setIsLoading(false);
     } else {
@@ -141,6 +155,20 @@ export function AuthProvider({ children }) {
 
     // getUserData();
   }, []);
+
+  // useEffect(() => {
+  //   setCurrentUser({
+  //     firstName: "Mukarram Nawaz",
+  //     email: "mukarram@gmail.com",
+  //     accountId: "67a1fdfaff275daed5015bb4",
+  //     userId: "5cc1b08ad62ec72e8378dd3",
+  //     avatarUrl:
+  //       "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50",
+  //   });
+  //   getToken();
+
+  //   // getUserData();
+  // }, []);
 
   const login = useCallback(async (email, password) => {
     try {
@@ -175,6 +203,7 @@ export function AuthProvider({ children }) {
         login,
         logout,
         isLoading,
+        authUser,
         currentUserUsers,
         currentUserTeams,
       }}

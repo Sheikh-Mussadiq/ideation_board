@@ -144,8 +144,7 @@
 // }
 
 import { supabase } from "../lib/supabase";
-const userData = await supabase.auth.getUser();
-const user = userData.data.user;
+
 
 export async function fetchBoards(accountId) {
   const { data: boards, error: boardsError } = await supabase
@@ -239,10 +238,10 @@ export async function fetchBoardsList() {
   return boards;
 }
 
-export async function createBoard(title, accountId) {
+export async function createBoard(title, accountId, userId) {
   const { data: board, error: boardError } = await supabase
     .from("boards")
-    .insert([{ title, account_id: accountId, created_by: user.id }])
+    .insert([{ title, account_id: accountId, created_by: userId }])
     .select()
     .single();
 

@@ -261,43 +261,16 @@ const navItems = [
   { name: "Ideation", path: "/ideation", icon: Lightbulb },
 ];
 
-export default function Sidebar() {
-  const [isExpanded, setIsExpanded] = useState(true);
-  const [myBoardsSearch, setMyBoardsSearch] = useState("");
-  const [sharedBoardsSearch, setSharedBoardsSearch] = useState("");
-  const [isBoardsOpen, setIsBoardsOpen] = useState(false);
-  const { currentUser } = useAuth();
-  const { boardsList, isLoading } = useBoards();
+const BoardSection = React.memo(({
+  title,
+  boards,
+  searchValue,
+  onSearchChange,
+  icon: Icon,
+}) => {
   const navigate = useNavigate();
-
-  // Split boards into my boards and shared boards
-  const myBoards = boardsList.filter(
-    (board) => board.created_by === currentUser.userId
-  );
-  const sharedBoards = boardsList.filter(
-    (board) => board.created_by !== currentUser.userId
-  );
-
-  // Filter boards based on search
-  const filteredMyBoards = myBoards.filter((board) =>
-    board.title.toLowerCase().includes(myBoardsSearch.toLowerCase())
-  );
-  const filteredSharedBoards = sharedBoards.filter((board) =>
-    board.title.toLowerCase().includes(sharedBoardsSearch.toLowerCase())
-  );
-
-  const handleBoardClickNoSidebar = () => {
-    setIsExpanded(true);
-    setIsBoardsOpen(true);
-  };
-
-  const BoardSection = ({
-    title,
-    boards,
-    searchValue,
-    onSearchChange,
-    icon: Icon,
-  }) => (
+  
+  return (
     <div className="space-y-2">
       <div className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-design-primaryGrey">
         <Icon className="h-4 w-4" />
@@ -316,14 +289,7 @@ export default function Sidebar() {
         </div>
       </div>
       <div className="space-y-1 max-h-40 overflow-y-auto scrollbar-hide">
-        {isLoading ? (
-          <div className="px-3 py-2">
-            <div className="animate-pulse space-y-2">
-              <div className="h-6 bg-design-greyBG dark:bg-design-black rounded w-3/4"></div>
-              <div className="h-6 bg-design-greyBG dark:bg-design-black rounded w-1/2"></div>
-            </div>
-          </div>
-        ) : boards.length > 0 ? (
+        {boards.length > 0 ? (
           boards.map((board) => (
             <motion.button
               key={board.id}
@@ -343,6 +309,44 @@ export default function Sidebar() {
       </div>
     </div>
   );
+});
+
+BoardSection.displayName = 'BoardSection';
+
+export default function Sidebar() {
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [myBoardsSearch, setMyBoardsSearch] = useState("");
+  const [sharedBoardsSearch, setSharedBoardsSearch] = useState("");
+  const [isBoardsOpen, setIsBoardsOpen] = useState(false);
+  const { currentUser, authUser } = useAuth();
+  const { boardsList, isLoading } = useBoards();
+  const navigate = useNavigate();
+
+  // Split boards into my boards and shared boards
+  const myBoards = boardsList.filter(
+    (board) => board.created_by === authUser.id
+  );
+  const sharedBoards = boardsList.filter(
+    (board) => board.created_by !== authUser.id
+  );
+
+  // Filter boards based on search
+  const myBoardsFiltered = React.useMemo(() => {
+    return myBoards.filter((board) =>
+      board.title.toLowerCase().includes(myBoardsSearch.toLowerCase())
+    );
+  }, [myBoards, myBoardsSearch]);
+
+  const sharedBoardsFiltered = React.useMemo(() => {
+    return sharedBoards.filter((board) =>
+      board.title.toLowerCase().includes(sharedBoardsSearch.toLowerCase())
+    );
+  }, [sharedBoards, sharedBoardsSearch]);
+
+  const handleBoardClickNoSidebar = () => {
+    setIsExpanded(true);
+    setIsBoardsOpen(true);
+  };
 
   return (
     <>
@@ -451,7 +455,7 @@ export default function Sidebar() {
                   >
                     <BoardSection
                       title="My Boards"
-                      boards={filteredMyBoards}
+                      boards={myBoardsFiltered}
                       searchValue={myBoardsSearch}
                       onSearchChange={setMyBoardsSearch}
                       icon={UserSquare2}
@@ -459,7 +463,7 @@ export default function Sidebar() {
 
                     <BoardSection
                       title="Shared Boards"
-                      boards={filteredSharedBoards}
+                      boards={sharedBoardsFiltered}
                       searchValue={sharedBoardsSearch}
                       onSearchChange={setSharedBoardsSearch}
                       icon={Users}

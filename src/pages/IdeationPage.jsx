@@ -62,8 +62,10 @@ export default function IdeationPage() {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLogsOpen, setIsLogsOpen] = useState(false);
-  const { currentUser, currentUserUsers, currentUserTeams } = useAuth();
+  const { currentUser, currentUserUsers, currentUserTeams, authUser } = useAuth();
   const activeUsers = usePresenceBroadcast(selectedBoardId, currentUser);
+  const selectedBoard = boards.find((board) => board.id === selectedBoardId);
+  const [teamUsers, setTeamUsers] = useState([]);
   const navigate = useNavigate();
   const { boardId } = useParams();
   const { updateBoardsList } = useBoards();
@@ -83,6 +85,21 @@ export default function IdeationPage() {
   useEffect(() => {
     setSelectedBoardId(boardId);
   }, [boardId]);
+
+  useEffect(() => {
+    if (!selectedBoard?.team_id) return;
+
+    const team = currentUserTeams.find((team) => team._id === selectedBoard.team_id);
+    if (!team) return;
+
+    const filteredUsers = currentUserUsers.filter((user) =>
+      team.users.includes(user._id)
+    );
+
+    setTeamUsers(filteredUsers);
+    console.log("team users: ", filteredUsers);
+  }, [selectedBoard, currentUserTeams, currentUserUsers]);
+
   const loadBoards = async (payload) => {
     try {
       // If it's a delete event, just remove the board from state
@@ -313,7 +330,8 @@ export default function IdeationPage() {
         setLoading(true);
         const newBoard = await createBoard(
           newBoardTitle.trim(),
-          currentUser.accountId
+          currentUser.accountId,
+          authUser.id
         );
         const updatedBoards = [...boards, newBoard];
         setBoards(updatedBoards);
@@ -507,6 +525,7 @@ export default function IdeationPage() {
           description: "Add a description...",
           labels: [],
           attachments: [],
+          assignee: [],
           position: 0, // Set initial position to 0
         },
         currentUser.accountId
@@ -727,11 +746,8 @@ export default function IdeationPage() {
     setActiveCard(null);
   };
 
-  const selectedBoard = boards.find((board) => board.id === selectedBoardId);
 
-  useEffect(() => {
-    console.log(currentUser, "board: ", selectedBoard);
-  }, [currentUser, selectedBoard]);
+
 
   if (isLoading) {
     return (
@@ -886,6 +902,7 @@ export default function IdeationPage() {
                   onDeleteColumn={() => handleDeleteColumn(column.id)}
                   onUpdateColumn={handleUpdateColumn}
                   boardId={selectedBoard.id}
+                  teamUsers = {teamUsers} 
                   boardTitle={selectedBoard.title}
                 />
               ))}
@@ -936,6 +953,7 @@ export default function IdeationPage() {
                 onDelete={handleDeleteCard}
                 onArchive={handleArchiveCard}
                 boardId={selectedBoard.id}
+                teamUsers={teamUsers}  // Add this prop
               />
             ) : null}
           </DragOverlay>

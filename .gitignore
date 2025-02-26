@@ -35,4 +35,4 @@ yarn-error.log*
 next-env.d.ts
 
 # AuthContext
-/src/context/AuthContext.jsx
+# /src/context/AuthContext.jsx

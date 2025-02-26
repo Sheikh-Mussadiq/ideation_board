@@ -11,9 +11,9 @@ import {
   Check,
 } from "lucide-react";
 import { format } from "date-fns";
-import PrioritySelect from "./PrioritySelect";
+// import PrioritySelect from "./PrioritySelect";
 import CardModal from "./CardModal";
-
+import Tooltip from "./Tooltip";
 // Shimmer loading component
 const ShimmerCard = () => (
   <div className="card p-4 relative overflow-hidden">
@@ -37,6 +37,7 @@ export default function KanbanCard({
   onArchive,
   boardId,
   boardTitle,
+  teamUsers,
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCompleted, setIsCompleted] = useState(card.completed || false);
@@ -159,6 +160,26 @@ export default function KanbanCard({
           </div>
         )}
 
+        {/* Assignees */}
+        {card.assignee && card.assignee.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {card.assignee.map((assignee, index) => (
+              <Tooltip key={assignee._id} text={`${assignee.firstName} ${assignee.lastName}`}>
+                <div
+                  className="h-6 w-6 rounded-full bg-design-primaryPurple text-white text-xs flex items-center justify-center"
+                  style={{
+                    zIndex: card.assignee.length - index,
+                    marginLeft: index > 0 ? '-8px' : '0',
+                  }}
+                >
+                  {assignee.firstName[0]}
+                  {assignee.lastName[0]}
+                </div>
+              </Tooltip>
+            ))}
+          </div>
+        )}
+
         {/* Card Metadata */}
         <div className="flex items-center gap-2 mt-3">
           <span
@@ -209,6 +230,7 @@ export default function KanbanCard({
         onArchive={onArchive}
         boardId={boardId}
         boardTitle={boardTitle}
+        teamUsers={teamUsers}
       />
     </>
   );

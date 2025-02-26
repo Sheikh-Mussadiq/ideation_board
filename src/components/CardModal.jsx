@@ -14,6 +14,7 @@ import {
   Tags,
   AlertCircle,
   NotebookText,
+  UserCircle,
 } from "lucide-react";
 
 import toast from "react-hot-toast";
@@ -28,6 +29,7 @@ import { updateComment } from "../services/cardService";
 import { useAuth } from "../context/AuthContext";
 import RichTextEditor from "./RichTextEditor";
 import Tooltip from "./Tooltip";
+import AssigneeModal from "./AssigneeModal";
 
 export default function CardModal({
   isOpen,
@@ -37,6 +39,7 @@ export default function CardModal({
   onDelete,
   onArchive,
   boardTitle,
+  teamUsers,
 }) {
   const [showChecklist, setShowChecklist] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -44,6 +47,7 @@ export default function CardModal({
   const [localDescription, setLocalDescription] = useState(card.description);
   const titleInputRef = useRef(null);
   const { currentUser } = useAuth();
+  const [isAssigneeModalOpen, setIsAssigneeModalOpen] = useState(false);
 
   // Update local state when card props change
   useEffect(() => {
@@ -250,6 +254,45 @@ export default function CardModal({
                         onUpdate={(labels) => onUpdate(card.id, { labels })}
                       />
                     </div>
+                    {/* Assignee */}
+                    <div className="grid grid-cols-2 items-center">
+                      <label className="flex gap-2 text-base font-medium text-design-primaryGrey">
+                        <UserCircle className="h-5 w-5 text-design-primaryGrey" />
+                        Assignees ({card.assignee?.length || 0})
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap gap-2">
+                          {card.assignee && card.assignee.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {card.assignee.map((assignee) => (
+                                <div
+                                  key={assignee._id}
+                                  className="flex items-center gap-2 bg-primary-light rounded-full pl-1 pr-2 py-1"
+                                >
+                                  <div className="h-6 w-6 rounded-full bg-design-primaryPurple text-white flex items-center justify-center text-xs">
+                                    {assignee.firstName[0]}
+                                    {assignee.lastName[0]}
+                                  </div>
+                                  <span className="text-xs text-design-primaryGrey">
+                                    {assignee.firstName}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-sm text-design-primaryGrey">
+                              No assignees
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => setIsAssigneeModalOpen(true)}
+                          className="p-2 text-design-primaryGrey hover:text-primary rounded-full hover:bg-primary-light transition-all"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Description */}
@@ -389,6 +432,13 @@ export default function CardModal({
                     }}
                   />
                 </div>
+                <AssigneeModal
+                  isOpen={isAssigneeModalOpen}
+                  onClose={() => setIsAssigneeModalOpen(false)}
+                  users={teamUsers}
+                  currentAssignees={card.assignee || []}
+                  onAssign={(assignee) => onUpdate(card.id, { assignee })}
+                />
               </Dialog.Panel>
             </Transition.Child>
           </div>

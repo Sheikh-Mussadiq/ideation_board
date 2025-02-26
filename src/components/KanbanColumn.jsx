@@ -33,6 +33,7 @@ export default function KanbanColumn({
   onUpdateColumn,
   boardId,
   boardTitle,
+  teamUsers,
 }) {
   const { setNodeRef } = useDroppable({
     id: column.id,
@@ -153,6 +154,7 @@ export default function KanbanColumn({
                 onDelete={onDeleteCard}
                 onArchive={onArchiveCard}
                 boardId={boardId}
+                teamUsers={teamUsers}
                 boardTitle={boardTitle}
               />
             ))}
