@@ -36,7 +36,7 @@ export function useNotifications() {
           event: '*',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${currentUser.userId}`,
+          // filter: `user_id=eq.${currentUser.userId}`,
         },
         (payload) => {
           if (payload.eventType === 'INSERT') {
@@ -62,7 +62,7 @@ export function useNotifications() {
   };
 
   const markAllAsRead = async () => {
-    if (!authUser?.id) return;
+    if (!currentUser.userId) return;
     try {
       await markAllNotificationsAsRead(currentUser.userId);
       useNotificationStore.getState().markAllAsRead();

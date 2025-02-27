@@ -46,7 +46,7 @@ export function AuthProvider({ children }) {
       updatedTime: "2021-07-20T14:45:50.456Z",
     },
     {
-      _id: "5cc1b08ad62ec72e8388cb50",
+      _id: "5cc1b08ad62ec72e8378dd3",
       email: "user2@example.com",
       userName: "userThree",
       firstName: "Mussadiq",
@@ -70,7 +70,7 @@ export function AuthProvider({ children }) {
       users: [
         "5cc1b08ad62ec72e8388cb47",
         "5cc1b08ad62ec72e8388cb48",
-        "5cc1b08ad62ec72e8388cb50",
+        "5cc1b08ad62ec72e8378dd3",
       ],
       channels: ["5cc1b08ad62ec72e8388cb53", "5cc1b08ad62ec72e8388cb54"],
       createdTime: "2023-06-15T08:30:00.000Z",
@@ -142,25 +142,11 @@ export function AuthProvider({ children }) {
     }
   };
 
-  useEffect(() => {
-    setCurrentUser({
-      firstName: "Mussadiq Mehmoood",
-      email: "Mussadiq@gmail.com",
-      accountId: "67a1fdfaff275daed5017dc7",
-      userId: "5cc1b08ad62ec72e8378dd4",
-      avatarUrl:
-        "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50",
-    });
-    getToken();
-
-    // getUserData();
-  }, []);
-
   // useEffect(() => {
   //   setCurrentUser({
-  //     firstName: "Mukarram Nawaz",
-  //     email: "mukarram@gmail.com",
-  //     accountId: "67a1fdfaff275daed5015bb4",
+  //     firstName: "Mussadiq Mehmoood",
+  //     email: "Mussadiq@gmail.com",
+  //     accountId: "67a1fdfaff275daed5017dc7",
   //     userId: "5cc1b08ad62ec72e8378dd3",
   //     avatarUrl:
   //       "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50",
@@ -169,6 +155,20 @@ export function AuthProvider({ children }) {
 
   //   // getUserData();
   // }, []);
+
+  useEffect(() => {
+    setCurrentUser({
+      firstName: "Mukarram Nawaz",
+      email: "mukarram@gmail.com",
+      accountId: "67a1fdfaff275daed5015bb4",
+      userId: "5cc1b08ad62ec72e8388cb4",
+      avatarUrl:
+        "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50",
+    });
+    getToken();
+
+    // getUserData();
+  }, []);
 
   const login = useCallback(async (email, password) => {
     try {

@@ -47,7 +47,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import LoadingShimmer from "../components/LoadingShimmer";
 import Tooltip from "../components/Tooltip";
 import { useBoards } from "../context/BoardContext";
-
+import { supabase } from "../lib/supabase";
 export default function IdeationPage() {
   const [boards, setBoards] = useState([]);
   const [selectedBoardId, setSelectedBoardId] = useState(null);
@@ -616,16 +616,16 @@ export default function IdeationPage() {
   // const handleUpdateCard = async (cardId, updates) => {
   //   try {
   //     setLoading(true);
-      
+
   //     // Get the current (old) card from state before updating
   //     const oldCard = boards
   //       .flatMap(board => board.columns)
   //       .flatMap(col => col.cards)
   //       .find(card => card.id === cardId);
-  
+
   //     // Perform the update (e.g., API call)
   //     await updateCard(cardId, updates, currentUser.accountId);
-  
+
   //     // Update the boards state with the new card data
   //     setBoards((prev) =>
   //       prev.map((board) => ({
@@ -638,20 +638,20 @@ export default function IdeationPage() {
   //         })),
   //       }))
   //     );
-  
+
   //     // If there are new assignees in the update, check against the old assignee list.
   //     if (updates.assignee && updates.assignee.length > 0 && oldCard) {
   //       // Extract _id values from the old card's assignee list (assuming they are objects)
   //       const oldAssigneeIds = oldCard.assignee.map((user) => user._id);
-  
+
   //       // Filter updates.assignee to only include truly new IDs
   //       const newAssignees = updates.assignee.filter(
   //         (id) => !oldAssigneeIds.includes(id)
   //       );
-  
+
   //       // Use the new title if provided; otherwise fallback to the old card title
   //       const cardTitle = updates.title || oldCard.title;
-  
+
   //       // Create notifications for the new assignees
   //       for (const user of newAssignees) {
   //         try {
@@ -678,20 +678,20 @@ export default function IdeationPage() {
   const handleUpdateCard = async (cardId, updates) => {
     try {
       setLoading(true);
-  
+
       let oldCard = null;
-  
+
       // Get the current (old) card from state only if updates has assignee
       if (updates.assignee && updates.assignee.length > 0) {
         oldCard = boards
-          .flatMap(board => board.columns)
-          .flatMap(col => col.cards)
-          .find(card => card.id === cardId);
+          .flatMap((board) => board.columns)
+          .flatMap((col) => col.cards)
+          .find((card) => card.id === cardId);
       }
-  
+
       // Perform the update (e.g., API call)
       await updateCard(cardId, updates, currentUser.accountId);
-  
+
       // Update the boards state with the new card data
       setBoards((prev) =>
         prev.map((board) => ({
@@ -704,30 +704,45 @@ export default function IdeationPage() {
           })),
         }))
       );
-  
+
       // If there are new assignees in the update, check against the old assignee list.
       if (updates.assignee && updates.assignee.length > 0 && oldCard) {
         // Extract _id values from the old card's assignee list (assuming they are objects)
-        const oldAssigneeIds =  oldCard.assignee.length> 0 ? oldCard.assignee.map((user) => user._id) : [];
-  
+        const oldAssigneeIds =
+          oldCard.assignee.length > 0
+            ? oldCard.assignee.map((user) => user._id)
+            : [];
+
         // Filter updates.assignee to only include truly new IDs
         const newAssignees = updates.assignee.filter(
           (user) => !oldAssigneeIds.includes(user._id)
         );
-  
+
         // Use the new title if provided; otherwise fallback to the old card title
         const cardTitle = updates.title || oldCard.title;
-  
+
         // Create notifications for the new assignees
         for (const user of newAssignees) {
+          console.log("Creating notification for user:", user);
           try {
-            await createNotification({
-              user_id: user._id,
-              content: `You've been assigned to "${cardTitle}" in board "${selectedBoard.title}"`,
-              type: "CARD_ASSIGNMENT",
-              board_id: selectedBoard.id,
-              card_id: cardId,
-            });
+            // await createNotification({
+            //   user_id: user._id,
+            //   content: `You've been assigned to "${cardTitle}" in board "${selectedBoard.title}"`,
+            //   type: "CARD_ASSIGNMENT",
+            //   board_id: selectedBoard.id,
+            //   card_id: cardId,
+            // });
+            await supabase.from("notifications").insert([
+              {
+                user_id: user._id,
+                content: `You've been assigned to "${cardTitle}" in board "${selectedBoard.title}"`,
+                type: "CARD_ASSIGNMENT",
+                board_id: selectedBoard.id,
+                card_id: cardId,
+                created_at: new Date().toISOString(),
+                read: false,
+              },
+            ]);
           } catch (error) {
             console.error("Error creating notification:", error);
           }
