@@ -24,57 +24,53 @@ const navItems = [
   { name: "Ideation", path: "/ideation", icon: Lightbulb },
 ];
 
-const BoardSection = React.memo(({
-  title,
-  boards,
-  searchValue,
-  onSearchChange,
-  icon: Icon,
-}) => {
-  const navigate = useNavigate();
-  
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-design-primaryGrey">
-        <Icon className="h-4 w-4" />
-        {title}
-      </div>
-      <div className="px-3">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search boards..."
-            value={searchValue}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full px-4 py-1.5 pl-8 text-sm bg-design-greyBG dark:bg-design-black border border-design-greyOutlines dark:border-design-greyOutlines/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-design-primaryPurple focus:border-transparent transition-all"
-          />
-          <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-design-primaryGrey" />
+const BoardSection = React.memo(
+  ({ title, boards, searchValue, onSearchChange, icon: Icon }) => {
+    const navigate = useNavigate();
+
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-design-primaryGrey">
+          <Icon className="h-4 w-4" />
+          {title}
+        </div>
+        <div className="px-3">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search boards..."
+              value={searchValue}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="w-full px-4 py-1.5 pl-8 text-sm bg-design-greyBG dark:bg-design-black border border-design-greyOutlines dark:border-design-greyOutlines/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-design-primaryPurple focus:border-transparent transition-all"
+            />
+            <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-design-primaryGrey" />
+          </div>
+        </div>
+        <div className="space-y-1 max-h-40 overflow-y-auto scrollbar-hide">
+          {boards.length > 0 ? (
+            boards.map((board) => (
+              <motion.button
+                key={board.id}
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                className="flex items-center w-full px-3 py-1.5 text-sm text-design-primaryGrey hover:bg-design-primaryPurple/10 hover:text-design-primaryPurple rounded-lg transition-all duration-200 ml-3"
+                onClick={() => navigate(`/ideation/${board.id}`)}
+              >
+                {board.title}
+              </motion.button>
+            ))
+          ) : (
+            <p className="text-sm text-design-primaryGrey dark:text-design-greyOutlines px-3 py-2">
+              No boards found
+            </p>
+          )}
         </div>
       </div>
-      <div className="space-y-1 max-h-40 overflow-y-auto scrollbar-hide">
-        {boards.length > 0 ? (
-          boards.map((board) => (
-            <motion.button
-              key={board.id}
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              className="flex items-center w-full px-3 py-1.5 text-sm text-design-primaryGrey hover:bg-design-primaryPurple/10 hover:text-design-primaryPurple rounded-lg transition-all duration-200 ml-3"
-              onClick={() => navigate(`/ideation/${board.id}`)}
-            >
-              {board.title}
-            </motion.button>
-          ))
-        ) : (
-          <p className="text-sm text-design-primaryGrey dark:text-design-greyOutlines px-3 py-2">
-            No boards found
-          </p>
-        )}
-      </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
-BoardSection.displayName = 'BoardSection';
+BoardSection.displayName = "BoardSection";
 
 export default function Sidebar() {
   const { isExpanded, setIsExpanded } = useSidebar();
@@ -123,12 +119,12 @@ export default function Sidebar() {
         <div className="flex flex-col h-full relative">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="absolute -right-3 top-6 bg-white rounded-full p-1.5 border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors"
+            className="absolute -right-3 top-6 bg-design-black rounded-full p-1.5 border border-design-greyOutlines shadow-sm "
           >
             {isExpanded ? (
-              <ChevronLeft className="h-4 w-4 text-gray-600" />
+              <ChevronLeft className="h-4 w-4 text-design-white" />
             ) : (
-              <ChevronRight className="h-4 w-4 text-gray-600" />
+              <ChevronRight className="h-4 w-4 text-design-white" />
             )}
           </button>
 
