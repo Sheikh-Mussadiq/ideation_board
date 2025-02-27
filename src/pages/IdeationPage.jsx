@@ -939,7 +939,7 @@ export default function IdeationPage() {
     : [];
 
   return (
-    <div className="h-[calc(100vh-8rem)] bg-design-white border border-design-greyOutlines rounded-3xl dark:bg-design-black p-6 flex flex-col mt-8">
+    <div className="h-[calc(100vh-4rem)] bg-design-white border border-design-greyOutlines rounded-3xl dark:bg-design-black p-6 flex flex-col mt-8">
       <div className="flex-none mb-4">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold">
@@ -1124,7 +1124,7 @@ export default function IdeationPage() {
         </DndContext>
       )}
 
-      <ResetDataButton />
+      {/* <ResetDataButton /> */}
 
       <DeleteBoardModal
         isOpen={isDeleteModalOpen}

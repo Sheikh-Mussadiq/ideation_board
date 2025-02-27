@@ -164,18 +164,16 @@ export default function KanbanCard({
         {card.assignee && card.assignee.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1">
             {card.assignee.map((assignee, index) => (
-              <Tooltip key={assignee._id} text={`${assignee.firstName} ${assignee.lastName}`} position="right">
-                <div
-                  className="h-6 w-6 rounded-full bg-design-primaryPurple text-white text-xs flex items-center justify-center"
-                  style={{
-                    zIndex: card.assignee.length - index,
-                    marginLeft: index > 0 ? '-8px' : '0',
-                  }}
-                >
-                  {assignee.firstName[0]}
-                  {assignee.lastName[0]}
-                </div>
-              </Tooltip>
+              <div
+                className="h-6 w-6 rounded-full bg-design-primaryPurple text-white text-xs flex items-center justify-center"
+                style={{
+                  zIndex: card.assignee.length - index,
+                  marginLeft: index > 0 ? "-12px" : "0",
+                }}
+              >
+                {assignee.firstName[0]}
+                {assignee.lastName[0]}
+              </div>
             ))}
           </div>
         )}

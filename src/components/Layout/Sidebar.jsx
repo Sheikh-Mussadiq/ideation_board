@@ -13,12 +13,15 @@ import {
   SquareKanban,
   UserSquare2,
   Users,
+  Settings,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Tooltip from "../Tooltip";
 import { useBoards } from "../../context/BoardContext";
 import { useAuth } from "../../context/AuthContext";
 import { useSidebar } from "../../context/SidebarContext";
+import SettingsModal from "../SettingsModal";
+
 const navItems = [
   { name: "Home", path: "/home", icon: Home },
   { name: "Ideation", path: "/ideation", icon: Lightbulb },
@@ -80,6 +83,7 @@ export default function Sidebar() {
   const { currentUser, authUser } = useAuth();
   const { boardsList, isLoading } = useBoards();
   const navigate = useNavigate();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Split boards into my boards and shared boards
   const myBoards = boardsList.filter(
@@ -110,25 +114,51 @@ export default function Sidebar() {
   return (
     <>
       <motion.div
-        className="fixed inset-y-0 left-0 bg-white/80 backdrop-blur-sm border-r border-gray-200 shadow-sm z-50 flex flex-col"
+        className="fixed inset-y-0 left-0 bg-white/60 dark:bg-design-black/60  backdrop-blur-xl border-r border-design-greyOutlines z-50 flex flex-col"
         animate={{
           width: isExpanded ? "16rem" : "4.5rem",
         }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
+        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
       >
         <div className="flex flex-col h-full relative">
+          {/* Toggle Button */}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="absolute -right-3 top-6 bg-design-black rounded-full p-1.5 border border-design-greyOutlines shadow-sm "
+            className="absolute -right-3 top-6 bg-design-primaryPurple hover:bg-design-primaryPurple/90 rounded-full p-1.5 shadow-lg shadow-design-primaryPurple/20 transition-all duration-300"
           >
             {isExpanded ? (
-              <ChevronLeft className="h-4 w-4 text-design-white" />
+              <ChevronLeft className="h-4 w-4 text-white" />
             ) : (
-              <ChevronRight className="h-4 w-4 text-design-white" />
+              <ChevronRight className="h-4 w-4 text-white" />
             )}
           </button>
 
-          <nav className="flex-1 p-4 space-y-2">
+          {/* Logo */}
+          <div className="p-4 mb-2">
+            <AnimatePresence>
+              {isExpanded ? (
+                <motion.h1
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-xl font-bold text-design-primaryPurple tracking-tight"
+                >
+                  Social Hub
+                </motion.h1>
+              ) : (
+                <motion.h1
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-xl font-bold text-design-primaryPurple"
+                >
+                  SH
+                </motion.h1>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <nav className="flex-1 px-3 space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -140,21 +170,21 @@ export default function Sidebar() {
                   <NavLink
                     to={item.path}
                     className={({ isActive }) =>
-                      `flex items-center px-3 py-2 rounded-lg transition-all duration-200 group ${
+                      `flex items-center px-3 py-2.5 rounded-xl transition-all duration-300 group ${
                         isActive
-                          ? "bg-design-primaryPurple text-white"
-                          : "text-gray-600 hover:bg-design-primaryPurple/10 hover:text-design-primaryPurple"
+                          ? "bg-design-primaryPurple text-white shadow-lg shadow-design-primaryPurple/20"
+                          : "text-design-primaryGrey hover:bg-design-primaryPurple/10 hover:text-design-primaryPurple"
                       }`
                     }
                   >
-                    <Icon className="h-5 w-5 flex-shrink-0" />
+                    <Icon className="h-[18px] w-[18px] flex-shrink-0" />
                     <AnimatePresence>
                       {isExpanded && (
                         <motion.span
-                          initial={{ opacity: 0, width: 0 }}
-                          animate={{ opacity: 1, width: "auto" }}
-                          exit={{ opacity: 0, width: 0 }}
-                          className="ml-3 font-medium overflow-hidden whitespace-nowrap"
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -10 }}
+                          className="ml-3 font-medium overflow-hidden whitespace-nowrap text-sm"
                         >
                           {item.name}
                         </motion.span>
@@ -165,6 +195,7 @@ export default function Sidebar() {
               );
             })}
 
+            {/* Boards Section */}
             <div className="mt-6">
               <Tooltip
                 text={!isExpanded ? "Boards" : undefined}
@@ -176,17 +207,17 @@ export default function Sidebar() {
                       ? setIsBoardsOpen(!isBoardsOpen)
                       : handleBoardClickNoSidebar();
                   }}
-                  className="flex items-center justify-between w-full px-3 py-2 text-gray-600 hover:bg-design-primaryPurple/10 hover:text-design-primaryPurple rounded-lg transition-all duration-200"
+                  className="flex items-center justify-between w-full px-3 py-2.5 text-design-primaryGrey hover:bg-design-primaryPurple/10 hover:text-design-primaryPurple rounded-xl transition-all duration-300"
                 >
                   <div className="flex items-center">
-                    <SquareKanban className="h-5 w-5 flex-shrink-0" />
+                    <SquareKanban className="h-[18px] w-[18px] flex-shrink-0" />
                     <AnimatePresence>
                       {isExpanded && (
                         <motion.span
-                          initial={{ opacity: 0, width: 0 }}
-                          animate={{ opacity: 1, width: "auto" }}
-                          exit={{ opacity: 0, width: 0 }}
-                          className="ml-3 font-medium overflow-hidden whitespace-nowrap"
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -10 }}
+                          className="ml-3 font-medium text-sm"
                         >
                           Boards
                         </motion.span>
@@ -195,23 +226,25 @@ export default function Sidebar() {
                   </div>
                   {isExpanded && (
                     <ChevronDown
-                      className={`h-4 w-4 transition-transform duration-200 ${
-                        isBoardsOpen ? "transform rotate-180" : ""
+                      className={`h-4 w-4 transition-transform duration-300 ${
+                        isBoardsOpen ? "rotate-180" : ""
                       }`}
                     />
                   )}
                 </button>
               </Tooltip>
 
+              {/* Boards Content */}
               <AnimatePresence>
                 {isBoardsOpen && isExpanded && (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
                     className="mt-2 space-y-4"
                   >
+                    {/* Existing BoardSection components remain unchanged */}
                     <BoardSection
                       title="My Boards"
                       boards={myBoardsFiltered}
@@ -219,7 +252,6 @@ export default function Sidebar() {
                       onSearchChange={setMyBoardsSearch}
                       icon={UserSquare2}
                     />
-
                     <BoardSection
                       title="Shared Boards"
                       boards={sharedBoardsFiltered}
@@ -233,13 +265,39 @@ export default function Sidebar() {
             </div>
           </nav>
 
-          <div className="p-4 border-t border-gray-200">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full bg-design-primaryPurple/20 flex items-center justify-center flex-shrink-0">
+          {/* User Profile Section */}
+          <div className="p-3 mt-auto space-y-2">
+            {/* Settings Button */}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setIsSettingsOpen(true)}
+              className="flex items-center gap-3 w-full p-2 rounded-xl hover:bg-design-primaryPurple/10 text-design-primaryGrey hover:text-design-primaryPurple transition-colors"
+            >
+              <Settings className="h-[18px] w-[18px]" />
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    className="text-sm font-medium"
+                  >
+                    Settings
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+            <motion.div
+              className="flex items-center gap-3 p-2 rounded-xl bg-design-greyBG/50 backdrop-blur-sm"
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="w-8 h-8 rounded-lg bg-design-primaryPurple/20 flex items-center justify-center flex-shrink-0">
                 {currentUser.avatarUrl ? (
                   <img
                     src={currentUser.avatarUrl}
-                    className="w-8 h-8 rounded-full"
+                    className="w-8 h-8 rounded-lg object-cover"
                     alt="User Avatar"
                   />
                 ) : (
@@ -251,24 +309,31 @@ export default function Sidebar() {
               <AnimatePresence>
                 {isExpanded && (
                   <motion.div
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: "auto" }}
-                    exit={{ opacity: 0, width: 0 }}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
                     className="flex-1 overflow-hidden"
                   >
-                    <p className="text-sm font-medium text-gray-700 truncate">
+                    <p className="text-sm font-medium text-design-primaryGrey truncate">
                       {currentUser.firstName}
                     </p>
-                    <p className="text-xs text-gray-500 truncate">
+                    <p className="text-xs text-design-primaryGrey/60 truncate">
                       {currentUser.email}
                     </p>
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </motion.div>
           </div>
         </div>
       </motion.div>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        user={currentUser}
+      />
     </>
   );
 }
