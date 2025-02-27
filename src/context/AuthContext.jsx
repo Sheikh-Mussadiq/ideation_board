@@ -55,6 +55,16 @@ export function AuthProvider({ children }) {
       createdTime: "2021-07-20T14:45:50.456Z",
       updatedTime: "2021-07-20T14:45:50.456Z",
     },
+    {
+      _id: "5cc1b08ad62ec72e8388cb4",
+      email: "mukarram@gmail.com",
+      userName: "Mukarram Nawaz",
+      firstName: "Mukarram",
+      lastName: "Nawaz",
+      role: "ADMIN",
+      createdTime: "2021-07-20T14:45:50.456Z",
+      updatedTime: "2021-07-20T14:45:50.456Z",
+    },
   ]);
   const [currentUserTeams, setCurrentUserTeams] = useState([
     {
@@ -71,6 +81,7 @@ export function AuthProvider({ children }) {
         "5cc1b08ad62ec72e8388cb47",
         "5cc1b08ad62ec72e8388cb48",
         "5cc1b08ad62ec72e8378dd3",
+        "5cc1b08ad62ec72e8388cb4",
       ],
       channels: ["5cc1b08ad62ec72e8388cb53", "5cc1b08ad62ec72e8388cb54"],
       createdTime: "2023-06-15T08:30:00.000Z",

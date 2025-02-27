@@ -36,9 +36,10 @@ export function useNotifications() {
           event: '*',
           schema: 'public',
           table: 'notifications',
-          // filter: `user_id=eq.${currentUser.userId}`,
+          filter: `user_id=eq.${currentUser.userId}`,
         },
         (payload) => {
+          console.log('Notification event:', payload);
           if (payload.eventType === 'INSERT') {
             addNotification(payload.new);
           }

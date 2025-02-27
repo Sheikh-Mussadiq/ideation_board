@@ -5,7 +5,7 @@ export async function fetchNotifications() {
     .from('notifications')
     .select('*')
     // .eq('user_id', userId)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: true });
 
   if (error) throw error;
   return data;
