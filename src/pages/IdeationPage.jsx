@@ -35,6 +35,7 @@ import {
   deleteColumn,
   updateColumn,
 } from "../services/columnService";
+import { createNotification } from "../services/notificationService";
 import { useRealtimeCards } from "../hooks/useRealtimeCards";
 import { useRealtimeColumns } from "../hooks/useRealtimeColumns";
 import { useLoadingCursor } from "../hooks/useLoadingCursor";
@@ -62,7 +63,8 @@ export default function IdeationPage() {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLogsOpen, setIsLogsOpen] = useState(false);
-  const { currentUser, currentUserUsers, currentUserTeams, authUser } = useAuth();
+  const { currentUser, currentUserUsers, currentUserTeams, authUser } =
+    useAuth();
   const activeUsers = usePresenceBroadcast(selectedBoardId, currentUser);
   const selectedBoard = boards.find((board) => board.id === selectedBoardId);
   const [teamUsers, setTeamUsers] = useState([]);
@@ -89,7 +91,9 @@ export default function IdeationPage() {
   useEffect(() => {
     if (!selectedBoard?.team_id) return;
 
-    const team = currentUserTeams.find((team) => team._id === selectedBoard.team_id);
+    const team = currentUserTeams.find(
+      (team) => team._id === selectedBoard.team_id
+    );
     if (!team) return;
 
     const filteredUsers = currentUserUsers.filter((user) =>
@@ -566,10 +570,129 @@ export default function IdeationPage() {
     }
   };
 
+  // const handleUpdateCard = async (cardId, updates) => {
+  //   try {
+  //     setLoading(true);
+  //     await updateCard(cardId, updates, currentUser.accountId);
+  //     setBoards((prev) =>
+  //       prev.map((board) => ({
+  //         ...board,
+  //         columns: board.columns.map((col) => ({
+  //           ...col,
+  //           cards: col.cards.map((card) =>
+  //             card.id === cardId ? { ...card, ...updates } : card
+  //           ),
+  //         })),
+  //       }))
+  //     );
+  //     // Inside handleUpdateCard function
+  //     if (updates.assignee && updates.assignee.length > 0) {
+  //       const newAssignees = updates.assignee.filter(
+  //         (_id) => !card.assignee.includes(_id)
+  //       );
+
+  //       for (const userId of newAssignees) {
+  //         try {
+  //           await createNotification({
+  //             user_id: userId,
+  //             content: `You've been assigned to "${card.title}" in board "${selectedBoard.title}"`,
+  //             type: "CARD_ASSIGNMENT",
+  //             board_id: selectedBoard.id,
+  //             card_id: card.id,
+  //           });
+  //         } catch (error) {
+  //           console.error("Error creating notification:", error);
+  //         }
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating card:", error);
+  //     toast.error("Failed to update card");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // const handleUpdateCard = async (cardId, updates) => {
+  //   try {
+  //     setLoading(true);
+      
+  //     // Get the current (old) card from state before updating
+  //     const oldCard = boards
+  //       .flatMap(board => board.columns)
+  //       .flatMap(col => col.cards)
+  //       .find(card => card.id === cardId);
+  
+  //     // Perform the update (e.g., API call)
+  //     await updateCard(cardId, updates, currentUser.accountId);
+  
+  //     // Update the boards state with the new card data
+  //     setBoards((prev) =>
+  //       prev.map((board) => ({
+  //         ...board,
+  //         columns: board.columns.map((col) => ({
+  //           ...col,
+  //           cards: col.cards.map((card) =>
+  //             card.id === cardId ? { ...card, ...updates } : card
+  //           ),
+  //         })),
+  //       }))
+  //     );
+  
+  //     // If there are new assignees in the update, check against the old assignee list.
+  //     if (updates.assignee && updates.assignee.length > 0 && oldCard) {
+  //       // Extract _id values from the old card's assignee list (assuming they are objects)
+  //       const oldAssigneeIds = oldCard.assignee.map((user) => user._id);
+  
+  //       // Filter updates.assignee to only include truly new IDs
+  //       const newAssignees = updates.assignee.filter(
+  //         (id) => !oldAssigneeIds.includes(id)
+  //       );
+  
+  //       // Use the new title if provided; otherwise fallback to the old card title
+  //       const cardTitle = updates.title || oldCard.title;
+  
+  //       // Create notifications for the new assignees
+  //       for (const user of newAssignees) {
+  //         try {
+  //           await createNotification({
+  //             user_id: user._id,
+  //             content: `You've been assigned to "${cardTitle}" in board "${selectedBoard.title}"`,
+  //             type: "CARD_ASSIGNMENT",
+  //             board_id: selectedBoard.id,
+  //             card_id: cardId,
+  //           });
+  //         } catch (error) {
+  //           console.error("Error creating notification:", error);
+  //         }
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating card:", error);
+  //     toast.error("Failed to update card");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleUpdateCard = async (cardId, updates) => {
     try {
       setLoading(true);
+  
+      let oldCard = null;
+  
+      // Get the current (old) card from state only if updates has assignee
+      if (updates.assignee && updates.assignee.length > 0) {
+        oldCard = boards
+          .flatMap(board => board.columns)
+          .flatMap(col => col.cards)
+          .find(card => card.id === cardId);
+      }
+  
+      // Perform the update (e.g., API call)
       await updateCard(cardId, updates, currentUser.accountId);
+  
+      // Update the boards state with the new card data
       setBoards((prev) =>
         prev.map((board) => ({
           ...board,
@@ -581,6 +704,35 @@ export default function IdeationPage() {
           })),
         }))
       );
+  
+      // If there are new assignees in the update, check against the old assignee list.
+      if (updates.assignee && updates.assignee.length > 0 && oldCard) {
+        // Extract _id values from the old card's assignee list (assuming they are objects)
+        const oldAssigneeIds =  oldCard.assignee.length> 0 ? oldCard.assignee.map((user) => user._id) : [];
+  
+        // Filter updates.assignee to only include truly new IDs
+        const newAssignees = updates.assignee.filter(
+          (user) => !oldAssigneeIds.includes(user._id)
+        );
+  
+        // Use the new title if provided; otherwise fallback to the old card title
+        const cardTitle = updates.title || oldCard.title;
+  
+        // Create notifications for the new assignees
+        for (const user of newAssignees) {
+          try {
+            await createNotification({
+              user_id: user._id,
+              content: `You've been assigned to "${cardTitle}" in board "${selectedBoard.title}"`,
+              type: "CARD_ASSIGNMENT",
+              board_id: selectedBoard.id,
+              card_id: cardId,
+            });
+          } catch (error) {
+            console.error("Error creating notification:", error);
+          }
+        }
+      }
     } catch (error) {
       console.error("Error updating card:", error);
       toast.error("Failed to update card");
@@ -746,9 +898,6 @@ export default function IdeationPage() {
     setActiveCard(null);
   };
 
-
-
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-light to-white dark:from-design-black dark:to-design-black p-6">
@@ -902,7 +1051,7 @@ export default function IdeationPage() {
                   onDeleteColumn={() => handleDeleteColumn(column.id)}
                   onUpdateColumn={handleUpdateColumn}
                   boardId={selectedBoard.id}
-                  teamUsers = {teamUsers} 
+                  teamUsers={teamUsers}
                   boardTitle={selectedBoard.title}
                 />
               ))}
@@ -953,7 +1102,7 @@ export default function IdeationPage() {
                 onDelete={handleDeleteCard}
                 onArchive={handleArchiveCard}
                 boardId={selectedBoard.id}
-                teamUsers={teamUsers}  // Add this prop
+                teamUsers={teamUsers} // Add this prop
               />
             ) : null}
           </DragOverlay>

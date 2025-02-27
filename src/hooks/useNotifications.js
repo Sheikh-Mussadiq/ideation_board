@@ -2,13 +2,30 @@ import { useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNotificationStore } from '../stores/notificationStore';
 import { useAuth } from '../context/AuthContext';
+import { 
+  fetchNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead
+} from '../services/notificationService';
 
 export function useNotifications() {
   const { addNotification } = useNotificationStore();
   const { currentUser } = useAuth();
 
   useEffect(() => {
-    if (!currentUser?.email) return;
+    if (!currentUser?.userId) return;
+
+    // Initial fetch of notifications
+    const loadNotifications = async () => {
+      try {
+        const notifications = await fetchNotifications();
+        notifications.forEach(notification => addNotification(notification));
+      } catch (error) {
+        console.error('Error loading notifications:', error);
+      }
+    };
+
+    loadNotifications();
 
     // Subscribe to new notifications
     const channel = supabase
@@ -16,24 +33,16 @@ export function useNotifications() {
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'notifications',
-          filter: `user_email=eq.${currentUser.email}`
+          filter: `user_id=eq.${currentUser.userId}`,
         },
         (payload) => {
-          if (payload.new) {
-            addNotification({
-              id: payload.new.id,
-              userEmail: payload.new.user_email,
-              type: payload.new.type,
-              content: payload.new.content,
-              cardId: payload.new.card_id,
-              boardId: payload.new.board_id,
-              read: payload.new.read,
-              createdAt: payload.new.created_at
-            });
+          if (payload.eventType === 'INSERT') {
+            addNotification(payload.new);
           }
+          // You could handle UPDATE and DELETE events here if needed
         }
       )
       .subscribe();
@@ -41,27 +50,24 @@ export function useNotifications() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [currentUser?.email, addNotification]);
+  }, [currentUser, addNotification]);
 
   const markAsRead = async (notificationId) => {
-    const { error } = await supabase
-      .from('notifications')
-      .update({ read: true })
-      .eq('id', notificationId);
-
-    if (!error) {
+    try {
+      await markNotificationAsRead(notificationId);
       useNotificationStore.getState().markAsRead(notificationId);
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
     }
   };
 
   const markAllAsRead = async () => {
-    const { error } = await supabase
-      .from('notifications')
-      .update({ read: true })
-      .eq('user_email', currentUser?.email);
-
-    if (!error) {
+    if (!authUser?.id) return;
+    try {
+      await markAllNotificationsAsRead(currentUser.userId);
       useNotificationStore.getState().markAllAsRead();
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
     }
   };
 
