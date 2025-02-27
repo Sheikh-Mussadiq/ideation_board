@@ -915,7 +915,7 @@ export default function IdeationPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-light to-white dark:from-design-black dark:to-design-black p-6">
+      <div className="h-[calc(100vh-4rem)] mt-8 border border-design-greyOutlines rounded-3xl bg-gradient-to-br from-primary-light to-white dark:from-design-black dark:to-design-black p-6">
         <div className="mx-auto">
           {/* Header shimmer */}
           <div className="flex justify-between items-center mb-8">
