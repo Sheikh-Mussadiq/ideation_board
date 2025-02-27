@@ -7,6 +7,7 @@ import LoginPage from "./pages/LoginPage";
 import IdeationPage from "./pages/IdeationPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { BoardProvider } from "./context/BoardContext";
+import { SidebarProvider } from './context/SidebarContext';
 
 import HomePage from "./pages/HomePage";
 
@@ -75,13 +76,15 @@ export default function App() {
   return (
     <AuthProvider>
       <BoardProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/*" element={<AuthenticatedRoutes />} />
-          </Routes>
-          <Toaster position="top-right" />
-        </BrowserRouter>
+        <SidebarProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/*" element={<AuthenticatedRoutes />} />
+            </Routes>
+            <Toaster position="top-right" />
+          </BrowserRouter>
+        </SidebarProvider>
       </BoardProvider>
     </AuthProvider>
   );
