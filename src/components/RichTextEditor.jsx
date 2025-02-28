@@ -1,7 +1,15 @@
 import React from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { Bold, Italic, List, ListOrdered } from "lucide-react";
+import Link from "@tiptap/extension-link";
+import Underline from "@tiptap/extension-underline";
+import {
+  Bold,
+  Italic,
+  List,
+  ListOrdered,
+  Underline as UnderlineIcon,
+} from "lucide-react";
 import Tooltip from "./Tooltip";
 
 const MenuBar = ({ editor }) => {
@@ -59,13 +67,39 @@ const MenuBar = ({ editor }) => {
           <ListOrdered className="h-4 w-4" />
         </button>
       </Tooltip>
+      <Tooltip text="Underline (Ctrl+U)">
+        <button
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          className={`p-1.5 rounded hover:bg-design-primaryPurple/20 transition-all duration-200 ${
+            editor.isActive("underline")
+              ? "bg-design-primaryPurple/20 text-design-primaryPurple"
+              : "text-design-primaryGrey"
+          }`}
+        >
+          <UnderlineIcon className="h-4 w-4" />
+        </button>
+      </Tooltip>
     </div>
   );
 };
 
 export default function RichTextEditor({ content, onChange, onBlur }) {
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      Underline,
+      Link.configure({
+        openOnClick: true,
+        autolink: true,
+        linkOnPaste: true,
+        validate: (href) => /^https?:\/\//.test(href),
+        HTMLAttributes: {
+          class: "text-design-primaryPurple hover:underline",
+          rel: "noopener noreferrer nofollow",
+          target: "_blank",
+        },
+      }),
+    ],
     content: content || "",
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
