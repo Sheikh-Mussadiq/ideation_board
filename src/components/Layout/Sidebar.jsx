@@ -272,7 +272,7 @@ export default function Sidebar() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setIsSettingsOpen(true)}
-              className="flex items-center gap-3 w-full p-2 rounded-xl hover:bg-design-primaryPurple/10 text-design-primaryGrey hover:text-design-primaryPurple transition-colors"
+              className="flex items-center justify-center md:justify-start gap-3 w-full p-2 rounded-xl hover:bg-design-primaryPurple/10 text-design-primaryGrey hover:text-design-primaryPurple transition-colors"
             >
               <Settings className="h-[18px] w-[18px]" />
               <AnimatePresence>
