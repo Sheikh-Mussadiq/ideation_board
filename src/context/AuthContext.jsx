@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
     {
       _id: "5cc1b08ad62ec72e8388cb47",
       email: "admin@example.com",
-      userName: "adminUser",
+      userName: "JohnDoe",
       firstName: "John",
       lastName: "Doe",
       role: "ADMIN",
@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
     {
       _id: "5cc1b08ad62ec72e8388cb48",
       email: "user1@example.com",
-      userName: "userOne",
+      userName: "AliceSmith",
       firstName: "Alice",
       lastName: "Smith",
       role: "USER",
@@ -38,7 +38,7 @@ export function AuthProvider({ children }) {
     {
       _id: "5cc1b08ad62ec72e8388cb49",
       email: "user2@example.com",
-      userName: "userTwo",
+      userName: "BobJohnson",
       firstName: "Bob",
       lastName: "Johnson",
       role: "USER",
@@ -48,7 +48,7 @@ export function AuthProvider({ children }) {
     {
       _id: "5cc1b08ad62ec72e8378dd3",
       email: "user2@example.com",
-      userName: "userThree",
+      userName: "MussadiqMehmood",
       firstName: "Mussadiq",
       lastName: "Mehmood",
       role: "ADMIN",
@@ -58,7 +58,7 @@ export function AuthProvider({ children }) {
     {
       _id: "5cc1b08ad62ec72e8388cb4",
       email: "mukarram@gmail.com",
-      userName: "Mukarram Nawaz",
+      userName: "MukarramNawaz",
       firstName: "Mukarram",
       lastName: "Nawaz",
       role: "ADMIN",
@@ -153,29 +153,14 @@ export function AuthProvider({ children }) {
     }
   };
 
-  useEffect(() => {
-    setCurrentUser({
-      firstName: "Mussadiq",
-      lastName: "Mehmood",
-      email: "Mussadiq@gmail.com",
-      accountId: "67a1fdfaff275daed5017dc7",
-      userId: "5cc1b08ad62ec72e8378dd3",
-      role: "ADMIN",
-      avatarUrl:
-        "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50",
-    });
-    getToken();
-
-    // getUserData();
-  }, []);
-
   // useEffect(() => {
   //   setCurrentUser({
-  //     firstName: "Mukarram",
-  //     lastName : "Nawaz",
-  //     email: "mukarram@gmail.com",
-  //     accountId: "67a1fdfaff275daed5015bb4",
-  //     userId: "5cc1b08ad62ec72e8388cb4",
+  //     firstName: "Mussadiq",
+  //     lastName: "Mehmood",
+  //     email: "Mussadiq@gmail.com",
+  //    userName: "MussadiqMehmood",  
+  //     accountId: "67a1fdfaff275daed5017dc7",
+  //     userId: "5cc1b08ad62ec72e8378dd3",
   //     role: "ADMIN",
   //     avatarUrl:
   //       "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50",
@@ -184,6 +169,23 @@ export function AuthProvider({ children }) {
 
   //   // getUserData();
   // }, []);
+
+  useEffect(() => {
+    setCurrentUser({
+      firstName: "Mukarram",
+      lastName : "Nawaz",
+      userName: "MukarramNawaz",
+      email: "mukarram@gmail.com",
+      accountId: "67a1fdfaff275daed5015bb4",
+      userId: "5cc1b08ad62ec72e8388cb4",
+      role: "ADMIN",
+      avatarUrl:
+        "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50",
+    });
+    getToken();
+
+    // getUserData();
+  }, []);
 
   const login = useCallback(async (email, password) => {
     try {

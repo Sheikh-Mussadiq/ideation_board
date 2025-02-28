@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { format } from "date-fns";
 import { User, Edit2, Trash2, MessageSquare, ChevronDown } from "lucide-react";
+import { createNotification } from "../services/notificationService";
+import { supabase } from "../lib/supabase"
+import { useAuth } from "../context/AuthContext";
 
 export default function CommentSection({
   comments,
@@ -8,16 +11,142 @@ export default function CommentSection({
   onAddComment,
   onEditComment,
   onDeleteComment,
+  teamUsers,
+  cardId,
+  cardTitle, 
+  boardId, 
 }) {
   const [newComment, setNewComment] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editText, setEditText] = useState("");
   const [showAllComments, setShowAllComments] = useState(false);
+  const [showMentions, setShowMentions] = useState(false);
+  const [mentionFilter, setMentionFilter] = useState("");
+  const [cursorPosition, setCursorPosition] = useState(0);
+  const { currentUser } = useAuth();
+  const inputRef = useRef(null);
 
-  const handleSubmit = (e) => {
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    const position = e.target.selectionStart;
+    setNewComment(value);
+    setCursorPosition(position);
+
+    // Find the word being typed at current cursor position
+    const textBeforeCursor = value.slice(0, position);
+    const wordsBeforeCursor = textBeforeCursor.split(/\s+/);
+    const currentWord = wordsBeforeCursor[wordsBeforeCursor.length - 1];
+
+    // Show mentions only if currently typing a mention (starts with @ and no spaces)
+    if (currentWord.startsWith("@")) {
+      const searchText = currentWord.slice(1).toLowerCase();
+      setMentionFilter(searchText);
+      setShowMentions(true);
+    } else {
+      setShowMentions(false);
+    }
+  };
+
+  const insertMention = (user) => {
+    const textBeforeCursor = newComment.slice(0, cursorPosition);
+    const textAfterCursor = newComment.slice(cursorPosition);
+
+    // Find the start of the current word
+    const lastSpaceBeforeCursor = textBeforeCursor.lastIndexOf(" ");
+    const start = lastSpaceBeforeCursor === -1 ? 0 : lastSpaceBeforeCursor + 1;
+
+    // Construct new text with mention
+    const newText =
+      newComment.slice(0, start) +
+      `@${user.userName} ` +
+      newComment.slice(cursorPosition);
+
+    setNewComment(newText);
+    setShowMentions(false);
+    inputRef.current?.focus();
+  };
+
+  const renderCommentText = (text) => {
+    if (!text) return null; // Handle cases where text is undefined/null
+
+    // Split the text into words while preserving spaces and punctuation
+    const words = text.split(/(\s+)/); // Keeps spaces separate
+
+    return words.map((word, index) => {
+      // Check if word is a mention (starts with @ and followed by a username)
+      if (word.startsWith("@") && word.length > 1) {
+        const mentionText = word.slice(1).trim(); // Remove '@' and trim spaces
+
+        // Check if this username exists in teamUsers
+        const mentionedUser = teamUsers.find(
+          (user) => user.userName.toLowerCase() === mentionText.toLowerCase()
+        );
+
+        if (mentionedUser) {
+          return (
+            <span key={index} className="font-medium text-design-primaryPurple">
+              {word}
+            </span>
+          );
+        }
+      }
+
+      // Return regular text for non-mentions
+      return <span key={index}>{word}</span>;
+    });
+  };
+
+  const extractMentions = (text) => {
+    const mentions = [];
+    const words = text.split(/\s+/);
+
+    words.forEach((word) => {
+      if (word.startsWith("@")) {
+        const username = word.slice(1);
+        const mentionedUser = teamUsers.find(
+          (user) => user.userName.toLowerCase() === username.toLowerCase()
+        );
+        if (mentionedUser) {
+          mentions.push(mentionedUser);
+        }
+      }
+    });
+
+    return mentions;
+  };
+
+  const filteredMentions = teamUsers.filter((user) =>
+    user.userName.toLowerCase().includes(mentionFilter.toLowerCase())
+  );
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (newComment.trim()) {
-      onAddComment(newComment.trim());
+      // First add the comment
+      await onAddComment(newComment.trim());
+
+      // Then handle mentions and notifications
+      const mentionedUsers = extractMentions(newComment.trim());
+
+      // Create notifications for each mentioned user
+      for (const user of mentionedUsers) {
+        try {
+          await supabase.from("notifications").insert([
+            {
+              user_id: user._id,
+              content: `${currentUser.userName} mentioned you in a comment: "${newComment.trim()}" at ${cardTitle}`,
+              type: "MENTION",
+              board_id: boardId,
+              card_id: cardId,
+              created_at: new Date().toISOString(),
+              read: false,
+            },
+          ]);
+        } catch (error) {
+          console.error("Error creating mention notification:", error);
+        }
+      }
+
       setNewComment("");
     }
   };
@@ -44,25 +173,46 @@ export default function CommentSection({
         )}
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="flex gap-2 bg-white p-3 rounded-lg shadow-sm dark:bg-design-black/50"
-      >
-        <input
-          type="text"
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Add a comment..."
-          className="input flex-1 min-w-0 border-gray-200 focus:border-primary focus:ring-primary p-2"
-        />
-        <button
-          type="submit"
-          disabled={!newComment.trim()}
-          className="btn-primary disabled:opacity-50 hover:scale-105 transition-transform shadow-lg hover:shadow-xl dark:disabled:bg-button-disabled-fill dark:disabled:text-button-disabled-text"
+      <div className="relative">
+        <form
+          onSubmit={handleSubmit}
+          className="flex gap-2 bg-white p-3 rounded-lg shadow-sm dark:bg-design-black/50"
         >
-          Add
-        </button>
-      </form>
+          <input
+            ref={inputRef}
+            type="text"
+            value={newComment}
+            onChange={handleInputChange}
+            placeholder="Add a comment... (Use @ to mention)"
+            className="input flex-1 min-w-0 border-gray-200 focus:border-primary focus:ring-primary p-2"
+          />
+          <button
+            type="submit"
+            disabled={!newComment.trim()}
+            className="btn-primary disabled:opacity-50 hover:scale-105 transition-transform shadow-lg hover:shadow-xl dark:disabled:bg-button-disabled-fill dark:disabled:text-button-disabled-text"
+          >
+            Add
+          </button>
+        </form>
+
+        {/* Mentions suggestions */}
+        {showMentions && filteredMentions.length > 0 && (
+          <div className="absolute bottom-full mb-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-48 overflow-y-auto z-10">
+            {filteredMentions.map((user) => (
+              <button
+                key={user._id}
+                onClick={() => insertMention(user)}
+                className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2"
+              >
+                <div className="h-6 w-6 rounded-full bg-design-primaryPurple text-white flex items-center justify-center text-xs">
+                  {user.userName[0]}
+                </div>
+                <span>@{user.userName}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="space-y-3">
         {visibleComments.map((comment) => (
@@ -80,11 +230,23 @@ export default function CommentSection({
                     {comment.author}
                   </span>
                   <span className="text-xs text-design-primaryGrey dark:text-design-greyOutlines">
-                   { comment.updated_at ?   format(new Date(comment.updated_at), "MMM d, yyyy HH:mm") : format(new Date(comment.created_at), "MMM d, yyyy HH:mm") }
+                    {comment.updated_at
+                      ? format(
+                          new Date(comment.updated_at),
+                          "MMM d, yyyy HH:mm"
+                        )
+                      : format(
+                          new Date(comment.created_at),
+                          "MMM d, yyyy HH:mm"
+                        )}
                   </span>
                 </div>
               </div>
-              <div className={`flex items-center space-x-2 ${comment.account_id === userAccountId ? "" : "hidden"}`}>
+              <div
+                className={`flex items-center space-x-2 ${
+                  comment.account_id === userAccountId ? "" : "hidden"
+                }`}
+              >
                 <button
                   onClick={() => {
                     setEditingId(comment.id);
@@ -127,7 +289,8 @@ export default function CommentSection({
               </div>
             ) : (
               <p className="mt-2 text-sm text-gray-700 leading-relaxed dark:text-design-greyOutlines">
-                {comment.text} {comment.updated_at ? " (edited)" : ""}
+                {renderCommentText(comment.text)}
+                {comment.updated_at ? " (edited)" : ""}
               </p>
             )}
           </div>

@@ -38,6 +38,7 @@ export default function CardModal({
   onUpdate,
   onDelete,
   onArchive,
+  boardId,
   boardTitle,
   teamUsers,
 }) {
@@ -430,6 +431,10 @@ export default function CardModal({
                         console.error("Error deleting comment:", error);
                       }
                     }}
+                    teamUsers={teamUsers}
+                    cardId={card.id}
+                    boardId={boardId}
+                    cardTitle={card.title}
                   />
                 </div>
                 <AssigneeModal
