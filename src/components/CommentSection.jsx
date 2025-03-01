@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { format } from "date-fns";
 import { User, Edit2, Trash2, MessageSquare, ChevronDown } from "lucide-react";
 import { createNotification } from "../services/notificationService";
-import { supabase } from "../lib/supabase"
+import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 
 export default function CommentSection({
@@ -13,8 +13,8 @@ export default function CommentSection({
   onDeleteComment,
   teamUsers,
   cardId,
-  cardTitle, 
-  boardId, 
+  cardTitle,
+  boardId,
 }) {
   const [newComment, setNewComment] = useState("");
   const [editingId, setEditingId] = useState(null);
@@ -134,7 +134,9 @@ export default function CommentSection({
           await supabase.from("notifications").insert([
             {
               user_id: user._id,
-              content: `${currentUser.userName} mentioned you in a comment: "${newComment.trim()}" at ${cardTitle}`,
+              content: `${
+                currentUser.userName
+              } mentioned you in a comment: "${newComment.trim()}" at ${cardTitle}`,
               type: "MENTION",
               board_id: boardId,
               card_id: cardId,
@@ -162,135 +164,136 @@ export default function CommentSection({
   const hasMoreComments = comments.length > 3;
 
   return (
-    <div className="space-y-4 animate-in fade-in-50 bg-gray-50/50 border border-gray-100 p-4 rounded-xl">
-      <div className="flex items-center text-sm text-gray-700">
-        <MessageSquare className="h-5 w-5 mr-2" />
-        <span className="font-medium">Comments</span>
+    <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-300 bg-white dark:bg-design-black/30 border border-design-greyOutlines/20 p-6 rounded-2xl shadow-sm">
+      <div className="flex items-center space-x-3">
+        <MessageSquare className="h-5 w-5 text-design-primaryPurple" />
+        <span className="font-semibold text-design-black dark:text-design-white">
+          Comments
+        </span>
         {comments.length > 0 && (
-          <span className="ml-2 px-2 py-0.5 rounded-full text-xs bg-primary-light text-primary">
+          <span className="px-2.5 py-1 rounded-full text-xs bg-design-lightPurpleButtonFill text-design-primaryPurple font-medium">
             {comments.length}
           </span>
         )}
       </div>
 
       <div className="relative">
-        <form
-          onSubmit={handleSubmit}
-          className="flex gap-2 bg-white p-3 rounded-lg shadow-sm dark:bg-design-black/50"
-        >
-          <input
-            ref={inputRef}
-            type="text"
-            value={newComment}
-            onChange={handleInputChange}
-            placeholder="Add a comment... (Use @ to mention)"
-            className="input flex-1 min-w-0 border-gray-200 focus:border-primary focus:ring-primary p-2"
-          />
-          <button
-            type="submit"
-            disabled={!newComment.trim()}
-            className="btn-primary disabled:opacity-50 hover:scale-105 transition-transform shadow-lg hover:shadow-xl dark:disabled:bg-button-disabled-fill dark:disabled:text-button-disabled-text"
-          >
-            Add
-          </button>
+        <form onSubmit={handleSubmit} className="group">
+          <div className="relative transition-all duration-200 focus-within:scale-[1.01]">
+            <input
+              ref={inputRef}
+              type="text"
+              value={newComment}
+              onChange={handleInputChange}
+              placeholder="Add a comment... (Use @ to mention)"
+              className="w-full px-4 py-3 rounded-xl border-2 border-design-greyOutlines/50 focus:border-design-primaryPurple focus:ring-0 dark:bg-design-black/50 dark:border-design-greyOutlines/20 placeholder:text-design-primaryGrey/50"
+            />
+            <button
+              type="submit"
+              disabled={!newComment.trim()}
+              className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-design-primaryPurple text-white rounded-lg font-medium shadow-lg hover:shadow-design-primaryPurple/25 disabled:opacity-50 disabled:hover:shadow-none transition-all duration-200 hover:scale-105 disabled:scale-100"
+            >
+              Send
+            </button>
+          </div>
         </form>
 
-        {/* Mentions suggestions */}
         {showMentions && filteredMentions.length > 0 && (
-          <div className="absolute bottom-full mb-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-48 overflow-y-auto z-10">
+          <div className="absolute bottom-full mb-2 w-full bg-white dark:bg-design-black/90 rounded-xl shadow-xl border border-design-greyOutlines/20 max-h-48 overflow-y-auto z-10 animate-in slide-in-from-top-2 duration-200">
             {filteredMentions.map((user) => (
               <button
                 key={user._id}
                 onClick={() => insertMention(user)}
-                className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2"
+                className="w-full text-left px-4 py-2.5 hover:bg-design-lightVioletSelection dark:hover:bg-design-primaryPurple/10 flex items-center gap-3 transition-colors duration-150"
               >
-                <div className="h-6 w-6 rounded-full bg-design-primaryPurple text-white flex items-center justify-center text-xs">
-                  {user.userName[0]}
+                <div className="h-8 w-8 rounded-full bg-design-primaryPurple text-white flex items-center justify-center text-sm font-medium">
+                  {user.userName[0].toUpperCase()}
                 </div>
-                <span>@{user.userName}</span>
+                <span className="text-design-black dark:text-design-white">
+                  @{user.userName}
+                </span>
               </button>
             ))}
           </div>
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {visibleComments.map((comment) => (
           <div
             key={comment.id}
-            className="bg-primary-light/50 rounded-lg p-3 hover:bg-primary-light transition-all hover:scale-[1.02] group"
+            className="group rounded-xl p-4 hover:bg-design-lightPurpleButtonFill dark:hover:bg-design-primaryPurple/5 transition-all duration-200 hover:scale-[1.01]"
           >
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-2">
-                <div className="h-8 w-8 rounded-full bg-white border-2 border-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <User className="h-4 w-4 text-primary" />
+            <div className="flex items-start justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="h-9 w-9 rounded-full bg-design-primaryPurple/10 border-2 border-design-primaryPurple/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <User className="h-4 w-4 text-design-primaryPurple" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-gray-800 dark:text-design-white">
+                  <span className="font-medium text-design-black dark:text-design-white">
                     {comment.author}
                   </span>
-                  <span className="text-xs text-design-primaryGrey dark:text-design-greyOutlines">
-                    {comment.updated_at
-                      ? format(
-                          new Date(comment.updated_at),
-                          "MMM d, yyyy HH:mm"
-                        )
-                      : format(
-                          new Date(comment.created_at),
-                          "MMM d, yyyy HH:mm"
-                        )}
+                  <span className="text-xs text-design-primaryGrey">
+                    {format(
+                      new Date(comment.updated_at || comment.created_at),
+                      "MMM d, yyyy HH:mm"
+                    )}
                   </span>
                 </div>
               </div>
-              <div
-                className={`flex items-center space-x-2 ${
-                  comment.account_id === userAccountId ? "" : "hidden"
-                }`}
-              >
-                <button
-                  onClick={() => {
-                    setEditingId(comment.id);
-                    setEditText(comment.text);
-                  }}
-                  className="btn-ghost p-1.5 rounded-lg hover:bg-white hover:scale-110 transition-transform dark:hover:bg-design-black/50"
-                >
-                  <Edit2 className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => onDeleteComment(comment.id)}
-                  className="btn-ghost p-1.5 rounded-lg hover:bg-white hover:text-semantic-error hover:scale-110 transition-transform dark:hover:bg-design-black/50"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
+
+              {comment.account_id === userAccountId && (
+                <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <button
+                    onClick={() => {
+                      setEditingId(comment.id);
+                      setEditText(comment.text);
+                    }}
+                    className="p-2 rounded-lg hover:bg-design-primaryPurple/10 hover:text-design-primaryPurple transition-colors duration-150"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => onDeleteComment(comment.id)}
+                    className="p-2 rounded-lg hover:bg-semantic-error-light hover:text-semantic-error transition-colors duration-150"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
             </div>
+
             {editingId === comment.id ? (
-              <div className="space-y-2">
+              <div className="mt-3 space-y-3">
                 <textarea
                   value={editText}
                   onChange={(e) => setEditText(e.target.value)}
-                  className="input w-full dark:bg-design-black/50 dark:border-design-greyOutlines/20"
+                  className="w-full px-4 py-2 rounded-xl border-2 border-design-greyOutlines/50 focus:border-design-primaryPurple focus:ring-0 dark:bg-design-black/50 min-h-[80px]"
                   rows={2}
                 />
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setEditingId(null)}
-                    className="btn-ghost btn-sm"
+                    className="px-4 py-1.5 rounded-lg hover:bg-design-greyBG transition-colors duration-150"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={() => handleEdit(comment.id)}
-                    className="btn-primary btn-sm"
+                    className="px-4 py-1.5 bg-design-primaryPurple text-white rounded-lg hover:bg-button-primary-hover transition-colors duration-150"
                   >
                     Save
                   </button>
                 </div>
               </div>
             ) : (
-              <p className="mt-2 text-sm text-gray-700 leading-relaxed dark:text-design-greyOutlines">
+              <p className="mt-3 text-design-black dark:text-design-greyOutlines leading-relaxed">
                 {renderCommentText(comment.text)}
-                {comment.updated_at ? " (edited)" : ""}
+                {comment.updated_at && (
+                  <span className="text-xs text-design-primaryGrey ml-2">
+                    (edited)
+                  </span>
+                )}
               </p>
             )}
           </div>
@@ -299,12 +302,14 @@ export default function CommentSection({
         {hasMoreComments && (
           <button
             onClick={() => setShowAllComments(!showAllComments)}
-            className="w-full py-2 px-4 text-sm text-primary hover:text-primary-hover flex items-center justify-center gap-2 group"
+            className="w-full py-3 text-design-primaryPurple hover:text-button-primary-hover flex items-center justify-center gap-2 group transition-colors duration-150"
           >
-            <span>{showAllComments ? "Show Less" : "View More Comments"}</span>
+            <span className="font-medium">
+              {showAllComments ? "Show Less" : "View More Comments"}
+            </span>
             <ChevronDown
-              className={`h-4 w-4 transition-transform duration-200 ${
-                showAllComments ? "rotate-180" : ""
+              className={`h-4 w-4 transition-transform duration-300 ${
+                showAllComments ? "rotate-180" : "group-hover:translate-y-0.5"
               }`}
             />
           </button>

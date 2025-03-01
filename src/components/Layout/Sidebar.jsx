@@ -132,7 +132,6 @@ export default function Sidebar() {
               <ChevronRight className="h-4 w-4 text-white" />
             )}
           </button>
-
           {/* Logo */}
           <div className="p-4 mb-2">
             <AnimatePresence>
@@ -157,7 +156,6 @@ export default function Sidebar() {
               )}
             </AnimatePresence>
           </div>
-
           <nav className="flex-1 px-3 space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -264,7 +262,6 @@ export default function Sidebar() {
               </AnimatePresence>
             </div>
           </nav>
-
           {/* User Profile Section */}
           <div className="p-3 mt-auto space-y-2">
             {/* Settings Button */}
@@ -272,7 +269,9 @@ export default function Sidebar() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setIsSettingsOpen(true)}
-              className="flex items-center justify-center md:justify-start gap-3 w-full p-2 rounded-xl hover:bg-design-primaryPurple/10 text-design-primaryGrey hover:text-design-primaryPurple transition-colors"
+              className={`flex items-center ${
+                isExpanded ? "justify-start" : "justify-center"
+              } gap-3 w-full p-2 rounded-xl hover:bg-design-primaryPurple/10 text-design-primaryGrey hover:text-design-primaryPurple transition-colors`}
             >
               <Settings className="h-[18px] w-[18px]" />
               <AnimatePresence>
@@ -289,7 +288,9 @@ export default function Sidebar() {
               </AnimatePresence>
             </motion.button>
             <motion.div
-              className="flex items-center gap-3 p-2 rounded-xl bg-design-greyBG/50 backdrop-blur-sm"
+              className={`flex items-center ${
+                isExpanded ? "justify-start" : "justify-center"
+              } gap-3 p-2 rounded-xl bg-design-greyBG/50 backdrop-blur-sm`}
               whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.2 }}
             >

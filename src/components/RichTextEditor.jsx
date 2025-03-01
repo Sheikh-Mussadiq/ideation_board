@@ -43,6 +43,18 @@ const MenuBar = ({ editor }) => {
           <Italic className="h-4 w-4" />
         </button>
       </Tooltip>
+      <Tooltip text="Underline (Ctrl+U)">
+        <button
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          className={`p-1.5 rounded hover:bg-design-primaryPurple/20 transition-all duration-200 ${
+            editor.isActive("underline")
+              ? "bg-design-primaryPurple/20 text-design-primaryPurple"
+              : "text-design-primaryGrey"
+          }`}
+        >
+          <UnderlineIcon className="h-4 w-4" />
+        </button>
+      </Tooltip>
       <Tooltip text="Bullet List">
         <button
           onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -65,18 +77,6 @@ const MenuBar = ({ editor }) => {
           }`}
         >
           <ListOrdered className="h-4 w-4" />
-        </button>
-      </Tooltip>
-      <Tooltip text="Underline (Ctrl+U)">
-        <button
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-          className={`p-1.5 rounded hover:bg-design-primaryPurple/20 transition-all duration-200 ${
-            editor.isActive("underline")
-              ? "bg-design-primaryPurple/20 text-design-primaryPurple"
-              : "text-design-primaryGrey"
-          }`}
-        >
-          <UnderlineIcon className="h-4 w-4" />
         </button>
       </Tooltip>
     </div>
