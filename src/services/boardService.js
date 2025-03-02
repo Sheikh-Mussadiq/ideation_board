@@ -146,7 +146,7 @@
 import { supabase } from "../lib/supabase";
 
 
-export async function fetchBoards(accountId) {
+export async function fetchBoards() {
   const { data: boards, error: boardsError } = await supabase
     .from("boards")
     .select("*")

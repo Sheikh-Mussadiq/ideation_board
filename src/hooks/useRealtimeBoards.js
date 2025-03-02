@@ -1,19 +1,17 @@
 import { useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
-export function useRealtimeBoards(accountId, onBoardChange) {
+export function useRealtimeBoards( onBoardChange) {
   useEffect(() => {
-    if (!accountId) return;
 
     const channel = supabase
-      .channel(`public:boards:${accountId}`)
+      .channel(`public:boards`)
       .on(
         'postgres_changes',
         {
           event: '*', 
           schema: 'public',
           table: 'boards',
-      
         },
         (payload) => {
           console.log('Board change received:', payload);
@@ -30,5 +28,5 @@ export function useRealtimeBoards(accountId, onBoardChange) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [accountId, onBoardChange]);
+  }, [ onBoardChange]);
 }

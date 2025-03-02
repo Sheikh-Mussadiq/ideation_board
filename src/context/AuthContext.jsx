@@ -153,31 +153,14 @@ export function AuthProvider({ children }) {
     }
   };
 
-  useEffect(() => {
-    setCurrentUser({
-      firstName: "Mussadiq",
-      lastName: "Mehmood",
-      email: "Mussadiq@gmail.com",
-      userName: "MussadiqMehmood",
-      accountId: "67a1fdfaff275daed5017dc7",
-      userId: "5cc1b08ad62ec72e8378dd3",
-      role: "ADMIN",
-      avatarUrl:
-        "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50",
-    });
-    getToken();
-
-    // getUserData();
-  }, []);
-
   // useEffect(() => {
   //   setCurrentUser({
-  //     firstName: "Mukarram",
-  //     lastName : "Nawaz",
-  //     userName: "MukarramNawaz",
-  //     email: "mukarram@gmail.com",
-  //     accountId: "67a1fdfaff275daed5015bb4",
-  //     userId: "5cc1b08ad62ec72e8388cb4",
+  //     firstName: "Mussadiq",
+  //     lastName: "Mehmood",
+  //     email: "Mussadiq@gmail.com",
+  //     userName: "MussadiqMehmood",
+  //     accountId: "67a1fdfaff275daed5017dc7",
+  //     userId: "5cc1b08ad62ec72e8378dd3",
   //     role: "ADMIN",
   //     avatarUrl:
   //       "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50",
@@ -186,6 +169,23 @@ export function AuthProvider({ children }) {
 
   //   // getUserData();
   // }, []);
+
+  useEffect(() => {
+    setCurrentUser({
+      firstName: "Mukarram",
+      lastName : "Nawaz",
+      userName: "MukarramNawaz",
+      email: "mukarram@gmail.com",
+      accountId: "67a1fdfaff275daed5015bb4",
+      userId: "5cc1b08ad62ec72e8388cb4",
+      role: "ADMIN",
+      avatarUrl:
+        "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50",
+    });
+    getToken();
+
+    // getUserData();
+  }, []);
 
   const login = useCallback(async (email, password) => {
     try {
