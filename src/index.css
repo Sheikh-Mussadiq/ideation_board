@@ -82,6 +82,15 @@
   cursor: wait !important;
 }
 
+
+.task-hover {
+  @apply bg-design-lightPurpleButtonFill text-design-primaryPurple;
+}
+
+.task-hover > div[class*="group-hover:block"] {
+  display: block !important;
+}
+
 /* TipTap Editor Styles */
 .ProseMirror {
   @apply min-h-[100px] px-3 py-2 text-sm text-gray-700 dark:text-design-greyOutlines;

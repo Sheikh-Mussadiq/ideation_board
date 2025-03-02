@@ -512,7 +512,6 @@
 //   );
 // }
 
-
 import React, { useEffect, useState } from "react";
 import { useBoards } from "../context/BoardContext";
 import { useAuth } from "../context/AuthContext";
@@ -604,7 +603,7 @@ const CalendarDay = ({ date, tasks }) => {
       }}
     >
       {format(new Date(date), "d")}
-      {hasTask && (
+      {/* {hasTask && (
         <AnimatePresence>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -632,6 +631,51 @@ const CalendarDay = ({ date, tasks }) => {
             ))}
           </motion.div>
         </AnimatePresence>
+      )}
+       */}
+      {hasTask && (
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-2 w-36">
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="bg-white p-2 rounded-lg shadow-lg border border-design-greyOutlines hidden group-hover:block z-10"
+              style={{ pointerEvents: "auto" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.parentElement.parentElement.classList.add(
+                  "task-hover"
+                );
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.parentElement.parentElement.classList.remove(
+                  "task-hover"
+                );
+              }}
+            >
+              <div className="space-y-1">
+                {dayTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className="text-xs p-1 hover:bg-design-lightPurpleButtonFill rounded transition-colors flex gap-2 items-center justify-center cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/ideation/${task.boardId}`);
+                    }}
+                  >
+                    <div className="font-medium text-design-black truncate">
+                      {task.title}
+                    </div>
+                    <div className="text-design-primaryGrey flex items-center gap-1">
+                      <ChevronRight className="h-3 w-3" />
+                      {task.boardTitle}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
       )}
     </motion.div>
   );
@@ -704,10 +748,13 @@ export default function HomePage() {
           <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
           <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white p-6 rounded-2xl border border-design-greyOutlines animate-pulse">
+            <div
+              key={i}
+              className="bg-white p-6 rounded-2xl border border-design-greyOutlines animate-pulse"
+            >
               <div className="flex items-center gap-4">
                 <div className="p-3 rounded-xl bg-gray-200 h-12 w-12"></div>
                 <div className="space-y-2">
@@ -728,7 +775,15 @@ export default function HomePage() {
         <h1 className="text-3xl font-bold text-design-black">Dashboard</h1>
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-design-primaryPurple/20 flex items-center justify-center">
-            {currentUser.firstName[0]}
+            {currentUser.avatarUrl ? (
+              <img
+                src={currentUser.avatarUrl}
+                alt="avatar"
+                className="h-10 w-10 rounded-xl"
+              />
+            ) : (
+              currentUser.firstName[0]
+            )}
           </div>
           <div>
             <p className="font-medium text-design-black">
