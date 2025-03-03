@@ -305,85 +305,11 @@ export async function createCard(columnId, card, accountId) {
   };
 }
 
-async function uploadFile(file) {
-  const { data, error } = await supabase.storage
-    .from("attachments")
-    .upload(`cards/${file.name}`, file);
 
-  if (error) {
-    console.error("Upload failed:", error);
-    throw error;
-  }
-
-  return data.path; // This gives the file path
-}
-
-function getFileUrl(filePath) {
-  return supabase.storage.from("attachments").getPublicUrl(filePath).data
-    .publicUrl;
-}
-
-export async function updateCard(cardId, updates, accountId) {
+export async function updateCard(cardId, updates) {
   console.log("updates in card service updateCard: ", updates);
 
-  // 1️⃣ Fetch the existing attachments from the database
-
-  if (updates.attachments) {
-    const { data: card, error: fetchError } = await supabase
-      .from("cards")
-      .select("attachments")
-      .eq("id", cardId)
-      .single();
-
-    if (fetchError) throw fetchError;
-
-    const existingAttachments = card?.attachments || [];
-
-    // 2️⃣ Find Deleted Attachments
-    const deletedAttachments = existingAttachments.filter(
-      (oldAttachment) =>
-        !updates.attachments.some(
-          (newAttachment) => newAttachment.id === oldAttachment.id
-        )
-    );
-
-    // 3️⃣ Delete Files from Supabase Storage if Removed
-    for (let attachment of deletedAttachments) {
-      if (attachment.type === "file") {
-        const filePath = `cards/${attachment.name}`;
-        await supabase.storage.from("attachments").remove([filePath]);
-      }
-    }
-
-    // 4️⃣ Find New Attachments (ones that are in updates but not in existing)
-    let newAttachments = updates.attachments.filter(
-      (newAttachment) =>
-        !existingAttachments.some(
-          (oldAttachment) => oldAttachment.id === newAttachment.id
-        )
-    );
-
-    // 5️⃣ Handle File Uploads (for newly added files)
-    for (let attachment of newAttachments) {
-      if (attachment.type === "file" && attachment.url.startsWith("blob:")) {
-        try {
-          const file = await fetch(attachment.url).then((res) => res.blob()); // Convert blob URL to file
-          const filePath = `cards/${attachment.name}`;
-          const { data, error } = await supabase.storage
-            .from("attachments")
-            .upload(filePath, file);
-
-          if (error) throw error;
-
-          attachment.url = supabase.storage
-            .from("attachments")
-            .getPublicUrl(filePath).data.publicUrl;
-        } catch (err) {
-          console.error("File upload failed:", err);
-        }
-      }
-    }
-  }
+ 
   const { error: cardError } = await supabase
     .from("cards")
     .update({
@@ -401,7 +327,7 @@ export async function updateCard(cardId, updates, accountId) {
       attachments: updates.attachments,
       updated_at: new Date().toISOString(),
     })
-    // .eq("account_id", accountId)
+    
     .eq("id", cardId);
 
   if (cardError) throw cardError;
@@ -409,7 +335,7 @@ export async function updateCard(cardId, updates, accountId) {
 
 export async function deleteCard(cardId, accountId) {
   const { error } = await supabase.from("cards").delete().eq("id", cardId);
-  // .eq("account_id", accountId);
+ 
   if (error) throw error;
 }
 
@@ -417,7 +343,6 @@ export const moveCardToColumn = async (
   cardId,
   columnId,
   newPosition,
-  accountId
 ) => {
   const { data, error } = await supabase
     .from("cards")
@@ -431,7 +356,7 @@ export const moveCardToColumn = async (
   return data;
 };
 
-export const updateCardPositions = async (cards, accountId) => {
+export const updateCardPositions = async (cards) => {
   const updates = cards.map((card) =>
     supabase
       .from("cards")
