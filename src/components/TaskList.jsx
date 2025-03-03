@@ -154,7 +154,7 @@ export default function TaskList({ tasks, onStatusChange }) {
   const hasMore = displayedTasks.length < sortedTasks.length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 bg-white p-6 rounded-2xl border border-design-greyOutlines">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-design-black">My Tasks</h2>
         <span className="text-sm text-design-primaryGrey">
@@ -198,4 +198,4 @@ export default function TaskList({ tasks, onStatusChange }) {
       )}
     </div>
   );
-};
+}
