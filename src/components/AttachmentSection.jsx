@@ -701,6 +701,8 @@ export default function AttachmentSection({
   attachments,
   onAddAttachment,
   onDeleteAttachment,
+  boardId,
+  boardTitle,
 }) {
   const [isAddingLink, setIsAddingLink] = useState(false);
   const [newLink, setNewLink] = useState("");
@@ -765,8 +767,8 @@ export default function AttachmentSection({
     try {
       // Generate a unique file path
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-      const filePath = `attachments/${fileName}`;
+      const fileName = `${file.name.substring(0, file.name.lastIndexOf('.')) || file.name}_${Date.now()}.${fileExt}`;
+      const filePath = `${boardTitle} ${boardId}/${fileName}`;
 
       // Upload file to Supabase Storage
       const { data, error } = await supabase.storage

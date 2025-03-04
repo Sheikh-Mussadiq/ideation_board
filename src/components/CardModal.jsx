@@ -388,6 +388,8 @@ export default function CardModal({
                         ),
                       })
                     }
+                    boardId = {boardId}
+                    boardTitle = {boardTitle}
                   />
 
                   {/* Comments */}
