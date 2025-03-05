@@ -395,13 +395,13 @@ export default function CardModal({
                   {/* Comments */}
                   <CommentSection
                     comments={card.comments || []}
-                    userAccountId={currentUser.accountId}
+                    userUserId={currentUser.userId}
                     onAddComment={async (text) => {
                       const newComment = {
                         id: Date.now().toString(),
                         text,
                         author: currentUser.firstName,
-                        account_id: currentUser.accountId,
+                        user_id: currentUser.userId,
                         created_at: new Date().toISOString(),
                       };
                       try {
@@ -414,7 +414,6 @@ export default function CardModal({
                       const updatedComment = {
                         id: commentId,
                         text,
-                        account_id: currentUser.accountId,
                         editedAt: new Date().toISOString(),
                       };
                       try {

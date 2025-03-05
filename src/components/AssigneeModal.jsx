@@ -38,8 +38,7 @@ export default function AssigneeModal({
   const filteredUsers = users.filter(
     (user) =>
       user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
+      user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -162,9 +161,7 @@ export default function AssigneeModal({
                       <p className="font-medium text-design-black">
                         {user.firstName} {user.lastName}
                       </p>
-                      <p className="text-sm text-design-primaryGrey">
-                        {user.email}
-                      </p>
+                      
                     </div>
                   </div>
                   <motion.div
