@@ -1,34 +1,74 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday } from "date-fns";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import {
+  format,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  isSameMonth,
+  isSameDay,
+  isToday,
+  startOfWeek,
+  endOfWeek,
+  parseISO,
+  isWithinInterval,
+  getDay,
+} from "date-fns";
+import {
+  Calendar as CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+  ArrowRight,
+} from "lucide-react";
 
 const priorityColors = {
-  high: "semantic-error",
-  medium: "semantic-warning",
-  low: "semantic-success",
+  high: "bg-semantic-error",
+  medium: "bg-semantic-warning",
+  low: "bg-semantic-success",
 };
 
 const CalendarDay = ({ date, tasks, currentMonth, onTaskClick }) => {
   const isCurrentMonth = isSameMonth(date, currentMonth);
   const isCurrentDate = isToday(date);
-  const dayTasks = tasks.filter((task) => task.due_date && isSameDay(new Date(task.due_date), date));
+
+  // Improve task filtering to handle ISO date strings
+  const dayTasks = tasks.filter((task) => {
+    if (!task.due_date) return false;
+    const taskDate =
+      typeof task.due_date === "string"
+        ? parseISO(task.due_date)
+        : task.due_date;
+    return isSameDay(taskDate, date);
+  });
+
   const hasTask = dayTasks.length > 0;
 
   return (
     <motion.div
-      whileHover={hasTask ? { scale: 1.05 } : {}}
+      whileHover={hasTask ? { scale: 1.05, zIndex: 10 } : {}}
       className={`
         relative p-2 min-h-[60px] rounded-lg transition-all duration-300 group
         ${!isCurrentMonth ? "opacity-30" : ""}
         ${isCurrentDate ? "ring-2 ring-design-primaryPurple ring-offset-2" : ""}
-        ${hasTask ? "bg-design-lightPurpleButtonFill cursor-pointer" : "hover:bg-design-greyBG/50"}
+        ${
+          hasTask
+            ? "bg-design-lightPurpleButtonFill cursor-pointer"
+            : "hover:bg-design-greyBG/50"
+        }
       `}
     >
-      <span className={`
+      <span
+        className={`
         text-sm font-medium block mb-1
-        ${isCurrentDate ? "text-design-primaryPurple" : "text-design-primaryGrey"}
-      `}>
+        ${
+          isCurrentDate
+            ? "text-design-primaryPurple"
+            : "text-design-primaryGrey"
+        }
+      `}
+      >
         {format(date, "d")}
       </span>
 
@@ -38,7 +78,9 @@ const CalendarDay = ({ date, tasks, currentMonth, onTaskClick }) => {
           {dayTasks.slice(0, 2).map((task) => (
             <div
               key={task.id}
-              className={`w-2 h-2 rounded-full bg-${priorityColors[task.priority]}`}
+              className={`w-2 h-2 rounded-full ${
+                priorityColors[task.priority]
+              }`}
             />
           ))}
           {dayTasks.length > 2 && (
@@ -49,16 +91,20 @@ const CalendarDay = ({ date, tasks, currentMonth, onTaskClick }) => {
         </div>
       )}
 
-      {/* Task Preview Popup */}
+      {/* Task Preview Popup - Updated positioning and z-index */}
       {hasTask && (
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-2 w-48 z-20 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto">
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-2 w-48 z-50 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto">
           <AnimatePresence>
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
               transition={{ duration: 0.2 }}
-              className="bg-white rounded-lg shadow-lg border border-design-greyOutlines p-2"
+              className="bg-white rounded-lg shadow-lg border border-design-greyOutlines p-2 relative"
+              style={{
+                backdropFilter: "blur(8px)",
+                backgroundColor: "rgba(255, 255, 255, 0.95)",
+              }}
             >
               <div className="space-y-2">
                 {dayTasks.map((task) => (
@@ -72,7 +118,15 @@ const CalendarDay = ({ date, tasks, currentMonth, onTaskClick }) => {
                       <p className="text-sm font-medium text-design-black truncate">
                         {task.title}
                       </p>
-                      <p className={`text-xs text-${priorityColors[task.priority]}`}>
+                      <p
+                        className={`text-xs ${
+                          task.priority === "high"
+                            ? "text-semantic-error"
+                            : task.priority === "medium"
+                            ? "text-semantic-warning"
+                            : "text-semantic-success"
+                        }`}
+                      >
                         {task.priority}
                       </p>
                     </div>
@@ -92,16 +146,38 @@ export default function Calendar({ tasks, onTaskClick }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
 
-  const days = eachDayOfInterval({
-    start: startOfMonth(currentMonth),
-    end: endOfMonth(currentMonth),
-  });
+  // Get all days for the month view including padding days
+  const getDaysInView = (date) => {
+    const start = startOfWeek(startOfMonth(date));
+    const end = endOfWeek(endOfMonth(date));
+    return eachDayOfInterval({ start, end });
+  };
+
+  const days = getDaysInView(currentMonth);
+
+  // Get tasks for the visible date range
+  const getVisibleTasks = () => {
+    return tasks.filter((task) => {
+      if (!task.due_date) return false;
+      const taskDate =
+        typeof task.due_date === "string"
+          ? parseISO(task.due_date)
+          : task.due_date;
+      return isWithinInterval(taskDate, {
+        start: startOfMonth(currentMonth),
+        end: endOfMonth(currentMonth),
+      });
+    });
+  };
+
+  const visibleTasks = getVisibleTasks();
 
   const handleMonthChange = async (direction) => {
     setIsLoading(true);
-    const newMonth = direction === 'next' 
-      ? addMonths(currentMonth, 1)
-      : subMonths(currentMonth, 1);
+    const newMonth =
+      direction === "next"
+        ? addMonths(currentMonth, 1)
+        : subMonths(currentMonth, 1);
     setCurrentMonth(newMonth);
     setIsLoading(false);
   };
@@ -119,7 +195,7 @@ export default function Calendar({ tasks, onTaskClick }) {
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => handleMonthChange('prev')}
+            onClick={() => handleMonthChange("prev")}
             className="p-1 rounded-lg hover:bg-design-greyBG transition-colors"
             disabled={isLoading}
           >
@@ -131,7 +207,7 @@ export default function Calendar({ tasks, onTaskClick }) {
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => handleMonthChange('next')}
+            onClick={() => handleMonthChange("next")}
             className="p-1 rounded-lg hover:bg-design-greyBG transition-colors"
             disabled={isLoading}
           >
@@ -141,6 +217,7 @@ export default function Calendar({ tasks, onTaskClick }) {
       </div>
 
       <div className="grid grid-cols-7 gap-2">
+        {/* Day headers with better styling */}
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
           <div
             key={day}
@@ -149,11 +226,13 @@ export default function Calendar({ tasks, onTaskClick }) {
             {day}
           </div>
         ))}
-        {days.map((date) => (
+
+        {/* Calendar days with padding */}
+        {days.map((date, index) => (
           <CalendarDay
             key={date.toISOString()}
             date={date}
-            tasks={tasks}
+            tasks={visibleTasks}
             currentMonth={currentMonth}
             onTaskClick={onTaskClick}
           />

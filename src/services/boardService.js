@@ -145,7 +145,6 @@
 
 import { supabase } from "../lib/supabase";
 
-
 export async function fetchBoards() {
   const { data: boards, error: boardsError } = await supabase
     .from("boards")
@@ -220,6 +219,8 @@ export async function fetchBoards() {
         team_id: board.team_id,
         account_id: board.account_id,
         created_by: board.created_by,
+        created_at: board.created_at,
+        updated_at: board.updated_at,
       };
     })
   );
@@ -335,10 +336,10 @@ export async function deleteBoard(boardId) {
 
 export async function fetchBoardLogs(boardId) {
   const { data: logs, error } = await supabase
-    .from('board_logs')
-    .select('*')
-    .eq('board_id', boardId)
-    .order('created_at', { ascending: false });
+    .from("board_logs")
+    .select("*")
+    .eq("board_id", boardId)
+    .order("created_at", { ascending: false });
 
   if (error) throw error;
   return logs;

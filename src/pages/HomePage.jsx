@@ -8,6 +8,7 @@ import {
   Users,
   Layers,
   ArrowRight,
+  ChevronDown,
 } from "lucide-react";
 import { format, isSameDay } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -63,43 +64,162 @@ const StatCard = ({ icon: Icon, title, value, color }) => (
   </motion.div>
 );
 
-const BoardCard = ({ board, teamName, totalCards, onClick }) => (
-  <motion.div
-    initial={{ opacity: 0, x: -20 }}
-    animate={{ opacity: 1, x: 0 }}
-    whileHover={{ scale: 1.02 }}
-    className="bg-white p-4 rounded-xl border border-design-greyOutlines hover:border-design-primaryPurple/30 transition-all cursor-pointer"
-    onClick={onClick}
-  >
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-design-lightPurpleButtonFill">
-          <Layers className="h-5 w-5 text-design-primaryPurple" />
-        </div>
-        <div>
-          <h3 className="font-medium text-design-black">{board.title}</h3>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs text-design-primaryGrey flex items-center gap-1">
-              <ClipboardList className="h-3 w-3" />
-              {totalCards} cards
-            </span>
-            {teamName && (
-              <span className="text-xs text-design-primaryGrey flex items-center gap-1">
-                <Users className="h-3 w-3" />
-                {teamName}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-      <ArrowRight className="h-5 w-5 text-design-primaryGrey" />
-    </div>
-  </motion.div>
+const formatDate = (dateString) => {
+  if (!dateString) return "N/A";
+  try {
+    return format(new Date(dateString), "MMM dd, yyyy");
+  } catch (error) {
+    return "Invalid date";
+  }
+};
+
+// Update the BoardTable component
+const BoardTable = ({ boards, teams, onBoardClick }) => (
+  <div className="overflow-x-auto">
+    <table className="w-full">
+      <thead>
+        <tr className="border-b border-design-greyOutlines">
+          <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
+            Board Name
+          </th>
+          <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
+            Team
+          </th>
+          <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
+            Total Cards
+          </th>
+          <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
+            Completed
+          </th>
+          <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
+            Created At
+          </th>
+          <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
+            Last Updated
+          </th>
+          <th className="text-left p-3 text-sm font-medium text-design-primaryGrey"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {boards.map((board) => {
+          const team = teams.find((team) => team._id === board.team_id);
+          const totalCards = board.columns?.reduce(
+            (acc, col) => acc + (col.cards?.length || 0),
+            0
+          );
+          const completedCards = board.columns?.reduce(
+            (acc, col) =>
+              acc + (col.cards?.filter((card) => card.completed)?.length || 0),
+            0
+          );
+
+          return (
+            <motion.tr
+              key={board.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              whileHover={{ backgroundColor: "rgba(124, 58, 237, 0.05)" }}
+              onClick={() => onBoardClick(board.id)}
+              className="border-b border-design-greyOutlines cursor-pointer"
+            >
+              <td className="p-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-design-lightPurpleButtonFill">
+                    <Layers className="h-5 w-5 text-design-primaryPurple" />
+                  </div>
+                  <span className="font-medium text-design-black">
+                    {board.title}
+                  </span>
+                </div>
+              </td>
+              <td className="p-3">
+                <span className="text-sm text-design-primaryGrey flex items-center gap-1">
+                  <Users className="h-4 w-4" />
+                  {team?.name || "Personal"}
+                </span>
+              </td>
+              <td className="p-3">
+                <span className="text-sm text-design-primaryGrey">
+                  {totalCards}
+                </span>
+              </td>
+              <td className="p-3">
+                <span className="text-sm text-design-primaryGrey">
+                  {completedCards}/{totalCards}
+                </span>
+              </td>
+              <td className="p-3">
+                <span className="text-sm text-design-primaryGrey">
+                  {formatDate(board.created_at)}
+                </span>
+              </td>
+              <td className="p-3">
+                <span className="text-sm text-design-primaryGrey">
+                  {formatDate(board.updated_at)}
+                </span>
+              </td>
+              <td className="p-3 text-right">
+                <ArrowRight className="h-5 w-5 text-design-primaryGrey inline-block" />
+              </td>
+            </motion.tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
 );
 
+const BoardDropdown = ({ boards, selectedBoard, onBoardSelect }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 px-4 py-2 rounded-xl border border-design-greyOutlines hover:border-design-primaryPurple/30 transition-all"
+      >
+        <Layers className="h-5 w-5 text-design-primaryPurple" />
+        <span className="font-medium text-design-black">
+          {selectedBoard ? selectedBoard.title : "All Boards"}
+        </span>
+        <ChevronDown className="h-4 w-4 text-design-primaryGrey" />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl border border-design-greyOutlines shadow-lg z-50">
+          <div className="p-2">
+            <div
+              className="p-2 rounded-lg cursor-pointer hover:bg-design-lightPurpleButtonFill"
+              onClick={() => {
+                onBoardSelect(null);
+                setIsOpen(false);
+              }}
+            >
+              All Boards
+            </div>
+            {boards.map((board) => (
+              <div
+                key={board.id}
+                className="p-2 rounded-lg cursor-pointer hover:bg-design-lightPurpleButtonFill"
+                onClick={() => {
+                  onBoardSelect(board);
+                  setIsOpen(false);
+                }}
+              >
+                {board.title}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function HomePage() {
-  const { boardsList, loadInitialBoards, isLoading } = useBoards();
+  const { boardsList, loadInitialBoards, isLoading, updateCard } = useBoards();
   const { currentUser, currentUserTeams } = useAuth();
+  const [selectedBoard, setSelectedBoard] = useState(null);
   const [stats, setStats] = useState({
     totalTasks: 0,
     completedTasks: 0,
@@ -115,12 +235,13 @@ export default function HomePage() {
   }, [isLoading, boardsList.length, loadInitialBoards]);
 
   useEffect(() => {
-    // Calculate statistics
     let totalTasks = 0;
     let completedTasks = 0;
     let myTasks = [];
 
-    boardsList.forEach((board) => {
+    const boardsToProcess = selectedBoard ? [selectedBoard] : boardsList;
+
+    boardsToProcess.forEach((board) => {
       board.columns?.forEach((column) => {
         column.cards?.forEach((card) => {
           totalTasks++;
@@ -130,28 +251,19 @@ export default function HomePage() {
               (assignee) => assignee._id === currentUser.userId
             )
           ) {
-            myTasks.push(card);
+            // Add both board ID and board title to the task
+            myTasks.push({
+              ...card,
+              boardId: board.id,
+              boardTitle: board.title,
+            });
           }
         });
       });
     });
-    setStats({ totalTasks, completedTasks, myTasks });
 
-    // Generate calendar days (current month)
-    const today = new Date();
-    const daysInMonth = new Date(
-      today.getFullYear(),
-      today.getMonth() + 1,
-      0
-    ).getDate();
-    const days = Array.from({ length: daysInMonth }, (_, i) =>
-      format(
-        new Date(today.getFullYear(), today.getMonth(), i + 1),
-        "yyyy-MM-dd"
-      )
-    );
-    setCalendarDays(days);
-  }, [boardsList, currentUser]);
+    setStats({ totalTasks, completedTasks, myTasks });
+  }, [boardsList, currentUser, selectedBoard]);
 
   const handleBoardClick = (boardId) => {
     navigate(`/ideation/${boardId}`);
@@ -226,27 +338,11 @@ export default function HomePage() {
             {greeting.text}, {currentUser.firstName}
           </h1>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-design-primaryPurple/20 flex items-center justify-center">
-            {currentUser.avatarUrl ? (
-              <img
-                src={currentUser.avatarUrl}
-                alt="avatar"
-                className="h-10 w-10 rounded-xl"
-              />
-            ) : (
-              currentUser.firstName[0]
-            )}
-          </div>
-          <div>
-            <p className="font-medium text-design-black">
-              {currentUser.firstName} {currentUser.lastName}
-            </p>
-            <p className="text-sm text-design-primaryGrey">
-              {currentUser.email}
-            </p>
-          </div>
-        </div>
+        <BoardDropdown
+          boards={boardsList}
+          selectedBoard={selectedBoard}
+          onBoardSelect={setSelectedBoard}
+        />
       </div>
 
       {/* Statistics */}
@@ -271,70 +367,44 @@ export default function HomePage() {
         />
       </div>
 
-      {/* Calendar and Boards Grid */}
+      {/* Calendar and Tasks Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Calendar */}
-        <div className="space-y-8">
-          <Calendar
-            tasks={stats.myTasks}
-            onTaskClick={(task) => navigate(`/ideation/${task.boardId}`)}
-          />
-        </div>
-        <TaskList
-          tasks={stats.myTasks.map((task) => ({
-            ...task,
-            boardTitle:
-              boardsList.find((board) =>
-                board.columns?.some((col) =>
-                  col.cards?.some((card) => card.id === task.id)
-                )
-              )?.title || "Unknown Board",
-          }))}
-          onStatusChange={(cardId, completed) => {
-            const boardId = boardsList.find((board) =>
-              board.columns?.some((col) =>
-                col.cards?.some((card) => card.id === cardId)
-              )
-            )?.id;
-            if (boardId) {
-              onUpdateCard(cardId, { completed });
+        <Calendar
+          tasks={stats.myTasks}
+          onTaskClick={(task) => {
+            if (task.boardId) {
+              navigate(`/ideation/${task.boardId}`);
             }
           }}
         />
+        <TaskList tasks={stats.myTasks} />
+      </div>
 
-        {/* Boards List */}
+      {/* Full Width Boards Section */}
+      {!selectedBoard && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white p-6 rounded-2xl border border-design-greyOutlines"
+          className="bg-white p-6 rounded-2xl border border-design-greyOutlines w-full"
         >
-          <h2 className="text-lg font-semibold text-design-black mb-4 flex items-center gap-2">
-            <Layers className="h-5 w-5 text-design-primaryPurple" />
-            My Boards
-          </h2>
-          <div className="space-y-3">
-            {boardsList.map((board) => {
-              const team = currentUserTeams.find(
-                (team) => team._id === board.team_id
-              );
-              const totalCards = board.columns?.reduce(
-                (acc, col) => acc + (col.cards?.length || 0),
-                0
-              );
-
-              return (
-                <BoardCard
-                  key={board.id}
-                  board={board}
-                  teamName={team?.name}
-                  totalCards={totalCards}
-                  onClick={() => handleBoardClick(board.id)}
-                />
-              );
-            })}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Layers className="h-5 w-5 text-design-primaryPurple" />
+              <h2 className="text-lg font-semibold text-design-black">
+                My Boards
+              </h2>
+            </div>
+            <span className="text-sm text-design-primaryGrey">
+              {boardsList.length} {boardsList.length === 1 ? "Board" : "Boards"}
+            </span>
           </div>
+          <BoardTable
+            boards={boardsList}
+            teams={currentUserTeams}
+            onBoardClick={handleBoardClick}
+          />
         </motion.div>
-      </div>
+      )}
     </div>
   );
 }

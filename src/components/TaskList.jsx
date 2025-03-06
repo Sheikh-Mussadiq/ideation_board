@@ -29,7 +29,7 @@ const priorityConfig = {
   },
 };
 
-const TaskCard = ({ task, onStatusChange }) => {
+const TaskCard = ({ task }) => {
   const navigate = useNavigate();
   const PriorityIcon = priorityConfig[task.priority]?.icon || Clock;
 
@@ -49,17 +49,13 @@ const TaskCard = ({ task, onStatusChange }) => {
       exit={{ opacity: 0, y: -20 }}
       whileHover={{ scale: 1.02 }}
       onClick={() => navigate(`/ideation/${task.boardId}`)}
-      className="bg-white rounded-xl border border-design-greyOutlines p-4 hover:shadow-md transition-all cursor-pointer group"
+      className="bg-white rounded-xl border border-design-greyOutlines p-3.5 hover:shadow-md transition-all cursor-pointer group"
     >
       <div className="flex items-start gap-4">
         {/* Status Toggle */}
         <motion.button
           whileHover={{ scale: 1.2 }}
           whileTap={{ scale: 0.9 }}
-          onClick={(e) => {
-            e.stopPropagation();
-            onStatusChange(task.id, !task.completed);
-          }}
           className="mt-1"
         >
           {task.completed ? (
@@ -133,9 +129,6 @@ const TaskCard = ({ task, onStatusChange }) => {
 };
 
 export default function TaskList({ tasks, onStatusChange }) {
-  const [page, setPage] = useState(1);
-  const itemsPerPage = 5;
-
   // Sort tasks by due date and priority
   const sortedTasks = [...tasks].sort((a, b) => {
     // First sort by due date
@@ -150,15 +143,16 @@ export default function TaskList({ tasks, onStatusChange }) {
     return priorityOrder[a.priority] - priorityOrder[b.priority];
   });
 
-  const displayedTasks = sortedTasks.slice(0, page * itemsPerPage);
-  const hasMore = displayedTasks.length < sortedTasks.length;
+  // Only take the first 4 tasks
+  const displayedTasks = sortedTasks.slice(0, 4);
 
   return (
-    <div className="space-y-4 bg-white p-6 rounded-2xl border border-design-greyOutlines">
+    <div className="space-y-4 bg-white p-6 rounded-2xl border border-design-greyOutlines h-[calc(100%-0.5rem)]">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-design-black">My Tasks</h2>
         <span className="text-sm text-design-primaryGrey">
-          {sortedTasks.length} tasks
+          Showing {Math.min(4, sortedTasks.length)} of {sortedTasks.length}{" "}
+          tasks
         </span>
       </div>
 
@@ -185,17 +179,6 @@ export default function TaskList({ tasks, onStatusChange }) {
           </div>
         )}
       </AnimatePresence>
-
-      {hasMore && (
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setPage(page + 1)}
-          className="w-full py-2 text-sm text-design-primaryPurple hover:bg-design-lightPurpleButtonFill rounded-lg transition-colors"
-        >
-          Load More Tasks
-        </motion.button>
-      )}
     </div>
   );
 }

@@ -26,11 +26,17 @@ export default function CommentSection({
   const { currentUser } = useAuth();
   const inputRef = useRef(null);
 
+  const adjustTextareaHeight = (element) => {
+    element.style.height = "auto";
+    element.style.height = Math.min(element.scrollHeight, 150) + "px"; // Max height of 150px
+  };
+
   const handleInputChange = (e) => {
     const value = e.target.value;
     const position = e.target.selectionStart;
     setNewComment(value);
     setCursorPosition(position);
+    adjustTextareaHeight(e.target);
 
     // Find the word being typed at current cursor position
     const textBeforeCursor = value.slice(0, position);
@@ -179,19 +185,25 @@ export default function CommentSection({
 
       <div className="relative">
         <form onSubmit={handleSubmit} className="group">
-          <div className="relative transition-all duration-200 focus-within:scale-[1.01]">
-            <input
+          <div className="flex gap-2 transition-all duration-200 focus-within:scale-[1.01]">
+            <textarea
               ref={inputRef}
-              type="text"
               value={newComment}
               onChange={handleInputChange}
               placeholder="Add a comment... (Use @ to mention)"
-              className="w-full px-4 py-3 rounded-xl border-2 border-design-greyOutlines/50 focus:border-design-primaryPurple focus:ring-0 dark:bg-design-black/50 dark:border-design-greyOutlines/20 placeholder:text-design-primaryGrey/50"
+              rows={1}
+              className="flex-1 px-4 py-3 rounded-xl border-2 border-design-greyOutlines/50 focus:border-design-primaryPurple focus:ring-0 dark:bg-design-black/50 dark:border-design-greyOutlines/20 placeholder:text-design-primaryGrey/50 min-h-[48px] max-h-[150px] resize-none overflow-auto scrollbar-none"
+              style={{
+                height: "auto",
+                overflowY: "auto",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
             />
             <button
               type="submit"
               disabled={!newComment.trim()}
-              className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-design-primaryPurple text-white rounded-lg font-medium shadow-lg hover:shadow-design-primaryPurple/25 disabled:opacity-50 disabled:hover:shadow-none transition-all duration-200 hover:scale-105 disabled:scale-100"
+              className="h-12 px-4 bg-design-primaryPurple text-white rounded-xl font-medium shadow-lg hover:shadow-design-primaryPurple/25 disabled:opacity-50 disabled:hover:shadow-none transition-all duration-200 hover:scale-105 disabled:scale-100 self-start"
             >
               Send
             </button>
