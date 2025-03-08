@@ -85,7 +85,11 @@ export default function IdeationPage() {
   }, [boardId]);
 
   useEffect(() => {
-    if (!selectedBoard?.team_id) return;
+    if (!selectedBoard?.team_id)
+      {
+        setTeamUsers([]);
+        return;
+      };
 
     const team = currentUserTeams.find(
       (team) => team._id === selectedBoard.team_id
@@ -97,7 +101,7 @@ export default function IdeationPage() {
     );
 
     setTeamUsers(filteredUsers);
-  }, [selectedBoard, currentUserTeams, currentUserUsers]);
+  }, [selectedBoard?.team_id]);
 
   const handleBoardChange = async (payload) => {
     // If it's a delete event, just remove the board from state

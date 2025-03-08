@@ -49,14 +49,14 @@ const BoardSection = React.memo(
             <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-design-primaryGrey" />
           </div>
         </div>
-        <div className="space-y-1 max-h-40 overflow-y-auto scrollbar-hide">
+        <div className="space-y-1 max-h-40 overflow-y-auto over-">
           {boards.length > 0 ? (
             boards.map((board) => (
               <motion.button
                 key={board.id}
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                className="flex items-center w-full px-3 py-1.5 text-sm text-design-primaryGrey hover:bg-design-primaryPurple/10 hover:text-design-primaryPurple rounded-lg transition-all duration-200 ml-3"
+                className="flex items-center w-[90%] px-3 py-1.5 text-sm break-all text-left text-design-primaryGrey hover:bg-design-primaryPurple/10 hover:text-design-primaryPurple rounded-lg transition-all duration-200 ml-3"
                 onClick={() => navigate(`/ideation/${board.id}`)}
               >
                 {board.title}
