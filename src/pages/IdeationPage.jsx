@@ -7,18 +7,19 @@ import {
   PointerSensor,
 } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
-import { Plus, ChevronDown, Trash2, Clock } from "lucide-react";
+import { Plus, ChevronDown, Trash2, Clock, ClipboardList } from "lucide-react";
 import toast from "react-hot-toast";
 import KanbanColumn from "../components/KanbanColumn";
 import KanbanCard from "../components/KanbanCard";
-import ResetDataButton from "../components/ResetDataButton";
 import DeleteBoardModal from "../components/DeleteBoardModal";
-import TeamAssignmentModal from "../components/TeamAssignmentModal";
+import BoardSharingModal from "../components/BoardSharingModal";
 import BoardLogs from "../components/BoardLogs";
 import {
   assignBoardToTeam,
   fetchBoards,
   unassignBoardFromTeam,
+  shareWithUsers,
+  removeSharedUsers,
 } from "../services/boardService";
 import {
   createCard,
@@ -45,9 +46,17 @@ import LoadingShimmer from "../components/LoadingShimmer";
 import Tooltip from "../components/Tooltip";
 import { useBoards } from "../context/BoardContext";
 import { supabase } from "../lib/supabase";
+import { assigneeEmailService } from "../services/emailService";
 
 export default function IdeationPage() {
-  const { boardsList, isLoading: boardsLoading, loadInitialBoards, updateBoardsList, addBoard, removeBoardFromList } = useBoards();
+  const {
+    boardsList,
+    isLoading: boardsLoading,
+    loadInitialBoards,
+    updateBoardsList,
+    addBoard,
+    removeBoardFromList,
+  } = useBoards();
   const [selectedBoardId, setSelectedBoardId] = useState(null);
   const [activeCard, setActiveCard] = useState(null);
   const [isAddingBoard, setIsAddingBoard] = useState(false);
@@ -57,13 +66,13 @@ export default function IdeationPage() {
   const [loading, setLoading] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const [isLogsOpen, setIsLogsOpen] = useState(false);
   const { currentUser, currentUserUsers, currentUserTeams, authUser } =
     useAuth();
   const activeUsers = usePresenceBroadcast(selectedBoardId, currentUser);
-  const selectedBoard = boardsList.find((board) => board.id === selectedBoardId);
+  const selectedBoard = boardsList.find(
+    (board) => board.id === selectedBoardId
+  );
   const [teamUsers, setTeamUsers] = useState([]);
   const navigate = useNavigate();
   const { boardId } = useParams();
@@ -77,7 +86,7 @@ export default function IdeationPage() {
   );
 
   useEffect(() => {
-      loadInitialBoards();
+    loadInitialBoards();
   }, []);
 
   useEffect(() => {
@@ -85,29 +94,49 @@ export default function IdeationPage() {
   }, [boardId]);
 
   useEffect(() => {
-    if (!selectedBoard?.team_id)
-      {
-        setTeamUsers([]);
-        return;
-      };
+    if (!selectedBoard) {
+      setTeamUsers([]);
+      return;
+    }
 
-    const team = currentUserTeams.find(
-      (team) => team._id === selectedBoard.team_id
-    );
-    if (!team) return;
+    let allowedUsers = new Set();
 
+    if (selectedBoard.team_id) {
+      // If board has team_id, include team users and admins
+      const team = currentUserTeams.find(
+        (team) => team._id === selectedBoard.team_id
+      );
+      if (team) {
+        team.users.forEach((userId) => allowedUsers.add(userId));
+      }
+      // Add admins when board has team_id
+      currentUserUsers
+        .filter((user) => user.role === "ADMIN")
+        .forEach((admin) => allowedUsers.add(admin._id));
+    } else if (selectedBoard.shared_users) {
+      // If no team_id but has shared users, only include shared users
+      selectedBoard.shared_users.forEach((userId) => allowedUsers.add(userId));
+    }
+
+    // Filter currentUserUsers based on allowed users
     const filteredUsers = currentUserUsers.filter((user) =>
-      team.users.includes(user._id)
+      allowedUsers.has(user._id)
     );
 
     setTeamUsers(filteredUsers);
-  }, [selectedBoard?.team_id]);
+  }, [
+    selectedBoard?.team_id,
+    selectedBoard?.shared_users,
+    currentUserTeams,
+    currentUserUsers,
+    selectedBoard,
+  ]);
 
   const handleBoardChange = async (payload) => {
     // If it's a delete event, just remove the board from state
     if (payload?.type === "DELETE") {
       updateBoardsList(boardsList.filter((board) => board.id !== payload.id));
-      
+
       // If the deleted board was selected, select another board
       if (selectedBoardId === payload.id) {
         const remainingBoards = boardsList.filter(
@@ -123,19 +152,40 @@ export default function IdeationPage() {
       }
       return;
     }
-    
+
     // For other changes, update the board in the list
     const updatedBoards = await fetchBoards();
     updateBoardsList(updatedBoards);
   };
 
+  // useEffect(() => {
+  //   if (boardsList.length > 0 && !boardsLoading) {
+  //     if (boardId) {
+  //       // If URL has boardId, verify it exists and select it
+  //       const boardExists = boardsList.some((board) => board.id === boardId);
+  //       if (boardExists) {
+  //         setSelectedBoardId(boardId);
+  //       } else {
+  //         // If board doesn't exist, select first board and update URL
+  //         setSelectedBoardId(boardsList[0].id);
+  //         navigate(`/ideation/${boardsList[0].id}`);
+  //       }
+  //     } else {
+  //       // No boardId in URL, select first board and update URL
+  //       setSelectedBoardId(boardsList[0].id);
+  //       navigate(`/ideation/${boardsList[0].id}`);
+  //     }
+  //   }
+  // }, [boardsList, boardsLoading, boardId, navigate]);
+
   useEffect(() => {
-    if (boardsList.length > 0 && !boardsLoading) {
-      if (boardId) {
+    if (!boardsLoading) {
+      if (boardsList.length === 0) {
+        // If there are no boards, navigate to /ideation
+        navigate("/ideation");
+      } else if (boardId) {
         // If URL has boardId, verify it exists and select it
-        const boardExists = boardsList.some(
-          (board) => board.id === boardId
-        );
+        const boardExists = boardsList.some((board) => board.id === boardId);
         if (boardExists) {
           setSelectedBoardId(boardId);
         } else {
@@ -157,7 +207,7 @@ export default function IdeationPage() {
   };
 
   const handleCardChange = (updatedCard) => {
-    updateBoardsList(prevBoards => {
+    updateBoardsList((prevBoards) => {
       // Find the card's current location in any column
       let sourceColumnId;
       let cardFound = false;
@@ -216,7 +266,7 @@ export default function IdeationPage() {
 
   const handleColumnChange = (updatedColumn) => {
     if (updatedColumn.type === "DELETE") {
-      updateBoardsList(prev =>
+      updateBoardsList((prev) =>
         prev.map((board) => ({
           ...board,
           columns: board.columns.filter((col) => col.id !== updatedColumn.id),
@@ -225,7 +275,7 @@ export default function IdeationPage() {
       return;
     }
 
-    updateBoardsList(prev =>
+    updateBoardsList((prev) =>
       prev.map((board) => {
         if (board.id === updatedColumn.board_id) {
           const existingColumnIndex = board.columns.findIndex(
@@ -260,7 +310,7 @@ export default function IdeationPage() {
 
   const handleCommentChange = (updatedComment, eventType) => {
     if (eventType === "DELETE") {
-      updateBoardsList(prev =>
+      updateBoardsList((prev) =>
         prev.map((board) => ({
           ...board,
           columns: board.columns.map((col) => ({
@@ -279,7 +329,7 @@ export default function IdeationPage() {
       return;
     }
 
-    updateBoardsList(prev =>
+    updateBoardsList((prev) =>
       prev.map((board) => ({
         ...board,
         columns: board.columns.map((col) => ({
@@ -342,50 +392,6 @@ export default function IdeationPage() {
     }
   };
 
-  const handleAssignBoardToTeam = async (teamId) => {
-    try {
-      setLoading(true);
-      await assignBoardToTeam(selectedBoardId, teamId);
-      
-      updateBoardsList(prev =>
-        prev.map((board) =>
-          board.id === selectedBoardId ? { ...board, team_id: teamId } : board
-        )
-      );
-
-      toast.success("Board assigned to team successfully");
-      setIsTeamModalOpen(false);
-      setSelectedTeam(null);
-    } catch (error) {
-      console.error("Error assigning board to team:", error);
-      toast.error("Failed to assign board to team");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUnassignBoardFromTeam = async (teamId) => {
-    try {
-      setLoading(true);
-      await unassignBoardFromTeam(selectedBoardId);
-
-      updateBoardsList(prev =>
-        prev.map((board) =>
-          board.id === selectedBoardId ? { ...board, team_id: null } : board
-        )
-      );
-      
-      toast.success("Board unassigned from team successfully");
-      setIsTeamModalOpen(false);
-      setSelectedTeam(null);
-    } catch (error) {
-      console.error("Error unassigning board from team:", error);
-      toast.error("Failed to unassign board from team");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleDeleteBoard = async () => {
     if (!selectedBoardId) return;
 
@@ -394,7 +400,9 @@ export default function IdeationPage() {
       await removeBoardFromList(selectedBoardId);
 
       // Find next available board
-      const nextBoard = boardsList.find((board) => board.id !== selectedBoardId);
+      const nextBoard = boardsList.find(
+        (board) => board.id !== selectedBoardId
+      );
       if (nextBoard) {
         setSelectedBoardId(nextBoard.id);
         navigate(`/ideation/${nextBoard.id}`);
@@ -422,15 +430,15 @@ export default function IdeationPage() {
           newColumnTitle.trim(),
           currentUser.accountId
         );
-        
-        updateBoardsList(prev =>
+
+        updateBoardsList((prev) =>
           prev.map((board) =>
             board.id === selectedBoardId
               ? { ...board, columns: [...board.columns, newColumn] }
               : board
           )
         );
-        
+
         setNewColumnTitle("");
         setIsAddingColumn(false);
         toast.success("Column added successfully");
@@ -450,7 +458,7 @@ export default function IdeationPage() {
       setLoading(true);
       await deleteColumn(columnId, currentUser.accountId);
 
-      updateBoardsList(prev =>
+      updateBoardsList((prev) =>
         prev.map((board) =>
           board.id === selectedBoardId
             ? {
@@ -460,7 +468,7 @@ export default function IdeationPage() {
             : board
         )
       );
-      
+
       toast.success("Column deleted successfully");
     } catch (error) {
       console.error("Error deleting column:", error);
@@ -474,8 +482,8 @@ export default function IdeationPage() {
     try {
       setLoading(true);
       await updateColumn(columnId, updates, currentUser.accountId);
-      
-      updateBoardsList(prev =>
+
+      updateBoardsList((prev) =>
         prev.map((board) => ({
           ...board,
           columns: board.columns.map((col) =>
@@ -483,7 +491,7 @@ export default function IdeationPage() {
           ),
         }))
       );
-      
+
       toast.success("Column updated successfully");
     } catch (error) {
       console.error("Error updating column:", error);
@@ -510,7 +518,7 @@ export default function IdeationPage() {
         currentUser.accountId
       );
 
-      updateBoardsList(prev => {
+      updateBoardsList((prev) => {
         const updatedBoards = prev.map((board) => ({
           ...board,
           columns: board.columns.map((col) => {
@@ -537,7 +545,7 @@ export default function IdeationPage() {
         }));
         return updatedBoards;
       });
-      
+
       toast.success("Card added successfully");
     } catch (error) {
       console.error("Error adding card:", error);
@@ -565,7 +573,7 @@ export default function IdeationPage() {
       await updateCard(cardId, updates, currentUser.accountId);
 
       // Update the boards state with the new card data
-      updateBoardsList(prev =>
+      updateBoardsList((prev) =>
         prev.map((board) => ({
           ...board,
           columns: board.columns.map((col) => ({
@@ -581,8 +589,8 @@ export default function IdeationPage() {
       if (updates.assignee && updates.assignee.length > 0 && oldCard) {
         // Extract _id values from the old card's assignee list (assuming they are objects)
         const oldAssigneeIds = Array.isArray(oldCard.assignee)
-        ? oldCard.assignee.map((user) => user._id)
-        : [];
+          ? oldCard.assignee.map((user) => user._id)
+          : [];
 
         // Filter updates.assignee to only include truly new IDs
         const newAssignees = updates.assignee.filter(
@@ -592,9 +600,17 @@ export default function IdeationPage() {
         // Use the new title if provided; otherwise fallback to the old card title
         const cardTitle = updates.title || oldCard.title;
 
+        assigneeEmailService(
+          newAssignees,
+          currentUser.firstName,
+          cardTitle,
+          selectedBoardId,
+          selectedBoard.title
+        );
         // Create notifications for the new assignees
         for (const user of newAssignees) {
           try {
+            console.log("Creating notification for user:", user);
             await supabase.from("notifications").insert([
               {
                 user_id: user._id,
@@ -623,8 +639,8 @@ export default function IdeationPage() {
     try {
       setLoading(true);
       await deleteCard(cardId, currentUser.accountId);
-      
-      updateBoardsList(prev =>
+
+      updateBoardsList((prev) =>
         prev.map((board) => ({
           ...board,
           columns: board.columns.map((col) => ({
@@ -633,7 +649,7 @@ export default function IdeationPage() {
           })),
         }))
       );
-      
+
       toast.success("Card deleted successfully");
     } catch (error) {
       console.error("Error deleting card:", error);
@@ -646,8 +662,8 @@ export default function IdeationPage() {
   const handleArchiveCard = async (cardId) => {
     try {
       await updateCard(cardId, { archived: true }, currentUser.accountId);
-      
-      updateBoardsList(prev =>
+
+      updateBoardsList((prev) =>
         prev.map((board) => ({
           ...board,
           columns: board.columns.map((col) => ({
@@ -658,7 +674,7 @@ export default function IdeationPage() {
           })),
         }))
       );
-      
+
       toast.success("Card archived successfully");
     } catch (error) {
       console.error("Error archiving card:", error);
@@ -713,7 +729,7 @@ export default function IdeationPage() {
       : overColumn.cards.length;
 
     try {
-      updateBoardsList(prev => {
+      updateBoardsList((prev) => {
         const updatedBoards = prev.map((board) => ({
           ...board,
           columns: board.columns.map((col) => {
@@ -729,7 +745,9 @@ export default function IdeationPage() {
 
               if (isSameColumn) {
                 const cards = [...col.cards];
-                const oldIndex = cards.findIndex((card) => card.id === active.id);
+                const oldIndex = cards.findIndex(
+                  (card) => card.id === active.id
+                );
                 const [movedCard] = cards.splice(oldIndex, 1);
                 cards.splice(newPosition, 0, movedCard);
                 updatedCards = cards;
@@ -797,14 +815,69 @@ export default function IdeationPage() {
     );
   }
 
+  if (!boardsLoading && boardsList.length === 0) {
+    return (
+      <div className="h-[calc(100vh-4rem)] mt-8 border border-design-greyOutlines rounded-3xl bg-gradient-to-br from-primary-light to-white dark:from-design-black dark:to-design-black p-6">
+        <div className="h-full flex flex-col items-center justify-center">
+          <div className="bg-primary-light/30 p-6 rounded-full mb-6">
+            <ClipboardList className="w-16 h-16 text-primary" />
+          </div>
+          <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-3">
+            No Boards Yet
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-8 text-center max-w-md">
+            Create your first board to start organizing your ideas and tasks in
+            a visual way.
+          </p>
+          {isAddingBoard ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={newBoardTitle}
+                onChange={(e) => setNewBoardTitle(e.target.value)}
+                placeholder="Enter board title..."
+                className="input p-2"
+                autoFocus
+              />
+              <button
+                onClick={handleAddBoard}
+                className="btn-primary"
+                disabled={!newBoardTitle.trim()}
+              >
+                Create
+              </button>
+              <button
+                onClick={() => {
+                  setIsAddingBoard(false);
+                  setNewBoardTitle("");
+                }}
+                className="btn-ghost"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsAddingBoard(true)}
+              className="btn-primary flex items-center gap-2 px-6 py-3 text-lg animate-bounce"
+            >
+              <Plus className="h-5 w-5" />
+              Create Your First Board
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   // Verify teams have unique IDs before filtering
-  const filteredTeams = currentUserTeams
-    ? currentUserTeams
-        .filter((team) => team && (team._id || team.id)) // Ensure team and ID exists
-        .filter((team) =>
-          team.name.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-    : [];
+  // const filteredTeams = currentUserTeams
+  //   ? currentUserTeams
+  //       .filter((team) => team && (team._id || team.id)) // Ensure team and ID exists
+  //       .filter((team) =>
+  //         team.name.toLowerCase().includes(searchQuery.toLowerCase())
+  //       )
+  //   : [];
 
   return (
     <div className="h-[calc(100vh-4rem)] bg-design-white border border-design-greyOutlines rounded-3xl dark:bg-design-black p-6 flex flex-col mt-8">
@@ -860,56 +933,62 @@ export default function IdeationPage() {
             <button
               onClick={() => setIsTeamModalOpen(true)}
               className={`btn-secondary text-sm ${
-                selectedBoard &&
-                selectedBoard.created_by === authUser.id
+                selectedBoard && selectedBoard.created_by === authUser.id
                   ? ""
                   : "hidden"
               }`}
             >
               <span
                 className={`h-1.5 w-1.5 mr-2  ${
-                  selectedBoard && selectedBoard.team_id
+                  selectedBoard &&
+                  (selectedBoard.team_id ||
+                    selectedBoard?.shared_users?.length > 0)
                     ? "bg-green-400"
                     : "bg-red-400"
                 } rounded-full`}
               ></span>
-              Share with a Team
+              Share Board
             </button>
             <div className="flex -space-x-3">
               {activeUsers.map((user, index) => (
-                <Tooltip key={user.accountId} text={user.firstName}>
-                  <img
-                    src={user.avatarUrl}
-                    alt={user.firstName}
-                    className="w-8 h-8 rounded-full cursor-pointer border-2 border-white shadow-lg"
-                    style={{ zIndex: activeUsers.length - index }} // Ensures correct stacking order
-                  />
+                <Tooltip
+                  key={user.accountId}
+                  text={`${user.firstName} ${user.lastName}`}
+                >
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium text-white bg-design-primaryPurple  cursor-pointer border-2 border-white shadow-lg transition-transform hover:scale-110"
+                    style={{
+                      zIndex: activeUsers.length - index,
+                      backgroundColor: `hsl(${(index * 60) % 360}, 70%, 50%)`, // Creates different colors for each user
+                    }}
+                  >
+                    {`${user.firstName[0]}${user.lastName[0]}`}
+                  </div>
                 </Tooltip>
               ))}
             </div>
           </div>
-          {selectedBoardId &&
-             selectedBoard.created_by === authUser.id && (
-              <div>
-                <Tooltip text={"Delete Board"}>
-                  <button
-                    onClick={() => setIsDeleteModalOpen(true)}
-                    className="btn-ghost p-2 hover:text-semantic-error transition-all"
-                  >
-                    <Trash2 className="h-6 w-6" />
-                  </button>
-                </Tooltip>
+          {selectedBoardId && selectedBoard?.created_by === authUser.id && (
+            <div>
+              <Tooltip text={"Delete Board"}>
+                <button
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  className="btn-ghost p-2 hover:text-semantic-error transition-all"
+                >
+                  <Trash2 className="h-6 w-6" />
+                </button>
+              </Tooltip>
 
-                <Tooltip text={"Board Logs"}>
-                  <button
-                    onClick={() => setIsLogsOpen(true)}
-                    className="btn-ghost p-2 hover:text-semantic-error transition-all"
-                  >
-                    <Clock className="h-6 w-6" />
-                  </button>
-                </Tooltip>
-              </div>
-            )}
+              <Tooltip text={"Board Logs"}>
+                <button
+                  onClick={() => setIsLogsOpen(true)}
+                  className="btn-ghost p-2 hover:text-semantic-error transition-all"
+                >
+                  <Clock className="h-6 w-6" />
+                </button>
+              </Tooltip>
+            </div>
+          )}
         </div>
       </div>
 
@@ -997,21 +1076,14 @@ export default function IdeationPage() {
         onConfirm={handleDeleteBoard}
         boardTitle={selectedBoard?.title || ""}
       />
-      <TeamAssignmentModal
+      <BoardSharingModal
         isOpen={isTeamModalOpen}
-        onClose={() => {
-          setIsTeamModalOpen(false);
-          setSelectedTeam(null);
-          setSearchQuery("");
-        }}
-        teams={filteredTeams}
-        selectedTeam={selectedTeam}
-        onSelectTeam={setSelectedTeam}
-        onAssign={handleAssignBoardToTeam}
-        onUnassign={handleUnassignBoardFromTeam}
-        currentTeamId={selectedBoard?.team_id}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
+        onClose={() => setIsTeamModalOpen(false)}
+        board={selectedBoard}
+        updateBoardsList={updateBoardsList}
+        teams={currentUserTeams}
+        users={currentUserUsers}
+        currentUser={currentUser}
       />
       <BoardLogs
         isOpen={isLogsOpen}

@@ -26,12 +26,11 @@ const StatCard = ({ icon: Icon, title, value, color }) => (
     <div
       className={`absolute inset-0 opacity-15 ${
         {
-          total:
-            "bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-blue-600 via-sky-400 via-cyan-500 to-transparent",
+          total: "bg-gradient-to-r from-blue-600 via-sky-400 to-cyan-500",
           completed:
-            "bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-green-500 via-emerald-400 via-teal-500 to-transparent",
+            "bg-gradient-to-r from-green-500 via-emerald-400 to-teal-500",
           tasks:
-            "bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-violet-600 via-purple-500 via-fuchsia-500 to-transparent",
+            "bg-gradient-to-r from-violet-600 via-purple-500 to-fuchsia-500",
         }[color]
       }`}
     />
@@ -229,10 +228,10 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoading && boardsList.length === 0) {
+    if (!isLoading || boardsList.length === 0) {
       loadInitialBoards();
     }
-  }, [isLoading, boardsList.length, loadInitialBoards]);
+  }, []);
 
   useEffect(() => {
     let totalTasks = 0;
@@ -304,26 +303,101 @@ export default function HomePage() {
   if (isLoading) {
     return (
       <div className="p-8 space-y-8 animate-in fade-in-50">
+        {/* Header Shimmer */}
         <div className="flex items-center justify-between">
-          <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
-          <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+            <div className="h-9 w-64 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+          </div>
+          <div className="h-10 w-40 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
         </div>
 
+        {/* Stats Cards Shimmer */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="bg-white p-6 rounded-2xl border border-design-greyOutlines animate-pulse"
+              className="bg-white p-6 rounded-2xl border border-gray-100 animate-pulse"
             >
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-gray-200 h-12 w-12"></div>
-                <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-24"></div>
-                  <div className="h-6 bg-gray-200 rounded w-12"></div>
+                <div className="h-12 w-12 rounded-xl bg-gray-200 dark:bg-gray-700"></div>
+                <div className="space-y-2 flex-1">
+                  <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div className="h-7 w-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
                 </div>
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Calendar and Tasks Grid Shimmer */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Calendar Shimmer */}
+          <div className="bg-white p-6 rounded-2xl border border-gray-100">
+            <div className="flex items-center justify-between mb-6">
+              <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div className="h-5 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            </div>
+            <div className="grid grid-cols-7 gap-2">
+              {[...Array(35)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-16 rounded-lg bg-gray-100 dark:bg-gray-800 p-2"
+                >
+                  <div className="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tasks List Shimmer */}
+          <div className="bg-white p-6 rounded-2xl border border-gray-100">
+            <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-6"></div>
+            <div className="space-y-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-800"
+                >
+                  <div className="h-4 w-4 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                  <div className="space-y-2 flex-1">
+                    <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    <div className="h-3 w-1/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Boards Table Shimmer */}
+        <div className="bg-white p-6 rounded-2xl border border-gray-100">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <div className="h-5 w-5 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            </div>
+            <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          </div>
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between p-3 border-b border-gray-100"
+              >
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="h-10 w-10 rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+                  <div className="h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                </div>
+                <div className="flex items-center gap-8">
+                  <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div className="h-5 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div className="h-5 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useScrollLock } from "../hooks/useScrollLock";
 
 const LABEL_COLORS = {
   red: {
@@ -38,6 +39,7 @@ const LABEL_COLORS = {
 };
 
 export default function LabelModal({ isOpen, onClose, labels, onUpdate }) {
+  useScrollLock(isOpen);
   const [isAnimating, setIsAnimating] = useState(false);
   const [newLabelText, setNewLabelText] = useState("");
   const [selectedColor, setSelectedColor] = useState("blue");
@@ -71,7 +73,7 @@ export default function LabelModal({ isOpen, onClose, labels, onUpdate }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-[60]">
+    <div className="fixed inset-x-0 top-48 flex items-start justify-center z-[200] mt-4">
       <div
         className="fixed inset-0 bg-black/25 backdrop-blur-sm"
         onClick={handleClose}

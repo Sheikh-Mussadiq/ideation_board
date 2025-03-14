@@ -5,126 +5,74 @@ import React, {
   useState,
   useCallback,
 } from "react";
-import { loginToSocialHub } from "../services/socialhubAuth";
+import { fetchSocialHubDataAndCallBackend } from "../services/socialhubAuth";
 import { supabase } from "../lib/supabase";
-
+import { toast } from "react-hot-toast";
+import { getUserEmailNotification } from "../services/userService";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [authUser, setAuthUser] = useState(null);
-  const [currentUserUsers, setCurrentUserUsers] = useState([
-    {
-      _id: "5cc1b08ad62ec72e8388cb47",
-      userName: "JohnDoe",
-      firstName: "John",
-      lastName: "Doe",
-    },
-    {
-      _id: "5cc1b08ad62ec72e8388cb48",
-      userName: "AliceSmith",
-      firstName: "Alice",
-      lastName: "Smith",
-    },
-    {
-      _id: "5cc1b08ad62ec72e8388cb49",
-      userName: "BobJohnson",
-      firstName: "Bob",
-      lastName: "Johnson",
-    },
-    {
-      _id: "5cc1b08ad62ec72e8378dd3",
-      userName: "MussadiqMehmood",
-      firstName: "Mussadiq",
-      lastName: "Mehmood",
-    },
-    {
-      _id: "5cc1b08ad62ec72e8388cb4",
-      userName: "MukarramNawaz",
-      firstName: "Mukarram",
-      lastName: "Nawaz",
-    },
-  ]);
-  const [currentUserTeams, setCurrentUserTeams] = useState([
-    {
-      _id: "5cc1b08ad62ec72e8388cb50",
-      name: "Solo Admin Team",
-      users: ["5cc1b08ad62ec72e8388cb47"],
-      channels: ["5cc1b08ad62ec72e8388cb51"],
-      createdTime: "2022-02-10T12:00:00.000Z",
-    },
-    {
-      _id: "5cc1b08ad62ec72e8388cb52",
-      name: "Full Team",
-      users: [
-        "5cc1b08ad62ec72e8388cb47",
-        "5cc1b08ad62ec72e8388cb48",
-        "5cc1b08ad62ec72e8378dd3",
-        "5cc1b08ad62ec72e8388cb4",
-      ],
-      channels: ["5cc1b08ad62ec72e8388cb53", "5cc1b08ad62ec72e8388cb54"],
-      createdTime: "2023-06-15T08:30:00.000Z",
-    },
-  ]);
-
+  const [currentUserUsers, setCurrentUserUsers] = useState([]);
+  const [currentUserTeams, setCurrentUserTeams] = useState([]);
+  const [currentUserChannels, setCurrentUserChannels] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const getUserData = async () => {
-    const accessToken = localStorage.getItem("accessToken");
-    const cookies = localStorage.getItem("cookies");
-
-    if (!localStorage.getItem("accessToken")) return;
-    try {
-      const response = await fetch(
-        "http://localhost:5000/api/user/userDataSocialHub",
-        {
-          method: "POST", // Change this to 'GET' if it's a GET request
-          headers: {
-            "Content-Type": "application/json", // Ensure proper content type
-            Accept: "application/json",
-          },
-          body: JSON.stringify({ accessToken, cookieHeader: cookies }), // Remove if using GET request
-        }
-      );
-
-      console.log("from auth context for userData: ", response);
-      if (response.ok) {
-        const userData = await response.json();
-        setCurrentUser(userData);
-        setIsAuthenticated(true);
-      }
-    } catch (error) {
-      console.error("Failed to fetch user data:", error);
-    }
-
-    setIsLoading(false);
-  };
-
-  const getToken = async () => {
+  const getDataAndToken = async () => {
     const jwtResponse = await fetch(
-      "http://localhost:5000/api/auth/generateJWT",
+      `${import.meta.env.VITE_BACKEND_BASE_URL}/api/user/userDataSocialHub`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
+        credentials: "include",
       }
     );
 
     if (jwtResponse.ok) {
-      const { token } = await jwtResponse.json();
-      // localStorage.setItem("supabase_jwt", token);
+      const apiResponse = await jwtResponse.json();
+      console.log("from jwt and all data development: ", apiResponse);
 
-      // **Set the token in Supabase auth**
+      const token = apiResponse.token;
       await supabase.auth.setSession({
         access_token: token,
         refresh_token: token,
       });
 
+      // Set Supabase authenticated user from API response.
       const userData = await supabase.auth.getUser();
       setAuthUser(userData.data.user);
+
+      // Set Supabase authenticated user from API response. Not working for now
+      // const userData = apiResponse.userInfo.sbUser;
+      // setAuthUser(userData);
+
+      const emailPreferance = await getUserEmailNotification(
+        userData.data.user.id
+      );
+      setCurrentUser({
+        ...apiResponse.userInfo,
+        userName: `${apiResponse.userInfo.firstName}_${apiResponse.userInfo.lastName}`,
+        email_preferance: emailPreferance,
+      });
+
+      setCurrentUserTeams(apiResponse.userTeams);
+
+      const updatedUsers = apiResponse.userUsers.map((user) => {
+        const firstNameClean = user.firstName.replace(/\s+/g, "");
+        const lastNameClean = user.lastName.replace(/\s+/g, "");
+        return {
+          ...user,
+          userName: `${firstNameClean}_${lastNameClean}`,
+        };
+      });
+      console.log("after updating users: ", updatedUsers);
+      setCurrentUserUsers(updatedUsers);
+      setCurrentUserChannels(apiResponse.userChannels);
       setIsAuthenticated(true);
       setIsLoading(false);
     } else {
@@ -133,63 +81,109 @@ export function AuthProvider({ children }) {
     }
   };
 
-  useEffect(() => {
-    setCurrentUser({
-      firstName: "Mussadiq",
-      lastName: "Mehmood",
-      email: "Mussadiq@gmail.com",
-      userName: "MussadiqMehmood",
-      accountId: "67a1fdfaff275daed5017dc7",
-      userId: "5cc1b08ad62ec72e8378dd3",
-      role: "ADMIN",
-      avatarUrl:
-        "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50",
-    });
-    getToken();
-
-    // getUserData();
-  }, []);
-
-  // useEffect(() => {
-  //   setCurrentUser({
-  //     firstName: "Mukarram",
-  //     lastName : "Nawaz",
-  //     userName: "MukarramNawaz",
-  //     email: "mukarram@gmail.com",
-  //     accountId: "67a1fdfaff275daed5015bb4",
-  //     userId: "5cc1b08ad62ec72e8388cb4",
-  //     role: "ADMIN",
-  //     avatarUrl:
-  //       "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50",
-  //   });
-  //   getToken();
-
-  //   // getUserData();
-  // }, []);
-
-  const login = useCallback(async (email, password) => {
+  const getToken = async () => {
     try {
-      const response = await loginToSocialHub(email, password);
-      if (response?.accessToken) {
-        console.log("from auth context: ", response);
-        setCurrentUser(response.userData);
-        setIsAuthenticated(true);
-        return true;
-      }
+      const apiResponse = await fetchSocialHubDataAndCallBackend();
+      console.log("from jwt and all data production: ", apiResponse);
 
-      return false;
+      // await supabase.auth.setSession({
+      //   // access_token: token,
+      //   // refresh_token: token,
+      // });
+
+      // Set Supabase authenticated user from API response.
+      // const userData = await supabase.auth.getUser();
+      // setAuthUser(userData.data.user);
+
+      //Set Supabase authenticated user from API response.
+      // await supabase.auth.setSession({
+      //   // access_token: token,
+      //   // refresh_token: token,
+      // });
+
+      // Set Supabase authenticated user from API response.
+      // const userData = await supabase.auth.getUser();
+      // setAuthUser(userData.data.user);
+
+      //Set Supabase authenticated user from API response.
+      const userData = apiResponse.userInfo.sbUser;
+      setAuthUser(userData);
+
+      const emailPreferance = await getUserEmailNotification(userData.id);
+      setCurrentUser({
+        ...apiResponse.userInfo,
+        email_preferance: emailPreferance,
+      });
+
+      setCurrentUserTeams(apiResponse.userTeams);
+
+      const updatedUsers = apiResponse.userUsers.map((user) => {
+        const firstNameClean = user.firstName.replace(/\s+/g, "");
+        const lastNameClean = user.lastName.replace(/\s+/g, "");
+        return {
+          ...user,
+          userName: `${firstNameClean}_${lastNameClean}`,
+        };
+      });
+
+      console.log("after updating users: ", updatedUsers);
+      setCurrentUserUsers(updatedUsers);
+      setCurrentUserChannels(apiResponse.userChannels);
+      setIsAuthenticated(true);
     } catch (error) {
-      console.error("Login error:", error);
-      throw error;
+      toast.error(error.message || "An error occurred while fetching data");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
+    if (import.meta.env.VITE_ENVIORNMENT === "development") {
+      console.log("from development");
+      getDataAndToken();
+    } else {
+      console.log("from production");
+      getToken();
+    }
   }, []);
 
-  const logout = useCallback(() => {
-    setIsAuthenticated(false);
-    setCurrentUser(null);
-    localStorage.removeItem("accessToken");
+  const login = useCallback(async (email, password) => {
+    try {
+      const loginResponse = await fetch(
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/api/user/loginSocialHub`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+          credentials: "include",
+        }
+      );
+
+      const LoginResponse = await loginResponse.json();
+      console.log("from social hub login: ", LoginResponse);
+
+      if (!LoginResponse.success) {
+        // Handle non-200 responses
+        throw new Error("Login failed");
+      }
+
+      if (import.meta.env.VITE_ENVIORNMENT === "development") {
+        console.log("from development");
+        await getDataAndToken();
+      } else {
+        console.log("from production");
+        await getToken();
+      }
+
+      return LoginResponse.success;
+    } catch (error) {
+      toast.error("Login failed");
+      console.error("SocialHub login error:", error);
+      throw error;
+    }
   }, []);
 
   return (
@@ -198,11 +192,11 @@ export function AuthProvider({ children }) {
         isAuthenticated,
         currentUser,
         login,
-        logout,
         isLoading,
         authUser,
         currentUserUsers,
         currentUserTeams,
+        currentUserChannels,
       }}
     >
       {children}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { X, Plus, CheckSquare, Square } from "lucide-react";
+import { useScrollLock } from "../hooks/useScrollLock";
 
 export default function ChecklistModal({
   isOpen,
@@ -9,6 +10,7 @@ export default function ChecklistModal({
   checklist,
   onUpdate,
 }) {
+  useScrollLock(isOpen);
   const [newItemText, setNewItemText] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -54,9 +56,9 @@ export default function ChecklistModal({
   if (!isOpen) return null;
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center z-50">
+    <div className="fixed inset-x-0 top-80 flex items-start justify-center z-[200] mt-4">
       <div
-        className="absolute inset-0 bg-black/25 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/25 backdrop-blur-sm"
         onClick={handleClose}
         style={{
           animation: isAnimating
@@ -66,7 +68,7 @@ export default function ChecklistModal({
       />
 
       <div
-        className="relative w-full max-w-md bg-white rounded-2xl p-8 shadow-xl border border-gray-100"
+        className="relative w-full max-w-md mx-4 bg-white rounded-2xl p-8 shadow-xl border border-gray-100"
         style={{
           animation: isAnimating
             ? "slideIn 0.2s ease-out forwards"

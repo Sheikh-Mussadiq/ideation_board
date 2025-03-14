@@ -16,7 +16,6 @@ export async function createCard(columnId, card, accountId) {
         account_id: accountId,
       },
     ])
-
     .select()
     .single();
 
@@ -24,7 +23,6 @@ export async function createCard(columnId, card, accountId) {
   return {
     ...newCard,
     attachments: [],
-    comments: [],
   };
 }
 

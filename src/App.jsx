@@ -7,15 +7,10 @@ import LoginPage from "./pages/LoginPage";
 import IdeationPage from "./pages/IdeationPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { BoardProvider } from "./context/BoardContext";
-import { SidebarProvider } from './context/SidebarContext';
-
+import { SidebarProvider } from "./context/SidebarContext";
+import NavigateToSocialHubPage from "./pages/NavigateToSocialHubPage";
 import HomePage from "./pages/HomePage";
-
-const LoadingSpinner = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
-  </div>
-);
+import LoadingScreen from "./components/LoadingScreen";
 
 const ProtectedLayout = ({ children }) => (
   <ProtectedRoute>
@@ -23,15 +18,30 @@ const ProtectedLayout = ({ children }) => (
   </ProtectedRoute>
 );
 
+const ProtectedLoginRoute = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+  const isDevelopment = import.meta.env.VITE_ENVIORNMENT === "development";
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/home" replace />;
+  }
+
+  return isDevelopment ? <LoginPage /> : <NavigateToSocialHubPage />;
+};
+
 const AuthenticatedRoutes = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <LoadingScreen />;
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/ideation/login" replace />;
   }
 
   return (
@@ -42,7 +52,7 @@ const AuthenticatedRoutes = () => {
       {/* <Route path="/content/:id" element={<ProtectedLayout><ContentDetailsPage /></ProtectedLayout>} /> */}
       {/* <Route path="/content/search" element={<ProtectedLayout><ContentSearchPage /></ProtectedLayout>} /> */}
       {/* <Route path="/ideation" element={<ProtectedLayout><IdeationPage /></ProtectedLayout>} /> */}
-      <Route path="/" element={<Navigate to="/ideation" replace />} />
+      <Route path="/" element={<Navigate to="/home" replace />} />
       <Route
         path="/ideation"
         element={
@@ -79,7 +89,7 @@ export default function App() {
         <SidebarProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/login" element={<LoginPage />} />
+              <Route path="/ideation/login" element={<ProtectedLoginRoute />} />
               <Route path="/*" element={<AuthenticatedRoutes />} />
             </Routes>
             <Toaster position="top-right" />

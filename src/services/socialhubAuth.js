@@ -1,78 +1,116 @@
-import toast from 'react-hot-toast';
-import { API_CONFIG } from '../config';
+// Example: socialHubService.js (frontend)
+export async function fetchSocialHubDataAndCallBackend() {
+  // 1) Parse cookies from document.cookie (if needed)
+  //    If your domain and SocialHub domain are the same or properly set for cross-domain,
+  //    simply using 'credentials: "include"' in fetch calls should automatically send them.
+  const cookies = document.cookie
+    .split(';')
+    .map(cookie => cookie.trim().split('='))
+    .reduce((acc, [key, val]) => {
+      acc[key] = val;
+      return acc;
+    }, {});
 
-export async function loginToSocialHub(username, password) {
+  const maloonAccessToken = cookies['accesstoken'];
 
-
-  try {
-    const response = await fetch('http://localhost:5000/api/user/loginSocialHub', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({ username, password }),
-    });
-  
-  console.log("from social hub auth: ", response);
-    if (!response.ok) {
-      // Handle non-200 responses
-      const errorData = await response.json();
-      console.error('SocialHub API error:', errorData);
-      throw new Error(errorData.message || 'Login failed');
-    }
-  
-    // Parse the response body
-    const data = await response.json();
-
-    // Store the access token in localStorage
-    if (data.accessToken) {
-      localStorage.setItem('cookies', data.cookies);
-      localStorage.setItem('accessToken', data.accessToken);
-    } else {
-      throw new Error('Access token not found in response');
-    }
-  
-    return data; // Return the data
-  } catch (error) {
-    toast.error('Login failed');
-    console.error('SocialHub login error:', error);
-    throw error;
+  if (!maloonAccessToken) {
+    throw new Error("Missing 'accesstoken' or 'hidden_accesstoken' cookies");
   }
 
-  // try {
-  //   const response = await fetch(`${API_CONFIG.SOCIALHUB_API_URL}/users/login`, {
-  //     method: 'POST',
-  //     headers: API_CONFIG.HEADERS,
-  //     credentials: 'include',
-  //     body: JSON.stringify({ username, password })
-  //   });
+  // 2) Call the 3 SocialHub endpoints from the frontend.
+  //    We append the accesstoken in the query param (like your original code),
+  //    and set 'credentials: "include"' to send cookies automatically.
+  // --- a) User Info ---
 
-  //   if (!response.ok) {
-  //     const errorData = await response.json();
-  //     console.error('SocialHub API error:', errorData);
-  //     throw new Error(JSON.stringify(errorData));
-  //   }
+  const userInfoRes = await fetch(
+    `${import.meta.env.VITE_SOCIALHUB_API_URL}/api2/sb-auth?accesstoken=${maloonAccessToken}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        addon: import.meta.env.VITE_ADDON_NAME
+      }),
+      credentials: "include",
+    }
+  );
 
-  //   // Extract access token from cookies
-  //   const cookies = response.headers.get('set-cookie');
-  //   if (!cookies) {
-  //     throw new Error('No authentication cookies received');
-  //   }
+  console.log('userInfoRes : ', userInfoRes);
+  if (!userInfoRes.ok) {
+    throw new Error("Failed to fetch user info from SocialHub");
+  }
+  const userInfoData = await userInfoRes.json();
+  console.log('userInfoData : ', userInfoData);
 
-  //   const accessToken = cookies
-  //     .split(';')
-  //     .find(cookie => cookie.trim().startsWith('accesstoken='))
-  //     ?.split('=')[1];
+  // --- b) Team Info ---
+  const teamInfoRes = await fetch(
+    `${import.meta.env.VITE_SOCIALHUB_API_URL}/api2/teams?accesstoken=${maloonAccessToken}`,
+    {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Accept': 'application/json' }
+    }
+  );
 
-  //   if (!accessToken) {
-  //     throw new Error('Access token not found in cookies');
-  //   }
+  if (!teamInfoRes.ok) {
+    throw new Error("Failed to fetch team info from SocialHub");
+  }
+  const teamInfoData = await teamInfoRes.json();
 
-  //   return { accessToken };
-  // } catch (error) {
-  //   console.error('SocialHub login error:', error);
-  //   throw error;
-  // }
-  
+  // --- c) User Users Info ---
+  const userUsersInfoRes = await fetch(
+    `${import.meta.env.VITE_SOCIALHUB_API_URL}/api2/users?accesstoken=${maloonAccessToken}`,
+    {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Accept': 'application/json' }
+    }
+  );
+  if (!userUsersInfoRes.ok) {
+    throw new Error("Failed to fetch user-users info from SocialHub");
+  }
+  const userUsersInfoData = await userUsersInfoRes.json();
+
+  // --- d) User Channels Info ---
+  const userChannelsInfoRes = await fetch(
+    `${import.meta.env.VITE_SOCIALHUB_API_URL}/api2/channels?accesstoken=${maloonAccessToken}`,
+    {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Accept': 'application/json' }
+    }
+  );
+  if (!userChannelsInfoRes.ok) {
+    throw new Error("Failed to fetch user-channels info from SocialHub");
+  }
+
+  const userChannelsInfoData = await userChannelsInfoRes.json();
+
+  // 3) After you have all 3 sets of data from SocialHub,
+  //    send them to your backend route that now only deals with Supabase logic.
+ /* const supabaseRes = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/auth/generateJWT`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userInfoData,
+      teamInfoData,
+    }),
+    credentials: 'include'
+  });
+
+  if (!supabaseRes.ok) {
+    throw new Error("Failed to generate JWT in the backend");
+  }
+
+  // 4) Get the final data (including your newly created token, user info, etc.)
+  const supabaseData = await supabaseRes.json();
+*/
+
+  return {
+    userInfo: userInfoData,
+    userTeams: teamInfoData,
+    userUsers: userUsersInfoData,
+    userChannels: userChannelsInfoData
+  };
 }

@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Dialog, Switch, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { X, User, Mail, Shield, Hash, Bell } from "lucide-react";
+import { updateUserData } from "../services/userService";
 
 const UserDetailItem = ({ icon: Icon, label, value }) => (
   <div className="flex items-center gap-3 p-3 bg-design-greyBG/50 hover:bg-design-greyBG/70 rounded-xl transition-all">
@@ -13,9 +14,14 @@ const UserDetailItem = ({ icon: Icon, label, value }) => (
   </div>
 );
 
-export default function SettingsModal({ isOpen, onClose, user }) {
-  const [emailNotifications, setEmailNotifications] = useState(true);
+export default function SettingsModal({ isOpen, onClose, user, userId }) {
+  const [emailNotifications, setEmailNotifications] = useState(user?.email_preferance);
 
+  const handleNotificationToggle = async (checked) => {
+    setEmailNotifications(checked);
+    await updateUserData(checked, userId);
+  };
+  
   return (
     <Transition show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -65,11 +71,11 @@ export default function SettingsModal({ isOpen, onClose, user }) {
                     label="Full Name"
                     value={`${user.firstName} ${user.lastName}`}
                   />
-                  <UserDetailItem
+                  {/* <UserDetailItem
                     icon={User}
                     label="Username"
                     value={user.username}
-                  />
+                  /> */}
                   <UserDetailItem
                     icon={Mail}
                     label="Email"
@@ -101,7 +107,7 @@ export default function SettingsModal({ isOpen, onClose, user }) {
                     </div>
                     <Switch
                       checked={emailNotifications}
-                      onChange={setEmailNotifications}
+                      onChange={handleNotificationToggle}
                       className={`${
                         emailNotifications
                           ? "bg-design-primaryPurple"

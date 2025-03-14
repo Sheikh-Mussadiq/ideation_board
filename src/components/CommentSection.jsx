@@ -4,6 +4,8 @@ import { User, Edit2, Trash2, MessageSquare, ChevronDown } from "lucide-react";
 import { createNotification } from "../services/notificationService";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
+import { mentioningEmailService } from "../services/emailService";
+import toast from "react-hot-toast";
 
 export default function CommentSection({
   comments,
@@ -156,6 +158,15 @@ export default function CommentSection({
       }
 
       setNewComment("");
+
+      mentioningEmailService(
+        mentionedUsers,
+        currentUser.userName,
+        cardTitle,
+        boardId,
+        newComment.trim()
+      );
+
     }
   };
 

@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, UserMinus, Search, Users } from "lucide-react";
+import { useScrollLock } from "../hooks/useScrollLock";
 
 export default function AssigneeModal({
   isOpen,
   onClose,
   users,
-  currentAssignees = [],
+  currentAssignees,
   onAssign,
 }) {
+  useScrollLock(isOpen);
   const [localAssignees, setLocalAssignees] = useState(currentAssignees);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -44,18 +46,20 @@ export default function AssigneeModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.2 }}
-          className="absolute inset-0 z-50 flex items-center justify-center bg-design-black/20 backdrop-blur-[2px]"
-        >
+        <div className="fixed inset-x-0 top-48 flex items-start justify-center z-[200] mt-4">
           <motion.div
-            initial={{ y: 20 }}
-            animate={{ y: 0 }}
-            exit={{ y: 20 }}
-            className="w-[90%] max-w-md bg-white rounded-2xl shadow-lg overflow-hidden"
+            className="fixed inset-0 bg-black/20 backdrop-blur-[2px]"
+            onClick={onClose}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          />
+
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 20, opacity: 0 }}
+            className="w-[90%] max-w-md bg-white rounded-2xl shadow-lg overflow-hidden relative z-[201]"
           >
             {/* Header */}
             <div className="p-4 border-b border-design-greyOutlines bg-design-greyBG/50">
@@ -134,50 +138,62 @@ export default function AssigneeModal({
 
             {/* Users List */}
             <div className="max-h-[40vh] overflow-y-auto p-2 space-y-1">
-              {filteredUsers.map((user) => (
-                <motion.button
-                  key={user._id}
-                  onClick={() => handleUserClick(user)}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  className={`w-full flex items-center justify-between p-3 rounded-lg transition-all ${
-                    isAssigned(user._id)
-                      ? "bg-design-lightPurpleButtonFill text-design-primaryPurple"
-                      : "hover:bg-design-greyBG"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                        isAssigned(user._id)
-                          ? "bg-design-primaryPurple text-white"
-                          : "bg-design-greyBG text-design-primaryGrey"
-                      }`}
-                    >
-                      {user.firstName[0]}
-                      {user.lastName[0]}
-                    </div>
-                    <div className="text-left">
-                      <p className="font-medium text-design-black">
-                        {user.firstName} {user.lastName}
-                      </p>
-                      
-                    </div>
-                  </div>
-                  <motion.div
-                    initial={false}
-                    animate={
-                      isAssigned(user._id) ? { rotate: 360 } : { rotate: 0 }
-                    }
+              {users.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8">
+                  <Users className="w-16 h-16 text-gray-300 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-800 mb-2">
+                    No Team Members Yet
+                  </h3>
+                  <p className="text-gray-500 text-center text-sm max-w-[250px]">
+                    Share this board with a team first to start assigning tasks
+                    to team members
+                  </p>
+                </div>
+              ) : (
+                filteredUsers.map((user) => (
+                  <motion.button
+                    key={user._id}
+                    onClick={() => handleUserClick(user)}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    className={`w-full flex items-center justify-between p-3 rounded-lg transition-all ${
+                      isAssigned(user._id)
+                        ? "bg-design-lightPurpleButtonFill text-design-primaryPurple"
+                        : "hover:bg-design-greyBG"
+                    }`}
                   >
-                    {isAssigned(user._id) ? (
-                      <UserMinus className="h-5 w-5 text-semantic-error" />
-                    ) : (
-                      <Check className="h-5 w-5 text-design-primaryPurple opacity-0 group-hover:opacity-100" />
-                    )}
-                  </motion.div>
-                </motion.button>
-              ))}
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                          isAssigned(user._id)
+                            ? "bg-design-primaryPurple text-white"
+                            : "bg-design-greyBG text-design-primaryGrey"
+                        }`}
+                      >
+                        {user.firstName[0]}
+                        {user.lastName[0]}
+                      </div>
+                      <div className="text-left">
+                        <p className="font-medium text-design-black">
+                          {user.firstName} {user.lastName}
+                        </p>
+                      </div>
+                    </div>
+                    <motion.div
+                      initial={false}
+                      animate={
+                        isAssigned(user._id) ? { rotate: 360 } : { rotate: 0 }
+                      }
+                    >
+                      {isAssigned(user._id) ? (
+                        <UserMinus className="h-5 w-5 text-semantic-error" />
+                      ) : (
+                        <Check className="h-5 w-5 text-design-primaryPurple opacity-0 group-hover:opacity-100" />
+                      )}
+                    </motion.div>
+                  </motion.button>
+                ))
+              )}
             </div>
 
             {/* Footer */}
@@ -202,7 +218,7 @@ export default function AssigneeModal({
               </div>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );

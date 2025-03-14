@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS boards (
     title TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    
 );
 
 -- Create columns table
@@ -29,7 +30,7 @@ CREATE TABLE IF NOT EXISTS cards (
     description TEXT,
     priority TEXT CHECK (priority IN ('low', 'medium', 'high')),
     due_date TIMESTAMPTZ,
-    assignee TEXT,
+    assignee JSONB DEFAULT '[]',
     account_id text NOT NULL,
     labels jsonb NULL ,
     checklist jsonb NULL DEFAULT '[]'::jsonb,
@@ -48,6 +49,7 @@ CREATE TABLE IF NOT EXISTS comments (
     card_id UUID NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
     text TEXT NOT NULL,
     author TEXT NOT NULL,
+    user_id text NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ
 );
@@ -112,3 +114,108 @@ CREATE TRIGGER update_cards_updated_at
 --         SELECT 1 FROM columns WHERE board_id = board_id
 --     );
 -- END $$;
+ALTER TABLE boards ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE cards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE columns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE boards ADD COLUMN created_by UUID REFERENCES auth.users(id);
+ALTER TABLE boards ADD COLUMN team_id TEXT;
+
+CREATE POLICY "Allow any authenticated user to create a board"
+ON boards
+FOR INSERT
+WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Allow only creator to update their board"
+ON boards
+FOR UPDATE
+USING (auth.uid() = created_by);
+
+CREATE POLICY "Allow only creator to delete their board"
+ON boards
+FOR DELETE
+USING (auth.uid() = created_by);
+
+CREATE POLICY "Allow creator or team members to select board"
+ON boards
+FOR SELECT
+USING (
+  auth.uid() = created_by OR
+  boards.team_id IN (SELECT jsonb_array_elements_text(auth.jwt() -> 'teams'))
+);
+
+CREATE POLICY "Allow only creator to assign team to board"
+ON boards
+FOR UPDATE
+USING (auth.uid() = created_by)
+WITH CHECK (team_id IS NOT NULL);
+
+-- Policies for Columns Table
+CREATE POLICY "Allow any authenticated user to create a column"
+ON columns
+FOR INSERT
+WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Allow any authenticated user to update a column"
+ON columns
+FOR UPDATE
+USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Allow any authenticated user to delete a column"
+ON columns
+FOR DELETE
+USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Allow any authenticated user to select a column"
+ON columns
+FOR SELECT
+USING (auth.uid() IS NOT NULL);
+
+-- Policies for Cards Table
+CREATE POLICY "Allow any authenticated user to view cards"
+ON cards
+FOR SELECT
+USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Allow any authenticated user to create a card"
+ON cards
+FOR INSERT
+WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Allow any authenticated user to update a card"
+ON cards
+FOR UPDATE
+USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Allow any authenticated user to delete a card"
+ON cards
+FOR DELETE
+USING (auth.uid() IS NOT NULL);
+
+-- policy for all users can commment
+CREATE POLICY "Allow any authenticated user to select comments" 
+ON public.comments 
+FOR SELECT 
+TO authenticated 
+USING (true);
+
+CREATE POLICY "Allow any authenticated user to insert comments" 
+ON public.comments 
+FOR INSERT 
+TO authenticated 
+WITH CHECK (true);
+
+CREATE POLICY "Allow any authenticated user to update comments" 
+ON public.comments 
+FOR UPDATE 
+TO authenticated 
+USING (true) 
+WITH CHECK (true);
+
+CREATE POLICY "Allow any authenticated user to delete comments" 
+ON public.comments 
+FOR DELETE 
+TO authenticated 
+USING (true);

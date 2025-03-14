@@ -11,7 +11,7 @@ export function usePresenceBroadcast(boardId, currentUser) {
     const channel = supabase.channel(`presence:${boardId}`, {
       config: {
         presence: {
-          key: currentUser.accountId,
+          key: currentUser.email,
         },
       },
     });
@@ -22,9 +22,9 @@ export function usePresenceBroadcast(boardId, currentUser) {
       const users = Object.values(presenceState)
         .flat()
         .map((presence) => ({
-          accountId: presence.key,
+          // email: presence.key,
           firstName: presence.firstName,
-          avatarUrl: presence.avatarUrl,
+          lastName: presence.lastName
         }));
       setActiveUsers(users);
     });
@@ -34,8 +34,7 @@ export function usePresenceBroadcast(boardId, currentUser) {
       if (status === "SUBSCRIBED") {
         await channel.track({
           firstName: currentUser.firstName,
-          accountId: currentUser.accountId,
-          avatarUrl: currentUser.avatarUrl,
+          lastName: currentUser.lastName,
         });
       }
     });

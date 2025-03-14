@@ -30,6 +30,7 @@ import { useAuth } from "../context/AuthContext";
 import RichTextEditor from "./RichTextEditor";
 import Tooltip from "./Tooltip";
 import AssigneeModal from "./AssigneeModal";
+import ShareChannelModal from "./ShareChannelModal";
 
 export default function CardModal({
   isOpen,
@@ -47,8 +48,9 @@ export default function CardModal({
   const [localTitle, setLocalTitle] = useState(card.title);
   const [localDescription, setLocalDescription] = useState(card.description);
   const titleInputRef = useRef(null);
-  const { currentUser } = useAuth();
+  const { currentUser, currentUserChannels } = useAuth();
   const [isAssigneeModalOpen, setIsAssigneeModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   // Update local state when card props change
   useEffect(() => {
@@ -78,9 +80,39 @@ export default function CardModal({
     }
   };
 
-  const handleDescriptionChange = (e) => {
-    setLocalDescription(e.target.value);
-  };
+  const handleShareToSocialHub = async (selectedChannelIds) => {
+    const postData = {
+      title: card.title,
+      description: card.description,
+      attachments: card.attachments,
+      userId: currentUser.userId,
+      userName: currentUser.email,
+      channelIds: selectedChannelIds
+    };
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/cp/post`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(postData)
+      });
+      if (!response.ok) {
+        throw new Error("Failed to create post");
+      }
+  
+      const data = await response.json();
+      toast.success("Successfully shared to selected channels!");
+      console.log("Post created successfully:", data);
+    } catch (error) {
+      toast.error("Failed to share post");
+      console.error("Error creating post:", error);
+    }
+  }
+
+  // const handleDescriptionChange = (e) => {
+  //   setLocalDescription(e.target.value);
+  // };
 
   const handleDescriptionBlur = () => {
     if (localDescription !== card.description) {
@@ -125,12 +157,9 @@ export default function CardModal({
                   </p>
 
                   <div className="flex items-center space-x-2">
-                    <Tooltip text="Share Link" position="left">
+                    <Tooltip text="Share on CP SocialHub" position="left">
                       <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(window.location.href);
-                          toast.success("Link copied to clipboard!");
-                        }}
+                        onClick={() => setIsShareModalOpen(true)}
                         className="p-2 text-gray-400 hover:text-primary rounded-full 
                           hover:bg-primary-light transition-all duration-200 hover:scale-105"
                       >
@@ -444,6 +473,13 @@ export default function CardModal({
                   users={teamUsers}
                   currentAssignees={card.assignee || []}
                   onAssign={(assignee) => onUpdate(card.id, { assignee })}
+                />
+                <ShareChannelModal
+                  isOpen={isShareModalOpen}
+                  onClose={() => setIsShareModalOpen(false)}
+                  channels={currentUserChannels}
+                  activeChannelIds={currentUser.activeChannelIds}
+                  onShare={handleShareToSocialHub}
                 />
               </Dialog.Panel>
             </Transition.Child>
