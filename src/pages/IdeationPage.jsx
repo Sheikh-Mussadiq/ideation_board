@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -7,20 +7,26 @@ import {
   PointerSensor,
 } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
-import { Plus, ChevronDown, Trash2, Clock, ClipboardList } from "lucide-react";
+import {
+  Plus,
+  ChevronDown,
+  Trash2,
+  Clock,
+  ClipboardList,
+  MoreVertical,
+  FolderPlus,
+  Archive,
+  Share2,
+  Upload,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import KanbanColumn from "../components/KanbanColumn";
 import KanbanCard from "../components/KanbanCard";
 import DeleteBoardModal from "../components/DeleteBoardModal";
 import BoardSharingModal from "../components/BoardSharingModal";
 import BoardLogs from "../components/BoardLogs";
-import {
-  assignBoardToTeam,
-  fetchBoards,
-  unassignBoardFromTeam,
-  shareWithUsers,
-  removeSharedUsers,
-} from "../services/boardService";
+import ArchivedCardsModal from "../components/ArchivedCardsModal";
+import { fetchBoards } from "../services/boardService";
 import {
   createCard,
   updateCard,
@@ -33,7 +39,8 @@ import {
   deleteColumn,
   updateColumn,
 } from "../services/columnService";
-import { createNotification } from "../services/notificationService";
+import { importTrelloData } from "../services/importTrelloData";
+// import { createNotification } from "../services/notificationService";
 import { useRealtimeCards } from "../hooks/useRealtimeCards";
 import { useRealtimeColumns } from "../hooks/useRealtimeColumns";
 import { useLoadingCursor } from "../hooks/useLoadingCursor";
@@ -47,6 +54,7 @@ import Tooltip from "../components/Tooltip";
 import { useBoards } from "../context/BoardContext";
 import { supabase } from "../lib/supabase";
 import { assigneeEmailService } from "../services/emailService";
+import Translate from "../components/Translate"; // Import the Translate component
 
 export default function IdeationPage() {
   const {
@@ -67,6 +75,8 @@ export default function IdeationPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
   const [isLogsOpen, setIsLogsOpen] = useState(false);
+  const [isActionsOpen, setIsActionsOpen] = useState(false);
+  const [isArchivedCardsOpen, setIsArchivedCardsOpen] = useState(false);
   const { currentUser, currentUserUsers, currentUserTeams, authUser } =
     useAuth();
   const activeUsers = usePresenceBroadcast(selectedBoardId, currentUser);
@@ -84,6 +94,88 @@ export default function IdeationPage() {
       },
     })
   );
+
+  const fileInputRef = useRef(null);
+
+  const handleTrelloImport = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Add security checks
+    if (file.size > 1 * 1024 * 1024) {
+      // 1MB limit
+      toast.error("File size too large. Maximum size is 1MB.");
+      return;
+    }
+
+    if (file.type !== "application/json") {
+      toast.error("Only JSON files are allowed.");
+      return;
+    }
+
+    try {
+      const fileContent = await file.text();
+      const trelloJson = JSON.parse(fileContent);
+      // // Validate JSON structure before parsing
+      // if (
+      //   !fileContent.includes('"cards"') ||
+      //   !fileContent.includes('"lists"')
+      // ) {
+      //   throw new Error("Invalid Trello file format");
+      // }
+
+      // Basic validation to check if it's a Trello JSON
+      if (
+        !trelloJson.cards ||
+        !trelloJson.lists ||
+        !Array.isArray(trelloJson.cards) ||
+        !Array.isArray(trelloJson.lists)
+      ) {
+        throw new Error("Invalid Trello JSON format");
+      }
+
+      // TODO: Here you would process the Trello JSON and create boards/cards
+      toast.success("Successfully validated Trello JSON");
+
+      const result = await importTrelloData(
+        trelloJson,
+        currentUser.accountId,
+        authUser.id
+      );
+
+      if (result.success) {
+        // Update the boards list with the new board data
+        updateBoardsList((prevBoards) => {
+          const boardIndex = prevBoards.findIndex(
+            (b) => b.id === result.boardId
+          );
+          if (boardIndex >= 0) {
+            // Replace existing board
+            return prevBoards.map((b) =>
+              b.id === result.boardId ? result.board : b
+            );
+          } else {
+            // Add new board
+            return [...prevBoards, result.board];
+          }
+        });
+
+        setSelectedBoardId(result.boardId);
+        navigate(`/ideation/${result.boardId}`);
+        toast.success("Trello JSON imported successfully");
+      } else {
+        console.error("Import failed:", result.error);
+      }
+
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (error) {
+      console.error("Error processing Trello JSON:", error);
+      toast.error("Invalid Trello JSON file");
+    }
+  };
 
   useEffect(() => {
     loadInitialBoards();
@@ -157,26 +249,6 @@ export default function IdeationPage() {
     const updatedBoards = await fetchBoards();
     updateBoardsList(updatedBoards);
   };
-
-  // useEffect(() => {
-  //   if (boardsList.length > 0 && !boardsLoading) {
-  //     if (boardId) {
-  //       // If URL has boardId, verify it exists and select it
-  //       const boardExists = boardsList.some((board) => board.id === boardId);
-  //       if (boardExists) {
-  //         setSelectedBoardId(boardId);
-  //       } else {
-  //         // If board doesn't exist, select first board and update URL
-  //         setSelectedBoardId(boardsList[0].id);
-  //         navigate(`/ideation/${boardsList[0].id}`);
-  //       }
-  //     } else {
-  //       // No boardId in URL, select first board and update URL
-  //       setSelectedBoardId(boardsList[0].id);
-  //       navigate(`/ideation/${boardsList[0].id}`);
-  //     }
-  //   }
-  // }, [boardsList, boardsLoading, boardId, navigate]);
 
   useEffect(() => {
     if (!boardsLoading) {
@@ -799,6 +871,110 @@ export default function IdeationPage() {
     setActiveCard(null);
   };
 
+  const handleRestoreCard = async (cardId, columnId, position) => {
+    try {
+      // Update the board state to include the restored card
+      updateBoardsList((prev) =>
+        prev.map((board) => ({
+          ...board,
+          columns: board.columns.map((col) => {
+            if (col.id === columnId) {
+              // Find the card and update its archived status
+              const cardIndex = col.cards.findIndex((c) => c.id === cardId);
+              if (cardIndex !== -1) {
+                // Card already exists in column, just update archived status
+                return {
+                  ...col,
+                  cards: col.cards.map((c) =>
+                    c.id === cardId ? { ...c, archived: false } : c
+                  ),
+                };
+              } else {
+                // Card not found in column, add it back
+                // We would need the full card details here, which should come from the ArchivedCardsModal
+                return col;
+              }
+            }
+            return col;
+          }),
+        }))
+      );
+
+      toast.success("Card restored successfully");
+    } catch (error) {
+      console.error("Error restoring card:", error);
+      toast.error("Failed to restore card");
+    }
+  };
+
+  const BoardActions = () => {
+    const buttonRef = useRef(null);
+
+    const dropdownItems = [
+      {
+        label: <Translate>Board History</Translate>,
+        icon: <Clock className="h-4 w-4" />,
+        onClick: () => setIsLogsOpen(true),
+        visible: true,
+      },
+      {
+        label: <Translate>Archived Cards</Translate>,
+        icon: <Archive className="h-4 w-4" />,
+        onClick: () => setIsArchivedCardsOpen(true),
+        visible: true,
+      },
+      {
+        label: <Translate>Delete Board</Translate>,
+        icon: <Trash2 className="h-4 w-4 text-semantic-error" />,
+        onClick: () => setIsDeleteModalOpen(true),
+        className: "text-semantic-error",
+        visible: selectedBoard?.created_by === authUser.id,
+      },
+    ];
+
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (buttonRef.current && !buttonRef.current.contains(event.target)) {
+          setIsActionsOpen(false);
+        }
+      };
+
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    return (
+      <div className="relative" ref={buttonRef}>
+        <button
+          onClick={() => setIsActionsOpen(!isActionsOpen)}
+          className="btn-ghost p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+        >
+          <MoreVertical className="h-5 w-5" />
+        </button>
+
+        {isActionsOpen && (
+          <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
+            {dropdownItems
+              .filter((item) => item.visible)
+              .map((item, index) => (
+                <button
+                  key={index}
+                  onClick={item.onClick}
+                  className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${
+                    item.className || ""
+                  }`}
+                >
+                  {item.icon}
+                  {item.label}
+                </button>
+              ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   if (boardsLoading) {
     return (
       <div className="h-[calc(100vh-4rem)] mt-8 border border-design-greyOutlines rounded-3xl bg-gradient-to-br from-primary-light to-white dark:from-design-black dark:to-design-black p-6">
@@ -823,11 +999,13 @@ export default function IdeationPage() {
             <ClipboardList className="w-16 h-16 text-primary" />
           </div>
           <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-3">
-            No Boards Yet
+            <Translate>No Boards Yet</Translate>
           </h2>
           <p className="text-gray-500 dark:text-gray-400 mb-8 text-center max-w-md">
-            Create your first board to start organizing your ideas and tasks in
-            a visual way.
+            <Translate>
+              Create your first board to start organizing your ideas and tasks
+              in a visual way.
+            </Translate>
           </p>
           {isAddingBoard ? (
             <div className="flex items-center gap-2">
@@ -844,7 +1022,7 @@ export default function IdeationPage() {
                 className="btn-primary"
                 disabled={!newBoardTitle.trim()}
               >
-                Create
+                <Translate>Create</Translate>
               </button>
               <button
                 onClick={() => {
@@ -853,31 +1031,42 @@ export default function IdeationPage() {
                 }}
                 className="btn-ghost"
               >
-                Cancel
+                <Translate>Cancel</Translate>
               </button>
             </div>
           ) : (
-            <button
-              onClick={() => setIsAddingBoard(true)}
-              className="btn-primary flex items-center gap-2 px-6 py-3 text-lg animate-bounce"
-            >
-              <Plus className="h-5 w-5" />
-              Create Your First Board
-            </button>
+            <div className="flex flex-col items-center gap-4">
+              <button
+                onClick={() => setIsAddingBoard(true)}
+                className="btn-primary flex items-center gap-2 px-6 py-3 text-lg animate-bounce"
+              >
+                <Plus className="h-5 w-5" />
+                <Translate>Create Your First Board</Translate>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleTrelloImport}
+                  ref={fileInputRef}
+                  className="hidden"
+                  id="trello-import"
+                />
+                <label
+                  htmlFor="trello-import"
+                  className="btn-secondary flex items-center gap-2 cursor-pointer"
+                >
+                  <Upload className="h-5 w-5" />
+                  <Translate> Import from Trello</Translate>
+                </label>
+              </div>
+            </div>
           )}
         </div>
       </div>
     );
   }
-
-  // Verify teams have unique IDs before filtering
-  // const filteredTeams = currentUserTeams
-  //   ? currentUserTeams
-  //       .filter((team) => team && (team._id || team.id)) // Ensure team and ID exists
-  //       .filter((team) =>
-  //         team.name.toLowerCase().includes(searchQuery.toLowerCase())
-  //       )
-  //   : [];
 
   return (
     <div className="h-[calc(100vh-4rem)] bg-design-white border border-design-greyOutlines rounded-3xl dark:bg-design-black p-6 flex flex-col mt-8">
@@ -894,11 +1083,11 @@ export default function IdeationPage() {
                   value={newBoardTitle}
                   onChange={(e) => setNewBoardTitle(e.target.value)}
                   placeholder="Board title..."
-                  className="input p-2"
+                  className="input"
                   autoFocus
                 />
                 <button onClick={handleAddBoard} className="btn-primary">
-                  Add
+                  <Translate>Add</Translate>
                 </button>
                 <button
                   onClick={() => {
@@ -907,29 +1096,45 @@ export default function IdeationPage() {
                   }}
                   className="btn-ghost"
                 >
-                  Cancel
+                  <Translate>Cancel</Translate>
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2 m-2">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsAddingBoard(true)}
-                  className="btn-primary group hover:scale-105 transition-transform"
+                  className="btn-primary group flex items-center gap-2 px-3 py-2 sm:px-4"
                 >
-                  <Plus className="h-4 w-4  group-hover:rotate-90 transition-transform" />
-                  Add Board
+                  <FolderPlus className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                  <span className="hidden sm:inline">
+                    <Translate>Add Board</Translate>
+                  </span>
                 </button>
+
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleTrelloImport}
+                  ref={fileInputRef}
+                  className="hidden"
+                  id="trello-import-header"
+                />
+                <label
+                  htmlFor="trello-import-header"
+                  className="btn-secondary group flex items-center gap-2 px-3 py-2 sm:px-4 cursor-pointer"
+                >
+                  <Upload className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                  <span className="hidden sm:inline">
+                    <Translate>Import Trello</Translate>
+                  </span>{" "}
+                </label>
               </div>
             )}
           </div>
         </div>
 
         <div className="flex items-center justify-between gap-4 mt-4">
-          {" "}
-          {/* Main Div */}
           <div className="flex items-center gap-4">
-            {" "}
-            {/*Team and user Div*/}
             <button
               onClick={() => setIsTeamModalOpen(true)}
               className={`btn-secondary text-sm ${
@@ -939,7 +1144,7 @@ export default function IdeationPage() {
               }`}
             >
               <span
-                className={`h-1.5 w-1.5 mr-2  ${
+                className={`h-1.5 w-1.5 mr-2 ${
                   selectedBoard &&
                   (selectedBoard.team_id ||
                     selectedBoard?.shared_users?.length > 0)
@@ -947,7 +1152,7 @@ export default function IdeationPage() {
                     : "bg-red-400"
                 } rounded-full`}
               ></span>
-              Share Board
+              <Translate>Share Board</Translate>
             </button>
             <div className="flex -space-x-3">
               {activeUsers.map((user, index) => (
@@ -968,27 +1173,7 @@ export default function IdeationPage() {
               ))}
             </div>
           </div>
-          {selectedBoardId && selectedBoard?.created_by === authUser.id && (
-            <div>
-              <Tooltip text={"Delete Board"}>
-                <button
-                  onClick={() => setIsDeleteModalOpen(true)}
-                  className="btn-ghost p-2 hover:text-semantic-error transition-all"
-                >
-                  <Trash2 className="h-6 w-6" />
-                </button>
-              </Tooltip>
-
-              <Tooltip text={"Board Logs"}>
-                <button
-                  onClick={() => setIsLogsOpen(true)}
-                  className="btn-ghost p-2 hover:text-semantic-error transition-all"
-                >
-                  <Clock className="h-6 w-6" />
-                </button>
-              </Tooltip>
-            </div>
-          )}
+          {selectedBoardId && <BoardActions />}
         </div>
       </div>
 
@@ -1029,7 +1214,7 @@ export default function IdeationPage() {
                 />
                 <div className="flex justify-end gap-2 mt-2">
                   <button onClick={handleAddColumn} className="btn-primary">
-                    Add
+                    <Translate>Add</Translate>
                   </button>
                   <button
                     onClick={() => {
@@ -1038,7 +1223,7 @@ export default function IdeationPage() {
                     }}
                     className="btn-ghost"
                   >
-                    Cancel
+                    <Translate>Cancel</Translate>
                   </button>
                 </div>
               </div>
@@ -1048,7 +1233,7 @@ export default function IdeationPage() {
                 className="flex-shrink-0 w-80 bg-design-greyBG/50 backdrop-blur-sm rounded-2xl p-4 flex items-center justify-center text-primary hover:text-primary-hover hover:bg-primary-light/50 transition-all  snap-start group"
               >
                 <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform" />
-                Add Column
+                <Translate>Add Column</Translate>
               </button>
             )}
           </div>
@@ -1089,6 +1274,14 @@ export default function IdeationPage() {
         isOpen={isLogsOpen}
         setIsOpen={setIsLogsOpen}
         board={selectedBoard}
+      />
+      <ArchivedCardsModal
+        isOpen={isArchivedCardsOpen}
+        onClose={() => setIsArchivedCardsOpen(false)}
+        onRestoreCard={() => {
+          setIsArchivedCardsOpen(false);
+        }}
+        boardId={selectedBoardId}
       />
     </div>
   );

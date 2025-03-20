@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { fetchBoardLogs } from "../services/boardService";
 import { formatDistanceToNow } from "date-fns";
+import Translate from "./Translate"; // Import Translate component
 
 const LogShimmer = () => (
   <div className="animate-pulse space-y-4">
@@ -159,7 +160,7 @@ export default function BoardLogs({ isOpen, setIsOpen, board }) {
                       <div className="flex items-center justify-between">
                         <Dialog.Title className="text-lg font-semibold flex items-center gap-2 text-design-black dark:text-design-white">
                           <History className="h-5 w-5 text-design-primaryPurple" />
-                          Activity Log
+                          <Translate>Activity Log</Translate>
                         </Dialog.Title>
                         <button
                           onClick={() => setIsOpen(false)}
@@ -176,11 +177,13 @@ export default function BoardLogs({ isOpen, setIsOpen, board }) {
                             <Listbox.Button className="relative w-full flex items-center gap-2 text-left bg-design-greyBG dark:bg-design-black border border-design-greyOutlines dark:border-design-greyOutlines/20 rounded-xl px-4 py-2.5 hover:bg-design-greyBG/80 dark:hover:bg-design-black/80 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-design-primaryPurple">
                               <Filter className="h-4 w-4 text-design-primaryGrey" />
                               <span className="block truncate text-sm">
-                                {
-                                  filterOptions.find(
-                                    (option) => option.id === filter
-                                  )?.name
-                                }
+                                <Translate>
+                                  {
+                                    filterOptions.find(
+                                      (option) => option.id === filter
+                                    )?.name
+                                  }
+                                </Translate>
                               </span>
                               <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
                                 <ChevronDown
@@ -229,7 +232,7 @@ export default function BoardLogs({ isOpen, setIsOpen, board }) {
                                                 : "font-normal"
                                             }`}
                                           >
-                                            {option.name}
+                                            <Translate>{option.name}</Translate>
                                           </span>
                                         </span>
                                         {selected && (
@@ -262,6 +265,7 @@ export default function BoardLogs({ isOpen, setIsOpen, board }) {
                           placeholder="Search activity logs..."
                           className="w-full pl-10 pr-4 py-2.5 bg-design-greyBG dark:bg-design-black border border-design-greyOutlines dark:border-design-greyOutlines/20 rounded-xl text-sm text-design-black dark:text-design-white placeholder-design-primaryGrey focus:outline-none focus:ring-2 focus:ring-design-primaryPurple transition-all duration-200"
                         />
+                        <span className="sr-only"><Translate>Search activity logs</Translate></span>
                       </div>
                     </div>
 
@@ -270,7 +274,7 @@ export default function BoardLogs({ isOpen, setIsOpen, board }) {
                         <LogShimmer />
                       ) : filteredLogs.length === 0 ? (
                         <div className="text-center text-design-primaryGrey dark:text-design-greyOutlines mt-8">
-                          No activity logs found
+                          <Translate>No activity logs found</Translate>
                         </div>
                       ) : (
                         <div className="space-y-4">

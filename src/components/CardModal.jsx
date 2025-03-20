@@ -15,6 +15,8 @@ import {
   AlertCircle,
   NotebookText,
   UserCircle,
+  Paperclip,
+  MessageSquare,
 } from "lucide-react";
 
 import toast from "react-hot-toast";
@@ -31,6 +33,7 @@ import RichTextEditor from "./RichTextEditor";
 import Tooltip from "./Tooltip";
 import AssigneeModal from "./AssigneeModal";
 import ShareChannelModal from "./ShareChannelModal";
+import Translate from "../components/Translate"; // Import Translate component
 
 export default function CardModal({
   isOpen,
@@ -85,22 +88,26 @@ export default function CardModal({
       title: card.title,
       description: card.description,
       attachments: card.attachments,
+      accountId: currentUser.accountId,
       userId: currentUser.userId,
       userName: currentUser.email,
-      channelIds: selectedChannelIds
+      channelIds: selectedChannelIds,
     };
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_BASE_URL}/api/cp/post`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(postData)
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_BASE_URL}/api/cp/post`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(postData),
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to create post");
       }
-  
+
       const data = await response.json();
       toast.success("Successfully shared to selected channels!");
       console.log("Post created successfully:", data);
@@ -108,7 +115,7 @@ export default function CardModal({
       toast.error("Failed to share post");
       console.error("Error creating post:", error);
     }
-  }
+  };
 
   // const handleDescriptionChange = (e) => {
   //   setLocalDescription(e.target.value);
@@ -157,7 +164,7 @@ export default function CardModal({
                   </p>
 
                   <div className="flex items-center space-x-2">
-                    <Tooltip text="Share on CP SocialHub" position="left">
+                    <Tooltip text="Create draft in CP SocialHub" position="left">
                       <button
                         onClick={() => setIsShareModalOpen(true)}
                         className="p-2 text-gray-400 hover:text-primary rounded-full 
@@ -242,7 +249,7 @@ export default function CardModal({
                       </button>
                       <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 hidden group-hover:block">
                         <div className="bg-gray-800 text-white text-sm py-1 px-2 rounded-md shadow-lg whitespace-nowrap">
-                          Edit Title
+                          <Translate>Edit Title</Translate>
                           <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-gray-800"></div>
                         </div>
                       </div>
@@ -254,7 +261,7 @@ export default function CardModal({
                     <div className="grid grid-cols-2 items-center ">
                       <label className="flex text-base font-medium text-design-primaryGrey">
                         <Calendar className="h-5 w-5 mr-2 text-design-primaryGrey" />
-                        Due Date
+                        <Translate>Due Date</Translate>
                       </label>
                       <DatePicker
                         value={card.due_date}
@@ -264,7 +271,7 @@ export default function CardModal({
                     <div className="grid grid-cols-2 items-center">
                       <label className="flex gap-2 text-base font-medium text-design-primaryGrey">
                         <AlertCircle className="h-5 w-5 text-design-primaryGrey" />
-                        Priority
+                        <Translate>Priority</Translate>
                       </label>
                       <PrioritySelect
                         value={card.priority}
@@ -277,7 +284,7 @@ export default function CardModal({
                     <div className="grid grid-cols-2 items-center ">
                       <label className="flex gap-2 text-base font-medium text-design-primaryGrey">
                         <Tags className="h-5 w-5 text-design-primaryGrey" />
-                        Labels
+                        <Translate>Labels</Translate>
                       </label>
                       <LabelManager
                         labels={card.labels}
@@ -288,7 +295,8 @@ export default function CardModal({
                     <div className="grid grid-cols-2 items-center">
                       <label className="flex gap-2 text-base font-medium text-design-primaryGrey">
                         <UserCircle className="h-5 w-5 text-design-primaryGrey" />
-                        Assignees ({card.assignee?.length || 0})
+                        <Translate>Assignees</Translate> (
+                        {card.assignee?.length || 0})
                       </label>
                       <div className="flex items-center gap-2">
                         <div className="flex flex-wrap gap-2">
@@ -311,7 +319,7 @@ export default function CardModal({
                             </div>
                           ) : (
                             <span className="text-sm text-design-primaryGrey">
-                              No assignees
+                              <Translate>No assignees</Translate>
                             </span>
                           )}
                         </div>
@@ -329,16 +337,8 @@ export default function CardModal({
                   <div className="space-y-2">
                     <label className="flex text-base font-medium text-gray-700 items-center">
                       <NotebookText className="h-5 w-5 mr-2 text-design-primaryGrey" />
-                      Description
+                      <Translate>Description</Translate>
                     </label>
-                    {/* <textarea
-                      value={localDescription}
-                      onChange={handleDescriptionChange}
-                      onBlur={handleDescriptionBlur}
-                      rows={4}
-                      className="w-full rounded-xl bg-design-greyBG/30 border border-gray-200 shadow-sm p-2 focus:border-primary focus:ring-primary resize-none transition-all hover:border-primary dark:bg-design-black/50 dark:border-design-greyOutlines/20"
-                      placeholder="Add a description..."
-                    /> */}
                     <RichTextEditor
                       key={card.id}
                       content={localDescription}
@@ -354,7 +354,11 @@ export default function CardModal({
                         onClick={() => setShowChecklist(!showChecklist)}
                         className="inline-flex items-center px-4 py-2 border border-design-greyOutlines rounded-lg shadow-sm text-sm font-medium text-primary bg-white transition-all hover:scale-105"
                       >
-                        {showChecklist ? "Hide Checklist" : "Show Checklist"}
+                        {showChecklist ? (
+                          <Translate>Hide Checklist</Translate>
+                        ) : (
+                          <Translate>Show Checklist</Translate>
+                        )}
                       </button>
                       {card.checklist && card.checklist.length > 0 && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium bg-button-tertiary-fill text-button-primary-cta dark:bg-button-tertiary-fill/20">
@@ -374,98 +378,89 @@ export default function CardModal({
                         }
                       />
                     )}
-                    {/* <ChecklistModal
-                      isOpen={showChecklist}
-                      onClose={() => setShowChecklist(false)}
-                      checklist={card.checklist || []}
-                      onUpdate={(checklist) => onUpdate(card.id, { checklist })}
-                    /> */}
-                    {/* {!showChecklist && (
-                      <div className="flex items-center justify-between">
-                        <button
-                          onClick={() => setShowChecklist(true)}
-                          className="inline-flex items-center px-4 py-2 border border-design-greyOutlines rounded-lg shadow-sm text-sm font-medium text-primary bg-white transition-all hover:scale-105"
-                        >
-                          Show Checklist
-                        </button>
-                        {card.checklist && card.checklist.length > 0 && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium bg-button-tertiary-fill text-button-primary-cta dark:bg-button-tertiary-fill/20">
-                            <CheckSquare className="h-4 w-4 mr-1" />
-                            {
-                              card.checklist.filter((item) => item.checked)
-                                .length
-                            }
-                            /{card.checklist.length}
-                          </span>
-                        )} */}
-                    {/* </div> */}
-                    {/* )} */}
                   </div>
 
                   {/* Attachments */}
-                  <AttachmentSection
-                    attachments={card.attachments || []}
-                    onAddAttachment={(attachment) =>
-                      onUpdate(card.id, {
-                        attachments: [...(card.attachments || []), attachment],
-                      })
-                    }
-                    onDeleteAttachment={(attachmentId) =>
-                      onUpdate(card.id, {
-                        attachments: (card.attachments || []).filter(
-                          (a) => a.id !== attachmentId
-                        ),
-                      })
-                    }
-                    boardId = {boardId}
-                    boardTitle = {boardTitle}
-                  />
+                  <div className="space-y-3">
+                    <h3 className="flex items-center text-base font-medium text-design-primaryGrey">
+                      <Paperclip className="h-5 w-5 mr-2 text-design-primaryGrey" />
+                      <Translate>Attachments</Translate> (
+                      {card.attachments?.length || 0})
+                    </h3>
+                    <AttachmentSection
+                      attachments={card.attachments || []}
+                      onAddAttachment={(attachment) =>
+                        onUpdate(card.id, {
+                          attachments: [
+                            ...(card.attachments || []),
+                            attachment,
+                          ],
+                        })
+                      }
+                      onDeleteAttachment={(attachmentId) =>
+                        onUpdate(card.id, {
+                          attachments: (card.attachments || []).filter(
+                            (a) => a.id !== attachmentId
+                          ),
+                        })
+                      }
+                      boardId={boardId}
+                      boardTitle={boardTitle}
+                    />
+                  </div>
 
                   {/* Comments */}
-                  <CommentSection
-                    comments={card.comments || []}
-                    userUserId={currentUser.userId}
-                    onAddComment={async (text) => {
-                      const newComment = {
-                        id: Date.now().toString(),
-                        text,
-                        author: currentUser.firstName,
-                        user_id: currentUser.userId,
-                        created_at: new Date().toISOString(),
-                      };
-                      try {
-                        await updateComment("add", card.id, newComment);
-                      } catch (error) {
-                        console.error("Error adding comment:", error);
-                      }
-                    }}
-                    onEditComment={async (commentId, text) => {
-                      const updatedComment = {
-                        id: commentId,
-                        text,
-                        editedAt: new Date().toISOString(),
-                      };
-                      try {
-                        await updateComment("edit", card.id, updatedComment);
-                      } catch (error) {
-                        console.error("Error editing comment:", error);
-                      }
-                    }}
-                    onDeleteComment={async (comment_ID) => {
-                      try {
-                        await updateComment("delete", card.id, {
-                          commentId: comment_ID,
-                          account_id: currentUser.accountId,
-                        });
-                      } catch (error) {
-                        console.error("Error deleting comment:", error);
-                      }
-                    }}
-                    teamUsers={teamUsers}
-                    cardId={card.id}
-                    boardId={boardId}
-                    cardTitle={card.title}
-                  />
+                  <div className="space-y-3">
+                    <h3 className="flex items-center text-base font-medium text-design-primaryGrey">
+                      <MessageSquare className="h-5 w-5 mr-2 text-design-primaryGrey" />
+                      <Translate>Comments</Translate> (
+                      {card.comments?.length || 0})
+                    </h3>
+                    <CommentSection
+                      comments={card.comments || []}
+                      userUserId={currentUser.userId}
+                      onAddComment={async (text) => {
+                        const newComment = {
+                          id: Date.now().toString(),
+                          text,
+                          author: currentUser.firstName,
+                          user_id: currentUser.userId,
+                          created_at: new Date().toISOString(),
+                        };
+                        try {
+                          await updateComment("add", card.id, newComment);
+                        } catch (error) {
+                          console.error("Error adding comment:", error);
+                        }
+                      }}
+                      onEditComment={async (commentId, text) => {
+                        const updatedComment = {
+                          id: commentId,
+                          text,
+                          editedAt: new Date().toISOString(),
+                        };
+                        try {
+                          await updateComment("edit", card.id, updatedComment);
+                        } catch (error) {
+                          console.error("Error editing comment:", error);
+                        }
+                      }}
+                      onDeleteComment={async (comment_ID) => {
+                        try {
+                          await updateComment("delete", card.id, {
+                            commentId: comment_ID,
+                            account_id: currentUser.accountId,
+                          });
+                        } catch (error) {
+                          console.error("Error deleting comment:", error);
+                        }
+                      }}
+                      teamUsers={teamUsers}
+                      cardId={card.id}
+                      boardId={boardId}
+                      cardTitle={card.title}
+                    />
+                  </div>
                 </div>
                 <AssigneeModal
                   isOpen={isAssigneeModalOpen}

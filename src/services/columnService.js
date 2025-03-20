@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import { normalizeSingleResult } from "../lib/helpers";
 
 export async function createColumn(boardId, title, accountId) {
   // Get the highest position number for the current board
@@ -28,9 +29,11 @@ export async function createColumn(boardId, title, accountId) {
 
   if (error) throw error;
 
+  const normalizedColumn = normalizeSingleResult(newColumn);
+
   return {
-    id: newColumn.id,
-    title: newColumn.title,
+    id: normalizedColumn.id,
+    title: normalizedColumn.title,
     cards: [],
   };
 }
@@ -51,5 +54,5 @@ export async function updateColumn(columnId, updates, accountId) {
     .single();
 
   if (error) throw error;
-  return data;
+  return normalizeSingleResult(data);
 }

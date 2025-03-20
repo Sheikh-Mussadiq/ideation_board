@@ -1,6 +1,6 @@
 import { supabase } from "../lib/supabase";
 import { boardShareEmailService } from "./emailService";
-
+import { normalizeSingleResult } from "../lib/helpers";
 export async function fetchBoards() {
   const { data: boards, error: boardsError } = await supabase
     .from("boards")
@@ -45,13 +45,16 @@ export async function fetchBoards() {
 
               return {
                 id: card.id,
+                column_id: card.column_id,
                 title: card.title,
                 description: card.description,
                 priority: card.priority,
-                labels: card.labels || [],
                 due_date: card.due_date,
-                assignee: card.assignee,
-                checklist: card.checklist,
+                assignee: card.assignee || [],
+                account_id: card.account_id,
+                labels: card.labels || [],
+                position: card.position,
+                checklist: card.checklist || [],
                 completed: card.completed,
                 attachments: card.attachments || [],
                 comments: comments || [],
@@ -62,6 +65,8 @@ export async function fetchBoards() {
 
           return {
             id: column.id,
+            board_id: column.board_id,
+            position: column.position,
             title: column.title,
             cards: cardsWithDetails,
           };
@@ -104,7 +109,7 @@ export async function createBoard(title, accountId, userId) {
     .single();
 
   if (boardError) throw boardError;
-
+  const normalizedBoard = normalizeSingleResult(board);
   const defaultColumns = [
     { title: "To Do", position: 0, account_id: accountId },
     { title: "In Progress", position: 1, account_id: accountId },
@@ -115,7 +120,7 @@ export async function createBoard(title, accountId, userId) {
     .from("columns")
     .insert(
       defaultColumns.map((col) => ({
-        board_id: board.id,
+        board_id: normalizedBoard.id,
         title: col.title,
         account_id: col.account_id,
         position: col.position,
@@ -126,14 +131,16 @@ export async function createBoard(title, accountId, userId) {
   if (columnsError) throw columnsError;
 
   return {
-    id: board.id,
-    title: board.title,
-    account_id: board.account_id,
-    created_by: board.created_by,
+    id: normalizedBoard.id,
+    title: normalizedBoard.title,
+    account_id: normalizedBoard.account_id,
+    created_by: normalizedBoard.created_by,
     columns: columns.map((col) => ({
       id: col.id,
       title: col.title,
       cards: [],
+      board_id: col.board_id,
+      position: col?.position,
     })),
   };
 }
@@ -180,7 +187,6 @@ export async function deleteBoard(boardId) {
     .delete()
     .eq("id", boardId);
   if (boardError) throw boardError;
-
 }
 
 export async function fetchBoardLogs(boardId) {
@@ -194,7 +200,12 @@ export async function fetchBoardLogs(boardId) {
   return logs;
 }
 
-export async function shareWithUsers(boardId, userIds, currentUserName, boardTitle) {
+export async function shareWithUsers(
+  boardId,
+  userIds,
+  currentUserName,
+  boardTitle
+) {
   // First fetch current shared_users
   const { data: currentBoard, error: fetchError } = await supabase
     .from("boards")
@@ -204,15 +215,15 @@ export async function shareWithUsers(boardId, userIds, currentUserName, boardTit
 
   if (fetchError) throw fetchError;
 
+  const normalizedBoard = normalizeSingleResult(currentBoard);
   // Combine existing and new users, removing duplicates
-  const currentUsers = currentBoard.shared_users || [];
+  const currentUsers = normalizedBoard.shared_users || [];
   const updatedUsers = [...new Set([...currentUsers, ...userIds])];
-  const newUsers = userIds.filter(userId => !currentUsers.includes(userId)); // Only new users
+  const newUsers = userIds.filter((userId) => !currentUsers.includes(userId)); // Only new users
 
   // Send email to new users
 
-  boardShareEmailService(newUsers, currentUserName ,boardTitle, boardId);
-
+  boardShareEmailService(newUsers, currentUserName, boardTitle, boardId);
 
   // Update the board with combined users
   const { data, error } = await supabase
@@ -237,7 +248,7 @@ export async function removeSharedUsers(boardId, userIds) {
 
   // Filter out the users to be removed
   const updatedUsers = (currentBoard.shared_users || []).filter(
-    userId => !userIds.includes(userId)
+    (userId) => !userIds.includes(userId)
   );
 
   // Update the board with the filtered users

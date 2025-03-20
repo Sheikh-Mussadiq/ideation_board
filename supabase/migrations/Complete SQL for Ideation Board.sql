@@ -122,6 +122,7 @@ ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE boards ADD COLUMN created_by UUID REFERENCES auth.users(id);
 ALTER TABLE boards ADD COLUMN team_id TEXT;
+ALTER TABLE public.boards ADD COLUMN shared_users text[];
 
 CREATE POLICY "Allow any authenticated user to create a board"
 ON boards
@@ -138,12 +139,13 @@ ON boards
 FOR DELETE
 USING (auth.uid() = created_by);
 
-CREATE POLICY "Allow creator or team members to select board"
+CREATE POLICY "Allow creator or team members or shared users to select board" 
 ON boards
 FOR SELECT
 USING (
-  auth.uid() = created_by OR
-  boards.team_id IN (SELECT jsonb_array_elements_text(auth.jwt() -> 'teams'))
+  (auth.uid() = created_by) OR 
+    (team_id IN (SELECT jsonb_array_elements_text((auth.jwt() -> 'teams'::text)))) OR 
+    (auth.jwt() ->> 'userId') = ANY(shared_users)
 );
 
 CREATE POLICY "Allow only creator to assign team to board"
@@ -223,7 +225,7 @@ USING (true);
 -- 1. Create the logs table
 CREATE TABLE board_logs (
   id BIGSERIAL PRIMARY KEY,
-  board_id UUID REFERENCES boards(id),
+  board_id UUID,
   event_type TEXT,        -- 'INSERT', 'UPDATE', 'DELETE'
   message TEXT,           -- Log message (e.g., "Alice created column 'To Do'")
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -456,7 +458,6 @@ AFTER DELETE ON public.boards
 FOR EACH ROW
 EXECUTE FUNCTION public.cleanup_board_logs();
 
-
 CREATE TABLE public.users (
     id uuid NOT NULL PRIMARY KEY,
     email text NOT NULL,
@@ -472,11 +473,13 @@ CREATE TABLE public.users (
 
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow users to select their own data" 
-ON public.users 
-FOR SELECT 
-TO authenticated 
-USING (id = (select auth.uid()));
+CREATE policy "Enable read access for all users"
+on "public"."users"
+FOR select
+to authenticated
+using (
+  true
+);
 
 CREATE POLICY "Allow users to insert their own data" 
 ON public.users 
@@ -497,13 +500,14 @@ FOR DELETE
 TO authenticated 
 USING (id = (select auth.uid()));
 
+
 create table notifications (
   id uuid default uuid_generate_v4() primary key,
-  user_id uuid references auth.users(id) on delete cascade,
+  user_id text not null,
   content text not null,
   type text not null,
-  board_id uuid references boards(id) on delete cascade,
-  card_id uuid references cards(id) on delete cascade,
+  board_id uuid ,
+  card_id uuid ,
   read boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now())
 );
@@ -512,18 +516,18 @@ create table notifications (
 alter table notifications enable row level security;
 
 -- Create policy for users to read their own notifications
-CREATE POLICY "Allow users to select their notifications" 
-ON public.notifications 
-FOR SELECT 
-TO authenticated 
+CREATE POLICY "Allow users to select their notifications"
+ON public.notifications
+FOR SELECT
+TO authenticated
 USING (((auth.jwt() ->> 'userId'::text) = user_id));
 
 -- Create policy for inserting notifications
-create POLICY "Enable insert for authenticated users only" 
-ON public.notifications 
+create POLICY "Enable insert for authenticated users only"
+ON public.notifications
 AS PERMISSIVE
-FOR INSERT 
-TO authenticated 
+FOR INSERT
+TO authenticated
 WITH CHECK (true);
 
 -- Create policy for users to update their own notifications
@@ -532,6 +536,7 @@ ON public.notifications
 FOR UPDATE
 TO authenticated
 USING (((auth.jwt() ->> 'userId'::text) = user_id));
+
 
 
 -- Create the storage bucket
@@ -624,28 +629,37 @@ USING (
     bucket_id = 'ideation_media'
 );
 
-alter policy "Enable read access for all users"
-on "public"."users"
-to authenticated
-using (
-  true
+
+-- Run this migration to enable realtime on all tables automatically, if errors, enable realtime manually on all tables except users
+ALTER PUBLICATION supabase_realtime ADD TABLE boards;
+ALTER PUBLICATION supabase_realtime ADD TABLE cards;
+ALTER PUBLICATION supabase_realtime ADD TABLE columns;
+ALTER PUBLICATION supabase_realtime ADD TABLE comments;
+ALTER PUBLICATION supabase_realtime ADD TABLE board_logs;
+ALTER PUBLICATION supabase_realtime ADD TABLE notifications;
+
+
+
+CREATE TABLE IF NOT EXISTS automation_access_tokens (
+  account_id text PRIMARY KEY,
+  token text NOT NULL,
+  created_at timestamp WITH time zone DEFAULT NOW() NOT NULL,
+  updated_at timestamp WITH time zone DEFAULT NOW() NOT NULL
 );
 
-alter policy Allow users to select their own data
-on "public"."users"
-rename to "Enable read access for all users";
+CREATE TRIGGER update_automation_access_tokens_updated_at BEFORE
+UPDATE
+  ON automation_access_tokens FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
+ALTER TABLE automation_access_tokens ENABLE ROW LEVEL SECURITY;
 
-ALTER TABLE public.boards ADD COLUMN shared_users text[];
+-- Drop the existing policy
+DROP POLICY IF EXISTS "Board logs select only for board creator" ON board_logs;
 
-DROP POLICY IF EXISTS "Allow creator or team members to select board" ON public.boards;
-
-CREATE POLICY "Allow creator or team members or shared users to select board" 
-ON public.boards 
-FOR SELECT 
-TO authenticated 
-USING (
-    (auth.uid() = created_by) OR 
-    (team_id IN (SELECT jsonb_array_elements_text((auth.jwt() -> 'teams'::text)))) OR 
-    (auth.jwt() ->> 'userId') = ANY(shared_users)
-);
+-- Create a new policy allowing only authenticated users to see board logs
+CREATE POLICY "Board logs select only for authenticated users"
+  ON board_logs
+  FOR SELECT
+  USING (
+    auth.role() = 'authenticated'
+  );

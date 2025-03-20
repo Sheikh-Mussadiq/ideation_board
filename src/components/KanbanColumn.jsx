@@ -7,6 +7,7 @@ import PresenceIndicator from "./PresenceIndicator";
 import { usePresence } from "../hooks/usePresence";
 import DeleteColumnModal from "./DeleteColumnModal";
 import Tooltip from "./Tooltip";
+import Translate from "../components/Translate";
 
 // Shimmer loading component
 const ShimmerColumn = () => (
@@ -164,7 +165,7 @@ export default function KanbanColumn({
         <div className="flex-none mt-3">
           <button onClick={onAddCard} className="btn-secondary w-full">
             <Plus className="h-4 w-4 mr-1" />
-            Add Card
+            <Translate>Add Card</Translate>
           </button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Layout from "./components/Layout";
@@ -8,6 +8,7 @@ import IdeationPage from "./pages/IdeationPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { BoardProvider } from "./context/BoardContext";
 import { SidebarProvider } from "./context/SidebarContext";
+import { LanguageProvider } from "./context/LanguageContext";
 import NavigateToSocialHubPage from "./pages/NavigateToSocialHubPage";
 import HomePage from "./pages/HomePage";
 import LoadingScreen from "./components/LoadingScreen";
@@ -46,12 +47,6 @@ const AuthenticatedRoutes = () => {
 
   return (
     <Routes>
-      {/* <Route path="/" element={<Navigate to="/ideation" replace />} /> */}
-      {/* <Route path="/dashboard" element={<ProtectedLayout><PostFormPage /></ProtectedLayout>} /> */}
-      {/* <Route path="/content" element={<ProtectedLayout><ContentListPage /></ProtectedLayout>} /> */}
-      {/* <Route path="/content/:id" element={<ProtectedLayout><ContentDetailsPage /></ProtectedLayout>} /> */}
-      {/* <Route path="/content/search" element={<ProtectedLayout><ContentSearchPage /></ProtectedLayout>} /> */}
-      {/* <Route path="/ideation" element={<ProtectedLayout><IdeationPage /></ProtectedLayout>} /> */}
       <Route path="/" element={<Navigate to="/home" replace />} />
       <Route
         path="/ideation"
@@ -87,13 +82,15 @@ export default function App() {
     <AuthProvider>
       <BoardProvider>
         <SidebarProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/ideation/login" element={<ProtectedLoginRoute />} />
-              <Route path="/*" element={<AuthenticatedRoutes />} />
-            </Routes>
-            <Toaster position="top-right" />
-          </BrowserRouter>
+          <LanguageProvider>
+            <HashRouter>
+              <Routes>
+                <Route path="/ideation/login" element={<ProtectedLoginRoute />} />
+                <Route path="/*" element={<AuthenticatedRoutes />} />
+              </Routes>
+              <Toaster position="top-right" />
+            </HashRouter>
+          </LanguageProvider>
         </SidebarProvider>
       </BoardProvider>
     </AuthProvider>

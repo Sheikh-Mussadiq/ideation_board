@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import LabelModal from "./LabelModal";
+import Translate from "./Translate";
 
 const LABEL_COLORS = {
   red: {
@@ -80,7 +81,7 @@ export default function LabelManager({ labels, onUpdate }) {
           className="btn-ghost hover:text-design-primaryPurple btn-sm rounded-full"
         >
           <Plus className="h-3 w-3 mr-1" />
-          Add Label
+          <Translate>Add Label</Translate>
         </motion.button>
       </div>
 

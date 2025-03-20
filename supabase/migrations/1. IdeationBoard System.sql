@@ -122,6 +122,7 @@ ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE boards ADD COLUMN created_by UUID REFERENCES auth.users(id);
 ALTER TABLE boards ADD COLUMN team_id TEXT;
+ALTER TABLE public.boards ADD COLUMN shared_users text[];
 
 CREATE POLICY "Allow any authenticated user to create a board"
 ON boards
@@ -138,12 +139,13 @@ ON boards
 FOR DELETE
 USING (auth.uid() = created_by);
 
-CREATE POLICY "Allow creator or team members to select board"
+CREATE POLICY "Allow creator or team members or shared users to select board" 
 ON boards
 FOR SELECT
 USING (
-  auth.uid() = created_by OR
-  boards.team_id IN (SELECT jsonb_array_elements_text(auth.jwt() -> 'teams'))
+  (auth.uid() = created_by) OR 
+    (team_id IN (SELECT jsonb_array_elements_text((auth.jwt() -> 'teams'::text)))) OR 
+    (auth.jwt() ->> 'userId') = ANY(shared_users)
 );
 
 CREATE POLICY "Allow only creator to assign team to board"

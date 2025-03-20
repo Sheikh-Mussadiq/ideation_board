@@ -14,6 +14,8 @@ import { useNotificationStore } from "../stores/notificationStore";
 import { useNotifications } from "../hooks/useNotifications";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import Translate from "./Translate"; // Import Translate component
+import { useWindowDimensions } from "../hooks/useWindowDimensions";
 
 const getNotificationIcon = (type) => {
   switch (type) {
@@ -34,6 +36,7 @@ export default function NotificationBell() {
   const { markAsRead, markAllAsRead } = useNotifications();
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const { width } = useWindowDimensions();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -88,17 +91,23 @@ export default function NotificationBell() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-lg ring-1 ring-black/5 z-50 max-h-[80vh] flex flex-col overflow-hidden backdrop-blur-sm"
+            className={`
+              fixed sm:absolute
+              ${width < 640 ? "inset-x-4 top-20" : "right-0 top-full mt-2"}
+              bg-white rounded-xl shadow-lg ring-1 ring-black/5 z-[100]
+              max-h-[80vh] flex flex-col overflow-hidden backdrop-blur-sm
+              ${width < 640 ? "w-auto" : "w-96"}
+            `}
           >
             <div className="p-4 bg-design-greyBG/50 border-b border-design-greyOutlines">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <h3 className="text-lg font-semibold text-design-black">
-                    Notifications
+                    <Translate>Notifications</Translate>
                   </h3>
                   {unreadCount > 0 && (
                     <span className="text-xs font-medium text-design-primaryGrey bg-white px-2 py-1 rounded-full">
-                      {unreadCount} new
+                      {unreadCount} <Translate>new</Translate>
                     </span>
                   )}
                 </div>
@@ -110,7 +119,7 @@ export default function NotificationBell() {
                     className="text-sm font-medium text-button-primary-cta hover:text-button-primary-hover transition-colors px-3 py-1.5 rounded-full hover:bg-button-tertiary-fill flex items-center gap-1.5"
                   >
                     <Check className="w-4 h-4" />
-                    Mark all read
+                    <Translate>Mark all read</Translate>
                   </motion.button>
                 )}
               </div>
@@ -129,10 +138,12 @@ export default function NotificationBell() {
                 >
                   <MailOpen className="h-12 w-12 text-design-primaryGrey mb-3" />
                   <p className="text-design-primaryGrey font-medium">
-                    No notifications yet
+                    <Translate>No notifications yet</Translate>
                   </p>
                   <p className="text-sm text-design-primaryGrey/70 mt-1">
-                    We'll notify you when something arrives
+                    <Translate>
+                      We'll notify you when something arrives
+                    </Translate>
                   </p>
                 </motion.div>
               ) : (

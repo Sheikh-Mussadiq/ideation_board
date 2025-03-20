@@ -1,3 +1,4 @@
+
 -- Step 1: Create helper function to delete storage objects
 CREATE OR REPLACE FUNCTION delete_storage_object(bucket_name TEXT, path TEXT)
 RETURNS void

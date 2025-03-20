@@ -9,6 +9,7 @@ import {
   removeSharedUsers,
 } from "../services/boardService";
 import toast from "react-hot-toast";
+import Translate from "../components/Translate";
 
 export default function BoardSharingModal({
   isOpen,
@@ -68,12 +69,7 @@ export default function BoardSharingModal({
   const handleShareWithUsers = async (userIds) => {
     try {
       setLoading(true);
-      await shareWithUsers(
-        board.id,
-        userIds,
-        currentUser.firstName,
-        board.title
-      );
+      await shareWithUsers(board.id, userIds);
 
       updateBoardsList((prev) =>
         prev.map((b) =>
@@ -88,6 +84,7 @@ export default function BoardSharingModal({
 
       toast.success("Board shared with users successfully");
       onClose();
+      
       setSelectedUsers([]);
     } catch (error) {
       console.error("Error sharing board with users:", error);
@@ -156,7 +153,7 @@ export default function BoardSharingModal({
       }`}
     >
       <Icon className="h-4 w-4" />
-      {label}
+      <Translate>{label}</Translate>
     </button>
   );
 
@@ -213,7 +210,7 @@ export default function BoardSharingModal({
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-design-black p-6 shadow-xl transition-all">
                 <Dialog.Title className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
                   <Users className="h-5 w-5 text-button-primary-cta" />
-                  Share Board
+                  <Translate>Share Board</Translate>
                 </Dialog.Title>
 
                 {/* Tabs */}
@@ -226,7 +223,7 @@ export default function BoardSharingModal({
                 <div className="relative mb-4">
                   <input
                     type="text"
-                    placeholder="Search teams or users..."
+                    placeholder={activeTab === "teams" ? <Translate>Search teams...</Translate> : <Translate>Search users...</Translate>}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full px-4 py-2 pl-10 text-sm bg-gray-50 dark:bg-design-black/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-button-primary-cta focus:border-transparent transition-all"
@@ -257,9 +254,9 @@ export default function BoardSharingModal({
                             <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                               {team.name}
                             </span>
-                            {board.team_id === team._id && (
+                            {board?.team_id === team._id && (
                               <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-2 py-1 rounded-full">
-                                Current
+                                <Translate>Current</Translate>
                               </span>
                             )}
                           </motion.button>
@@ -309,7 +306,7 @@ export default function BoardSharingModal({
                           </div>
                           {board.shared_users?.includes(user.id) && (
                             <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-2 py-1 rounded-full">
-                              Shared
+                              <Translate>Shared</Translate>
                             </span>
                           )}
                         </motion.button>
@@ -332,7 +329,7 @@ export default function BoardSharingModal({
                           {board.team_id === selectedTeam._id ? (
                             <span className="flex items-center gap-2">
                               <UserMinus className="h-4 w-4 text-semantic-error" />
-                              Stop Sharing with team:{" "}
+                              <Translate>Stop Sharing with team:</Translate>{" "}
                               <span className="font-semibold">
                                 {selectedTeam.name}
                               </span>
@@ -341,7 +338,7 @@ export default function BoardSharingModal({
                           ) : (
                             <span className="flex items-center gap-2">
                               <UserCheck className="h-4 w-4 text-semantic-success" />
-                              Share with team:{" "}
+                              <Translate>Share with team:</Translate>{" "}
                               <span className="font-semibold">
                                 {selectedTeam.name}
                               </span>
@@ -360,12 +357,12 @@ export default function BoardSharingModal({
                           {board.team_id === selectedTeam._id ? (
                             <>
                               <UserMinus className="h-4 w-4 mr-2" />
-                              Stop Sharing
+                              <Translate>Stop Sharing</Translate>
                             </>
                           ) : (
                             <>
                               <UserCheck className="h-4 w-4 mr-2" />
-                              Share
+                              <Translate>Share</Translate>
                             </>
                           )}
                         </button>
@@ -379,13 +376,12 @@ export default function BoardSharingModal({
                             ) ? (
                               <>
                                 <UserMinus className="h-4 w-4 text-semantic-error" />
-                                Remove {selectedUsers.length} users from board?
+                                <Translate>Remove</Translate> {selectedUsers.length} <Translate>users from board?</Translate>
                               </>
                             ) : (
                               <>
                                 <UserCheck className="h-4 w-4 text-semantic-success" />
-                                Share with {selectedUsers.length} selected
-                                users?
+                                <Translate>Share with</Translate> {selectedUsers.length} <Translate>selected users?</Translate>
                               </>
                             )}
                           </span>
@@ -405,12 +401,12 @@ export default function BoardSharingModal({
                           ) ? (
                             <>
                               <UserMinus className="h-4 w-4 mr-2" />
-                              Remove Users
+                              <Translate>Remove Users</Translate>
                             </>
                           ) : (
                             <>
                               <UserCheck className="h-4 w-4 mr-2" />
-                              Share with Users
+                              <Translate>Share with Users</Translate>
                             </>
                           )}
                         </button>

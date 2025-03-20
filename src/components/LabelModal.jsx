@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useScrollLock } from "../hooks/useScrollLock";
+import Translate from "./Translate";
 
 const LABEL_COLORS = {
   red: {
@@ -93,7 +94,9 @@ export default function LabelModal({ isOpen, onClose, labels, onUpdate }) {
         }}
       >
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold text-design-black">Labels</h3>
+          <h3 className="text-xl font-semibold text-design-black">
+            <Translate>Labels</Translate>
+          </h3>
           <button
             onClick={handleClose}
             className="text-gray-400 hover:text-semantic-error rounded-full hover:bg-semantic-error-light transition-colors p-1"
@@ -162,7 +165,7 @@ export default function LabelModal({ isOpen, onClose, labels, onUpdate }) {
                 disabled={!newLabelText.trim()}
                 className="w-full px-4 py-2 bg-design-primaryPurple text-white rounded-lg hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Add Label
+                <Translate>Add Label</Translate>
               </button>
             </div>
           </div>

@@ -1,18 +1,31 @@
+import Facebook from "../assets/fb_facebook_facebook_logo_icon.png";
+import Instagram from "../assets/camera_instagram_instagram_logo_icon.png";
+import Whatsapp from "../assets/bubble_chat_mobile_whatsapp_whatsapp_logo_icon.png";
+import Twitter from "../assets/x_twitter_elon_musk_twitter_new_logo_icon.png";
+import GoogleBusiness from "../assets/brand_business_google_logo_my_icon.png";
+import Linkedin from "../assets/linkedin_network_linkedin_logo_icon.png";
+import Mastodon from "../assets/mastodon_icon.png";
+import Pinterest from "../assets/inspiration_pin_pinned_pinterest_social_network_icon.png";
+// import Threads from "../assets/brand_chat_threads_logo_icon.png";
+import Tiktok from "../assets/tiktok_logo_brand_icon.png";
+import WordPress from "../assets/wordpress_wp_icon_icon.png";
+import Youtube from "../assets/video_youtube_icon.png";
+
 export const getSocialIcon = (network) => {
   const icons = {
-    facebook: "/fb_facebook_facebook logo_icon.svg",
-    google_my_business: "/brand_business_google_logo_my_icon.svg",
-    instagram_business: "/camera_instagram_instagram logo_icon.svg",
-    linkedin: "/linkedin_network_linkedin logo_icon.svg",
-    mastodon: "/mastodon_icon.svg",
-    pinterest: "/inspiration_pin_pinned_pinterest_social network_icon.svg",
-    threads: "/brand_chat_threads_logo_icon.svg",
-    tiktok: "/tiktok_logo_brand_icon.svg",
-    twitter: "/x_twitter_elon musk_twitter new logo_icon.svg",
-    whatsapp: "/bubble_chat_mobile_whatsapp_whatsapp logo_icon.svg",
-    wordpress: "/wordpress_wp icon_icon.svg",
-    youtube: "/video_youtube_icon.svg",
+    facebook: Facebook,
+    google_my_business: GoogleBusiness,
+    instagram_business: Instagram,
+    linkedin: Linkedin,
+    mastodon: Mastodon,
+    pinterest: Pinterest,
+    // threads: Threads,
+    tiktok: Tiktok,
+    twitter: Twitter,
+    whatsapp: Whatsapp,
+    wordpress: WordPress,
+    youtube: Youtube,
   };
 
-  return icons[network.toLowerCase()] || "/default-social.svg";
+  return icons[network.toLowerCase()] || "../assets/SocialHub.png";
 };

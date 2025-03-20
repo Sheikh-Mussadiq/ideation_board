@@ -1,5 +1,5 @@
-
 import { supabase } from "../lib/supabase";
+import { normalizeSingleResult } from "../lib/helpers";
 
 export async function createCard(columnId, card, accountId) {
   const { data: newCard, error: cardError } = await supabase
@@ -20,9 +20,11 @@ export async function createCard(columnId, card, accountId) {
     .single();
 
   if (cardError) throw cardError;
+  const normalizedCard = normalizeSingleResult(newCard);
+  
   return {
-    ...newCard,
-    attachments: [],
+    ...normalizedCard,
+    attachments: normalizedCard?.attachments || [],
   };
 }
 

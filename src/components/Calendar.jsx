@@ -22,6 +22,7 @@ import {
   ChevronRight,
   ArrowRight,
 } from "lucide-react";
+import Translate from "../components/Translate";
 
 const priorityColors = {
   high: "bg-semantic-error",
@@ -49,7 +50,7 @@ const CalendarDay = ({ date, tasks, currentMonth, onTaskClick }) => {
     <motion.div
       whileHover={hasTask ? { scale: 1.05, zIndex: 10 } : {}}
       className={`
-        relative p-2 min-h-[60px] rounded-lg transition-all duration-300 group
+        relative p-1.5 min-h-[45px] lg:min-h-[52px] rounded-lg transition-all duration-300 group
         ${!isCurrentMonth ? "opacity-30" : ""}
         ${isCurrentDate ? "ring-2 ring-design-primaryPurple ring-offset-2" : ""}
         ${
@@ -84,7 +85,7 @@ const CalendarDay = ({ date, tasks, currentMonth, onTaskClick }) => {
             />
           ))}
           {dayTasks.length > 2 && (
-            <div className="w-2 h-2 rounded-full bg-design-primaryGrey text-[8px] flex items-center justify-center">
+            <div className="w-2 h-2 rounded-full  text-[8px] flex items-center justify-center">
               +{dayTasks.length - 2}
             </div>
           )}
@@ -183,12 +184,12 @@ export default function Calendar({ tasks, onTaskClick }) {
   };
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-design-greyOutlines">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-white p-4 lg:p-5 rounded-2xl border border-design-greyOutlines h-full flex flex-col">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <CalendarIcon className="h-5 w-5 text-design-primaryPurple" />
           <h2 className="text-lg font-semibold text-design-black">
-            Task Calendar
+            <Translate>Task Calendar</Translate>
           </h2>
         </div>
         <div className="flex items-center gap-2">
@@ -202,7 +203,7 @@ export default function Calendar({ tasks, onTaskClick }) {
             <ChevronLeft className="h-5 w-5 text-design-primaryGrey" />
           </motion.button>
           <span className="text-sm font-medium text-design-black min-w-[100px] text-center">
-            {format(currentMonth, "MMMM yyyy")}
+            <Translate>{format(currentMonth, "MMMM yyyy")}</Translate>
           </span>
           <motion.button
             whileHover={{ scale: 1.1 }}
@@ -216,14 +217,14 @@ export default function Calendar({ tasks, onTaskClick }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-2">
+      <div className="grid grid-cols-7 gap-1.5 lg:gap-2 flex-1">
         {/* Day headers with better styling */}
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
           <div
             key={day}
-            className="text-center text-sm font-medium text-design-primaryGrey p-2"
+            className="text-center text-xs lg:text-sm font-medium text-design-primaryGrey p-1"
           >
-            {day}
+            <Translate>{day}</Translate>
           </div>
         ))}
 

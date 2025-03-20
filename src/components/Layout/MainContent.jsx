@@ -6,14 +6,12 @@ export default function MainContent({ children }) {
   const { isExpanded } = useSidebar();
 
   return (
-    <motion.div
-      className="min-h-screen"
-      animate={{
-        marginLeft: isExpanded ? "16rem" : "4.5rem",
-      }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
+    <div
+      className={`min-h-screen transition-all duration-300 ease-in-out ${
+        isExpanded ? "md:ml-64" : "md:ml-[4.5rem]"
+      }`}
     >
       <main className="p-6 animate-in fade-in-50">{children}</main>
-    </motion.div>
+    </div>
   );
 }

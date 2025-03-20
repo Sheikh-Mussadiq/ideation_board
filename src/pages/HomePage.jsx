@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useBoards } from "../context/BoardContext";
 import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import Calendar from "../components/Calendar";
 import TaskList from "../components/TaskList";
 import { Sun, Moon, Sunrise, Sunset } from "lucide-react";
+import Translate from "../components/Translate"; // Import Translate component
 
 const StatCard = ({ icon: Icon, title, value, color }) => (
   <motion.div
@@ -56,8 +57,12 @@ const StatCard = ({ icon: Icon, title, value, color }) => (
         />
       </div>
       <div>
-        <h3 className="text-sm font-medium text-design-primaryGrey">{title}</h3>
-        <p className="text-2xl font-bold text-design-black mt-1">{value}</p>
+        <h3 className="text-sm font-medium text-design-primaryGrey">
+          <Translate>{title}</Translate>
+        </h3>
+        <p className="text-2xl font-bold text-design-black mt-1">
+          <Translate>{value}</Translate>
+        </p>
       </div>
     </div>
   </motion.div>
@@ -79,22 +84,22 @@ const BoardTable = ({ boards, teams, onBoardClick }) => (
       <thead>
         <tr className="border-b border-design-greyOutlines">
           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
-            Board Name
+            <Translate>Board Name</Translate>
           </th>
           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
-            Team
+            <Translate>Team</Translate>
           </th>
           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
-            Total Cards
+            <Translate>Total Cards</Translate>
           </th>
           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
-            Completed
+            <Translate>Completed</Translate>
           </th>
           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
-            Created At
+            <Translate>Created At</Translate>
           </th>
           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
-            Last Updated
+            <Translate>Last Updated</Translate>
           </th>
           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey"></th>
         </tr>
@@ -134,7 +139,7 @@ const BoardTable = ({ boards, teams, onBoardClick }) => (
               <td className="p-3">
                 <span className="text-sm text-design-primaryGrey flex items-center gap-1">
                   <Users className="h-4 w-4" />
-                  {team?.name || "Personal"}
+                  <Translate>{team?.name || "Personal"}</Translate>
                 </span>
               </td>
               <td className="p-3">
@@ -170,18 +175,32 @@ const BoardTable = ({ boards, teams, onBoardClick }) => (
 
 const BoardDropdown = ({ boards, selectedBoard, onBoardSelect }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-4 py-2 rounded-xl border border-design-greyOutlines hover:border-design-primaryPurple/30 transition-all"
       >
-        <Layers className="h-5 w-5 text-design-primaryPurple" />
-        <span className="font-medium text-design-black">
-          {selectedBoard ? selectedBoard.title : "All Boards"}
-        </span>
-        <ChevronDown className="h-4 w-4 text-design-primaryGrey" />
+        <div className="flex items-center gap-2">
+          <Layers className="h-5 w-5 text-design-primaryPurple" />
+          <span className="font-medium text-design-black">
+            {selectedBoard ? selectedBoard.title : <Translate>All Boards</Translate>}
+          </span>
+        </div>
+        <ChevronDown className="h-4 w-4 text-design-primaryGrey ml-2" />
       </button>
 
       {isOpen && (
@@ -194,7 +213,7 @@ const BoardDropdown = ({ boards, selectedBoard, onBoardSelect }) => {
                 setIsOpen(false);
               }}
             >
-              All Boards
+              <Translate>All Boards</Translate>
             </div>
             {boards.map((board) => (
               <div
@@ -302,18 +321,18 @@ export default function HomePage() {
 
   if (isLoading) {
     return (
-      <div className="p-8 space-y-8 animate-in fade-in-50">
+      <div className="p-4 md:p-8 space-y-4 md:space-y-8 animate-in fade-in-50">
         {/* Header Shimmer */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
             <div className="h-9 w-64 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
           </div>
-          <div className="h-10 w-40 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+          <div className="h-10 w-full md:w-40 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
         </div>
 
         {/* Stats Cards Shimmer */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
@@ -331,8 +350,7 @@ export default function HomePage() {
         </div>
 
         {/* Calendar and Tasks Grid Shimmer */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Calendar Shimmer */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
           <div className="bg-white p-6 rounded-2xl border border-gray-100">
             <div className="flex items-center justify-between mb-6">
               <div className="h-5 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
@@ -350,7 +368,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Tasks List Shimmer */}
           <div className="bg-white p-6 rounded-2xl border border-gray-100">
             <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-6"></div>
             <div className="space-y-4">
@@ -370,7 +387,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Boards Table Shimmer */}
         <div className="bg-white p-6 rounded-2xl border border-gray-100">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
@@ -404,54 +420,60 @@ export default function HomePage() {
   }
 
   return (
-    <div className="p-8 space-y-8 animate-in fade-in-50">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-8 space-y-4 md:space-y-8 animate-in fade-in-50">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mt-4">
         <div className="flex items-center gap-3">
           <GreetingIcon className={`h-8 w-8 ${greeting.className}`} />
-          <h1 className="text-3xl font-bold text-design-black">
-            {greeting.text}, {currentUser.firstName}
+          <h1 className="text-2xl md:text-3xl font-bold text-design-black">
+            <Translate>{greeting.text}</Translate>, {currentUser.firstName}
           </h1>
         </div>
-        <BoardDropdown
-          boards={boardsList}
-          selectedBoard={selectedBoard}
-          onBoardSelect={setSelectedBoard}
-        />
+        <div className="flex justify-end w-full md:w-auto">
+          <BoardDropdown
+            boards={boardsList}
+            selectedBoard={selectedBoard}
+            onBoardSelect={setSelectedBoard}
+          />
+        </div>
       </div>
 
       {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         <StatCard
           icon={ClipboardList}
-          title="Total Tasks"
+          title={<Translate>Total Tasks</Translate>}
           value={stats.totalTasks}
           color="total"
         />
         <StatCard
           icon={CheckCircle2}
-          title="Completed Tasks"
+          title={<Translate>Completed Tasks</Translate>}
           value={stats.completedTasks}
           color="completed"
         />
         <StatCard
           icon={Layers}
-          title="My Tasks"
+          title={<Translate>My Tasks</Translate>}
           value={stats.myTasks.length}
           color="tasks"
         />
       </div>
 
       {/* Calendar and Tasks Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Calendar
-          tasks={stats.myTasks}
-          onTaskClick={(task) => {
-            if (task.boardId) {
-              navigate(`/ideation/${task.boardId}`);
-            }
-          }}
-        />
-        <TaskList tasks={stats.myTasks} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 lg:h-[600px]">
+        <div className="lg:h-full overflow-hidden">
+          <Calendar
+            tasks={stats.myTasks}
+            onTaskClick={(task) => {
+              if (task.boardId) {
+                navigate(`/ideation/${task.boardId}`);
+              }
+            }}
+          />
+        </div>
+        <div className="lg:h-full overflow-hidden">
+          <TaskList tasks={stats.myTasks} />
+        </div>
       </div>
 
       {/* Full Width Boards Section */}
@@ -459,24 +481,28 @@ export default function HomePage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white p-6 rounded-2xl border border-design-greyOutlines w-full"
+          className="bg-white p-4 md:p-6 rounded-2xl border border-design-greyOutlines w-full overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-4">
             <div className="flex items-center gap-2">
               <Layers className="h-5 w-5 text-design-primaryPurple" />
               <h2 className="text-lg font-semibold text-design-black">
-                My Boards
+                <Translate>My Boards</Translate>
               </h2>
             </div>
             <span className="text-sm text-design-primaryGrey">
-              {boardsList.length} {boardsList.length === 1 ? "Board" : "Boards"}
+              {boardsList.length} {boardsList.length === 1 ? <Translate>Board</Translate> : <Translate>Boards</Translate>}
             </span>
           </div>
-          <BoardTable
-            boards={boardsList}
-            teams={currentUserTeams}
-            onBoardClick={handleBoardClick}
-          />
+          <div className="overflow-x-auto -mx-4 md:mx-0">
+            <div className="min-w-[800px] px-4 md:px-0">
+              <BoardTable
+                boards={boardsList}
+                teams={currentUserTeams}
+                onBoardClick={handleBoardClick}
+              />
+            </div>
+          </div>
         </motion.div>
       )}
     </div>

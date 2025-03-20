@@ -3,6 +3,7 @@
 import { Fragment, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { X, AlertTriangle } from "lucide-react";
+import Translate from "./Translate";
 
 export default function DeleteBoardModal({
   isOpen,
@@ -77,15 +78,15 @@ export default function DeleteBoardModal({
                     as="h3"
                     className="text-lg font-semibold leading-6 text-design-black dark:text-design-white"
                   >
-                    Delete Board
+                    <Translate>Delete Board</Translate>
                   </Dialog.Title>
                 </div>
 
                 <div className="mt-3 text-center sm:mt-0 sm:text-left animate-in slide-in-from-top">
                   <div className="mt-2">
                     <p className="text-sm text-design-primaryGrey dark:text-design-greyOutlines leading-relaxed">
-                      Are you sure you want to delete the board "{boardTitle}"?
-                      This action cannot be undone.
+                      <Translate>Are you sure you want to delete the board</Translate> "{boardTitle}"?{" "}
+                      <Translate>This action cannot be undone.</Translate>
                     </p>
                   </div>
                 </div>
@@ -96,7 +97,7 @@ export default function DeleteBoardModal({
                     onClick={onClose}
                     className="btn-secondary"
                   >
-                    Cancel
+                    <Translate>Cancel</Translate>
                   </button>
                   <button
                     type="button"
@@ -109,11 +110,11 @@ export default function DeleteBoardModal({
                     }`}
                   >
                     {isDeleting ? (
-                      "Deleting..."
+                      <Translate>Deleting...</Translate>
                     ) : countdown > 0 ? (
-                      <>Delete ({countdown}s)</>
+                      <><Translate>Delete</Translate> ({countdown}s)</>
                     ) : (
-                      "Delete"
+                      <Translate>Delete</Translate>
                     )}
                   </button>
                 </div>

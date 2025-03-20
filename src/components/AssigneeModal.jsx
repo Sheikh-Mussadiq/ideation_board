@@ -59,10 +59,10 @@ export default function AssigneeModal({
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
-            className="w-[90%] max-w-md bg-white rounded-2xl shadow-lg overflow-hidden relative z-[201]"
+            className="w-[90%] max-w-md bg-white rounded-2xl shadow-lg overflow-hidden relative z-[201] flex flex-col max-h-[80vh]"
           >
-            {/* Header */}
-            <div className="p-4 border-b border-design-greyOutlines bg-design-greyBG/50">
+            {/* Header - Fixed */}
+            <div className="p-4 border-b border-design-greyOutlines bg-design-greyBG/50 flex-shrink-0">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <Users className="w-5 h-5 text-design-primaryPurple" />
@@ -96,16 +96,16 @@ export default function AssigneeModal({
               </div>
             </div>
 
-            {/* Selected Users Preview */}
+            {/* Selected Users Preview - Fixed */}
             <AnimatePresence>
               {localAssignees.length > 0 && (
                 <motion.div
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden"
+                  className="overflow-hidden flex-shrink-0 bg-design-lightPurpleButtonFill"
                 >
-                  <div className="p-3 flex flex-wrap gap-2 bg-design-lightPurpleButtonFill">
+                  <div className="p-3 flex flex-wrap gap-2">
                     {localAssignees.map((assignee) => (
                       <motion.div
                         key={assignee._id}
@@ -136,68 +136,70 @@ export default function AssigneeModal({
               )}
             </AnimatePresence>
 
-            {/* Users List */}
-            <div className="max-h-[40vh] overflow-y-auto p-2 space-y-1">
-              {users.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8">
-                  <Users className="w-16 h-16 text-gray-300 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-800 mb-2">
-                    No Team Members Yet
-                  </h3>
-                  <p className="text-gray-500 text-center text-sm max-w-[250px]">
-                    Share this board with a team first to start assigning tasks
-                    to team members
-                  </p>
-                </div>
-              ) : (
-                filteredUsers.map((user) => (
-                  <motion.button
-                    key={user._id}
-                    onClick={() => handleUserClick(user)}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                    className={`w-full flex items-center justify-between p-3 rounded-lg transition-all ${
-                      isAssigned(user._id)
-                        ? "bg-design-lightPurpleButtonFill text-design-primaryPurple"
-                        : "hover:bg-design-greyBG"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                          isAssigned(user._id)
-                            ? "bg-design-primaryPurple text-white"
-                            : "bg-design-greyBG text-design-primaryGrey"
-                        }`}
-                      >
-                        {user.firstName[0]}
-                        {user.lastName[0]}
-                      </div>
-                      <div className="text-left">
-                        <p className="font-medium text-design-black">
-                          {user.firstName} {user.lastName}
-                        </p>
-                      </div>
-                    </div>
-                    <motion.div
-                      initial={false}
-                      animate={
-                        isAssigned(user._id) ? { rotate: 360 } : { rotate: 0 }
-                      }
+            {/* Users List - Scrollable */}
+            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
+              <div className="p-2 space-y-1">
+                {users.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8">
+                    <Users className="w-16 h-16 text-gray-300 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-800 mb-2">
+                      No Team Members Yet
+                    </h3>
+                    <p className="text-gray-500 text-center text-sm max-w-[250px]">
+                      Share this board with a team first to start assigning
+                      tasks to team members
+                    </p>
+                  </div>
+                ) : (
+                  filteredUsers.map((user) => (
+                    <motion.button
+                      key={user._id}
+                      onClick={() => handleUserClick(user)}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      className={`w-full flex items-center justify-between p-3 rounded-lg transition-all ${
+                        isAssigned(user._id)
+                          ? "bg-design-lightPurpleButtonFill text-design-primaryPurple"
+                          : "hover:bg-design-greyBG"
+                      }`}
                     >
-                      {isAssigned(user._id) ? (
-                        <UserMinus className="h-5 w-5 text-semantic-error" />
-                      ) : (
-                        <Check className="h-5 w-5 text-design-primaryPurple opacity-0 group-hover:opacity-100" />
-                      )}
-                    </motion.div>
-                  </motion.button>
-                ))
-              )}
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                            isAssigned(user._id)
+                              ? "bg-design-primaryPurple text-white"
+                              : "bg-design-greyBG text-design-primaryGrey"
+                          }`}
+                        >
+                          {user.firstName[0]}
+                          {user.lastName[0]}
+                        </div>
+                        <div className="text-left">
+                          <p className="font-medium text-design-black">
+                            {user.firstName} {user.lastName}
+                          </p>
+                        </div>
+                      </div>
+                      <motion.div
+                        initial={false}
+                        animate={
+                          isAssigned(user._id) ? { rotate: 360 } : { rotate: 0 }
+                        }
+                      >
+                        {isAssigned(user._id) ? (
+                          <UserMinus className="h-5 w-5 text-semantic-error" />
+                        ) : (
+                          <Check className="h-5 w-5 text-design-primaryPurple opacity-0 group-hover:opacity-100" />
+                        )}
+                      </motion.div>
+                    </motion.button>
+                  ))
+                )}
+              </div>
             </div>
 
-            {/* Footer */}
-            <div className="p-4 border-t border-design-greyOutlines bg-design-greyBG/50">
+            {/* Footer - Fixed */}
+            <div className="p-4 border-t border-design-greyOutlines bg-design-greyBG/50 flex-shrink-0">
               <div className="flex justify-end gap-2">
                 <motion.button
                   whileHover={{ scale: 1.02 }}

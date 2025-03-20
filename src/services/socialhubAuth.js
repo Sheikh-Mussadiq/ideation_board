@@ -111,6 +111,6 @@ export async function fetchSocialHubDataAndCallBackend() {
     userInfo: userInfoData,
     userTeams: teamInfoData,
     userUsers: userUsersInfoData,
-    userChannels: userChannelsInfoData
+    userChannels: userChannelsInfoData.data
   };
 }

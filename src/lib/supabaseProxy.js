@@ -19,9 +19,9 @@ const createProxyFetch = (originalFetch) => {
     try {
       const originalUrl = new URL(url);
 
-      // Only intercept Supabase REST API calls
-      if (!originalUrl.pathname.includes('/rest/v1/')) {
-        return fetch(url, options);
+      // Only intercept Supabase REST and Auth API calls
+      if (!originalUrl.pathname.includes('/rest/v1/') && !originalUrl.pathname.includes('/auth/v1/')) {
+        return originalFetch(url, options);
       }
 
       // Get the access token
@@ -34,12 +34,11 @@ const createProxyFetch = (originalFetch) => {
       const proxyUrl = `${import.meta.env.VITE_SOCIALHUB_API_URL}/api2/sb-proxy${originalUrl.pathname}${queryParams ? '?' + queryParams : ''}${queryParams ? '&' : '?'}accesstoken=${maloonAccessToken}`;
 
       console.log('Proxying request:', {
-        from: url,
         to: proxyUrl
       });
 
       // Make the request through proxy
-      return fetch(proxyUrl, {
+      return originalFetch(proxyUrl, {
         ...options,
         credentials: 'include',
       });
@@ -58,9 +57,14 @@ export const createSupabaseProxy = (supabaseClient) => {
     ...supabaseClient.rest.headers,
     'X-Client-Info': 'supabase-js-proxy'
   };
+  supabaseClient.auth.headers = {
+    ...supabaseClient.auth.headers,
+    'X-Client-Info': 'supabase-js-proxy'
+  };
 
   // Override the fetch method in the client's config
   supabaseClient.rest.fetch = createProxyFetch(fetch);
+  supabaseClient.auth.fetch = createProxyFetch(fetch);
 
   return supabaseClient;
 };

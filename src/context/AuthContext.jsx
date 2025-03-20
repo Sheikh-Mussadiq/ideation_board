@@ -86,32 +86,24 @@ export function AuthProvider({ children }) {
       const apiResponse = await fetchSocialHubDataAndCallBackend();
       console.log("from jwt and all data production: ", apiResponse);
 
-      // await supabase.auth.setSession({
-      //   // access_token: token,
-      //   // refresh_token: token,
-      // });
+      const token = apiResponse.userInfo.sbToken;
+      await supabase.auth.setSession({
+        access_token: token,
+        refresh_token: token,
+      });
 
       // Set Supabase authenticated user from API response.
-      // const userData = await supabase.auth.getUser();
-      // setAuthUser(userData.data.user);
+      const userData = await supabase.auth.getUser();
+      setAuthUser(userData.data.user);
 
       //Set Supabase authenticated user from API response.
-      // await supabase.auth.setSession({
-      //   // access_token: token,
-      //   // refresh_token: token,
-      // });
+      // const userData = apiResponse.userInfo.sbUser;
+      // setAuthUser(userData);
 
-      // Set Supabase authenticated user from API response.
-      // const userData = await supabase.auth.getUser();
-      // setAuthUser(userData.data.user);
-
-      //Set Supabase authenticated user from API response.
-      const userData = apiResponse.userInfo.sbUser;
-      setAuthUser(userData);
-
-      const emailPreferance = await getUserEmailNotification(userData.id);
+      const emailPreferance = await getUserEmailNotification(userData.data.user.id);
       setCurrentUser({
         ...apiResponse.userInfo,
+        userName: `${apiResponse.userInfo.firstName}_${apiResponse.userInfo.lastName}`,
         email_preferance: emailPreferance,
       });
 

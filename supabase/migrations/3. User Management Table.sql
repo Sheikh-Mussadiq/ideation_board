@@ -13,11 +13,13 @@ CREATE TABLE public.users (
 
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow users to select their own data" 
-ON public.users 
-FOR SELECT 
-TO authenticated 
-USING (id = (select auth.uid()));
+CREATE policy "Enable read access for all users"
+on "public"."users"
+FOR select
+to authenticated
+using (
+  true
+);
 
 CREATE POLICY "Allow users to insert their own data" 
 ON public.users 

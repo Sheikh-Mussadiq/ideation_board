@@ -1,4 +1,5 @@
 import React from "react";
+import Translate from "./Translate"; // Import Translate component
 
 export default function Tooltip({ text, children, position = "top" }) {
   if (!text) return children;
@@ -14,7 +15,7 @@ export default function Tooltip({ text, children, position = "top" }) {
         `}
       >
         <div className="relative w-max px-2 py-1 text-sm font-medium text-white bg-gray-800 rounded-md">
-          {text}
+          <Translate>{text}</Translate>
           <div
             className={`
               absolute w-0 h-0 border-solid border-transparent

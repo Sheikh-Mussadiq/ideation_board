@@ -1,7 +1,8 @@
+
 -- 1. Create the logs table
 CREATE TABLE board_logs (
   id BIGSERIAL PRIMARY KEY,
-  board_id UUID REFERENCES boards(id),
+  board_id UUID,
   event_type TEXT,        -- 'INSERT', 'UPDATE', 'DELETE'
   message TEXT,           -- Log message (e.g., "Alice created column 'To Do'")
   created_at TIMESTAMPTZ DEFAULT NOW(),

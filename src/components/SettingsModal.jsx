@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Dialog, Switch, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import { X, User, Mail, Shield, Hash, Bell } from "lucide-react";
+import { X, User, Mail, Shield, Hash, Bell, Globe } from "lucide-react";
 import { updateUserData } from "../services/userService";
+import { useLanguage, LANGUAGES } from "../context/LanguageContext";
+import Translate from "./Translate";
 
 const UserDetailItem = ({ icon: Icon, label, value }) => (
   <div className="flex items-center gap-3 p-3 bg-design-greyBG/50 hover:bg-design-greyBG/70 rounded-xl transition-all">
@@ -15,13 +17,16 @@ const UserDetailItem = ({ icon: Icon, label, value }) => (
 );
 
 export default function SettingsModal({ isOpen, onClose, user, userId }) {
-  const [emailNotifications, setEmailNotifications] = useState(user?.email_preferance);
+  const [emailNotifications, setEmailNotifications] = useState(
+    user?.email_preferance
+  );
+  const { language, changeLanguage, languages } = useLanguage();
 
   const handleNotificationToggle = async (checked) => {
     setEmailNotifications(checked);
     await updateUserData(checked, userId);
   };
-  
+
   return (
     <Transition show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -54,7 +59,7 @@ export default function SettingsModal({ isOpen, onClose, user, userId }) {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                   <Dialog.Title className="text-xl font-semibold text-design-black dark:text-white">
-                    Settings
+                    <Translate>Settings</Translate>
                   </Dialog.Title>
                   <button
                     onClick={onClose}
@@ -68,29 +73,47 @@ export default function SettingsModal({ isOpen, onClose, user, userId }) {
                 <div className="space-y-4">
                   <UserDetailItem
                     icon={User}
-                    label="Full Name"
+                    label={<Translate>Full Name</Translate>}
                     value={`${user.firstName} ${user.lastName}`}
                   />
-                  {/* <UserDetailItem
-                    icon={User}
-                    label="Username"
-                    value={user.username}
-                  /> */}
                   <UserDetailItem
                     icon={Mail}
-                    label="Email"
+                    label={<Translate>Email</Translate>}
                     value={user.email}
                   />
                   <UserDetailItem
                     icon={Shield}
-                    label="Role"
+                    label={<Translate>Role</Translate>}
                     value={user.role || "User"}
                   />
                   <UserDetailItem
                     icon={Hash}
-                    label="User ID"
+                    label={<Translate>User ID</Translate>}
                     value={user.userId}
                   />
+
+                  {/* Language Selector */}
+                  <div className="flex items-center justify-between p-3 bg-design-greyBG/50 hover:bg-design-greyBG/70 rounded-xl transition-all">
+                    <div className="flex items-center gap-3">
+                      <Globe className="w-5 h-5 text-design-primaryPurple" />
+                      <div>
+                        <p className="font-medium text-design-black dark:text-white">
+                          <Translate>Language</Translate>
+                        </p>
+                        <p className="text-sm text-design-primaryGrey">
+                          <Translate>Select your preferred language</Translate>
+                        </p>
+                      </div>
+                    </div>
+                    <select
+                      value={language}
+                      onChange={(e) => changeLanguage(e.target.value)}
+                      className="px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-sm focus:ring-2 focus:ring-design-primaryPurple focus:outline-none"
+                    >
+                      <option value={languages.ENGLISH}>English</option>
+                      <option value={languages.GERMAN}>Deutsch</option>
+                    </select>
+                  </div>
 
                   {/* Notification Toggle */}
                   <div className="flex items-center justify-between p-3 bg-design-greyBG/50 hover:bg-design-greyBG/70 rounded-xl transition-all">
@@ -98,10 +121,10 @@ export default function SettingsModal({ isOpen, onClose, user, userId }) {
                       <Bell className="w-5 h-5 text-design-primaryPurple" />
                       <div>
                         <p className="font-medium text-design-black dark:text-white">
-                          Email Notifications
+                          <Translate>Email Notifications</Translate>
                         </p>
                         <p className="text-sm text-design-primaryGrey">
-                          Receive email updates
+                          <Translate>Receive email updates</Translate>
                         </p>
                       </div>
                     </div>

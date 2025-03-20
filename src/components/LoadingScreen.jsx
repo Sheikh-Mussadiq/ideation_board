@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import SocialHubSmiley from "../assets/SocialHub.png";
 
 const loadingPhrases = [
   "Organizing your ideas...",
@@ -70,7 +71,7 @@ export default function LoadingScreen() {
                   Social
                   <span className="text-design-black dark:text-white">Hub</span>
                   <img
-                    src="/SocialHub.png"
+                    src={SocialHubSmiley}
                     alt=""
                     className="h-12 w-12 mx-auto ml-2"
                   />

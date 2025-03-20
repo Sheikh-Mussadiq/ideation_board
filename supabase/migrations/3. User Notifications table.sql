@@ -3,8 +3,8 @@ create table notifications (
   user_id text not null,
   content text not null,
   type text not null,
-  board_id uuid references boards(id) on delete cascade,
-  card_id uuid references cards(id) on delete cascade,
+  board_id uuid , -- Should never be deleted even if the board is deleted
+  card_id uuid , -- Should never be deleted even if the card is deleted
   read boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now())
 );

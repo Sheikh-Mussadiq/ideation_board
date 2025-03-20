@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { normalizeSingleResult } from '../lib/helpers';
 
 export async function fetchNotifications() {
   const { data, error } = await supabase
@@ -25,7 +26,7 @@ export async function createNotification(notificationData) {
 
     console.log(data);
   if (error) throw error;
-  return data;
+  return normalizeSingleResult(data);
 }
 
 export async function markNotificationAsRead(notificationId) {
@@ -37,7 +38,7 @@ export async function markNotificationAsRead(notificationId) {
     .single();
 
   if (error) throw error;
-  return data;
+  return normalizeSingleResult(data);
 }
 
 export async function markAllNotificationsAsRead(userId) {
