@@ -207,6 +207,7 @@ export default function IdeationPage() {
           .filter((userId) => userId !== currentUser.userId) // Skip current user from team users
           .forEach((userId) => allowedUsers.add(userId));
       }
+      console.log(allowedUsers);
       // Add admins when board has team_id
       currentUserUsers
         .filter((user) => user.role === "ADMIN")
@@ -220,6 +221,7 @@ export default function IdeationPage() {
     const filteredUsers = currentUserUsers.filter((user) =>
       allowedUsers.has(user._id)
     );
+    console.log(allowedUsers, filteredUsers);
 
     // Create final users array with current user and filtered team users
     const finalUsers = [
@@ -233,9 +235,9 @@ export default function IdeationPage() {
         userName: currentUser.userName,
       },
       // Add other users, excluding current user if they're already in the team
-      ...filteredUsers.filter((user) => user._id !== currentUser._id),
+      ...filteredUsers.filter((user) => user._id !== currentUser.userId),
     ];
-
+    console.log(finalUsers);
     setTeamUsers(finalUsers);
   }, [
     selectedBoard?.team_id,

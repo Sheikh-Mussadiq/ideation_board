@@ -3,7 +3,6 @@ import { Dialog, Switch, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { X, User, Mail, Shield, Hash, Bell, Globe } from "lucide-react";
 import { updateUserData } from "../services/userService";
-import { useLanguage, LANGUAGES } from "../context/LanguageContext";
 
 const UserDetailItem = ({ icon: Icon, label, value }) => (
   <div className="flex items-center gap-3 p-3 bg-design-greyBG/50 hover:bg-design-greyBG/70 rounded-xl transition-all">
@@ -19,7 +18,6 @@ export default function SettingsModal({ isOpen, onClose, user, userId }) {
   const [emailNotifications, setEmailNotifications] = useState(
     user?.email_preferance
   );
-  const { language, changeLanguage, languages } = useLanguage();
 
   const handleNotificationToggle = async (checked) => {
     setEmailNotifications(checked);
@@ -92,7 +90,7 @@ export default function SettingsModal({ isOpen, onClose, user, userId }) {
                   />
 
                   {/* Language Selector */}
-                  <div className="flex items-center justify-between p-3 bg-design-greyBG/50 hover:bg-design-greyBG/70 rounded-xl transition-all">
+                  {/* <div className="flex items-center justify-between p-3 bg-design-greyBG/50 hover:bg-design-greyBG/70 rounded-xl transition-all">
                     <div className="flex items-center gap-3">
                       <Globe className="w-5 h-5 text-design-primaryPurple" />
                       <div>
@@ -112,7 +110,7 @@ export default function SettingsModal({ isOpen, onClose, user, userId }) {
                       <option value={languages.ENGLISH}>English</option>
                       <option value={languages.GERMAN}>Deutsch</option>
                     </select>
-                  </div>
+                  </div> */}
 
                   {/* Notification Toggle */}
                   <div className="flex items-center justify-between p-3 bg-design-greyBG/50 hover:bg-design-greyBG/70 rounded-xl transition-all">

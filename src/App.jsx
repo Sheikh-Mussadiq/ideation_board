@@ -8,7 +8,6 @@ import IdeationPage from "./pages/IdeationPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { BoardProvider } from "./context/BoardContext";
 import { SidebarProvider } from "./context/SidebarContext";
-import { LanguageProvider } from "./context/LanguageContext";
 import NavigateToSocialHubPage from "./pages/NavigateToSocialHubPage";
 import HomePage from "./pages/HomePage";
 import LoadingScreen from "./components/LoadingScreen";
@@ -82,15 +81,13 @@ export default function App() {
     <AuthProvider>
       <BoardProvider>
         <SidebarProvider>
-          <LanguageProvider>
-            <HashRouter>
-              <Routes>
-                <Route path="/ideation/login" element={<ProtectedLoginRoute />} />
-                <Route path="/*" element={<AuthenticatedRoutes />} />
-              </Routes>
-              <Toaster position="top-right" />
-            </HashRouter>
-          </LanguageProvider>
+          <HashRouter>
+            <Routes>
+              <Route path="/ideation/login" element={<ProtectedLoginRoute />} />
+              <Route path="/*" element={<AuthenticatedRoutes />} />
+            </Routes>
+            <Toaster position="top-right" />
+          </HashRouter>
         </SidebarProvider>
       </BoardProvider>
     </AuthProvider>
