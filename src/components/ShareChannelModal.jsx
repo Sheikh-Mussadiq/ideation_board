@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { X, Share2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getSocialIcon } from "../utils/socialIcons";
@@ -29,6 +29,9 @@ const modalVariants = {
   },
 };
 
+// Add this helper function at the top of the component
+const getChannelId = (channel) => channel.id || channel._id;
+
 export default function ShareChannelModal({
   isOpen,
   onClose,
@@ -39,15 +42,20 @@ export default function ShareChannelModal({
   useScrollLock(isOpen);
   const [selectedChannels, setSelectedChannels] = useState([]);
 
-  const handleChannelToggle = (channelId) => {
-    setSelectedChannels(prev => {
+  const handleChannelToggle = (channel) => {
+    const channelId = getChannelId(channel);
+    setSelectedChannels((prev) => {
       if (prev.includes(channelId)) {
-        return prev.filter(id => id !== channelId);
+        return prev.filter((id) => id !== channelId);
       } else {
         return [...prev, channelId];
       }
     });
   };
+
+  useEffect(() => {
+    console.log(activeChannelIds, channels, selectedChannels);
+  }, [selectedChannels]);
 
   const handleShare = () => {
     if (selectedChannels.length > 0) {
@@ -89,8 +97,11 @@ export default function ShareChannelModal({
               </button>
             </div>
             <p className="text-sm text-gray-900 mb-3">
-                <Translate>This will create a draft in the content planner for the selected cahnnels in SocialHub</Translate>
-              </p>
+              <Translate>
+                This will create a draft in the content planner for the selected
+                cahnnels in SocialHub
+              </Translate>
+            </p>
             {channels && channels.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8">
                 <Share2 className="w-16 h-16 text-gray-300 mb-4" />
@@ -108,10 +119,10 @@ export default function ShareChannelModal({
                 {channels &&
                   channels.map((channel) => (
                     <div
-                      key={channel.id}
-                      onClick={() => handleChannelToggle(channel.id)}
+                      key={getChannelId(channel)}
+                      onClick={() => handleChannelToggle(channel)}
                       className={`flex items-center justify-between p-3 rounded-lg cursor-pointer border transition-all ${
-                        selectedChannels.includes(channel.id)
+                        selectedChannels.includes(getChannelId(channel))
                           ? "bg-design-lightPurpleButtonFill border-primary"
                           : "hover:bg-gray-50 border-gray-200"
                       }`}
@@ -124,21 +135,14 @@ export default function ShareChannelModal({
                         />
                         <div className="flex flex-col">
                           <span className="font-medium">
-                            {channels.filter(c => 
-                              c.name === channel.name && 
-                              c.socialNetwork === channel.socialNetwork
+                            {channels.filter(
+                              (c) =>
+                                c.name === channel.name &&
+                                c.socialNetwork === channel.socialNetwork
                             ).length > 1
                               ? channel.uniqueName || channel.name
                               : channel.name}
                           </span>
-                          {channels.filter(c => 
-                            c.name === channel.name && 
-                            c.socialNetwork === channel.socialNetwork
-                          ).length > 1 && (
-                            <span className="text-xs text-gray-500">
-                              {channel.location || channel.uniqueName}
-                            </span>
-                          )}
                         </div>
                       </div>
                       <div className="flex flex-col items-center gap-1">

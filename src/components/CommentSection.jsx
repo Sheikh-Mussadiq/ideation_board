@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { format } from "date-fns";
 import { User, Edit2, Trash2, MessageSquare, ChevronDown } from "lucide-react";
-import { createNotification } from "../services/notificationService";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 import { mentioningEmailService } from "../services/emailService";
@@ -113,7 +112,7 @@ export default function CommentSection({
       if (word.startsWith("@")) {
         const username = word.slice(1);
         const mentionedUser = teamUsers.find(
-          (user) => user.userName.toLowerCase() === username.toLowerCase()
+          (user) => user.userName.toLowerCase() === username.toLowerCase() && user._id !== userUserId
         );
         if (mentionedUser) {
           mentions.push(mentionedUser);
@@ -160,14 +159,13 @@ export default function CommentSection({
 
       setNewComment("");
 
-      mentioningEmailService(
+      mentionedUsers.length > 0 && mentioningEmailService(
         mentionedUsers,
         currentUser.userName,
         cardTitle,
         boardId,
         newComment.trim()
       );
-
     }
   };
 
@@ -204,6 +202,12 @@ export default function CommentSection({
               onChange={handleInputChange}
               placeholder="Add a comment... (Use @ to mention)"
               rows={1}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey && newComment.trim()) {
+                  e.preventDefault();
+                  handleSubmit(e);
+                }
+              }}
               className="flex-1 px-4 py-3 rounded-xl border-2 border-design-greyOutlines/50 focus:border-design-primaryPurple focus:ring-0 dark:bg-design-black/50 dark:border-design-greyOutlines/20 placeholder:text-design-primaryGrey/50 min-h-[48px] max-h-[150px] resize-none overflow-auto scrollbar-none"
               style={{
                 height: "auto",
@@ -292,6 +296,12 @@ export default function CommentSection({
                 <textarea
                   value={editText}
                   onChange={(e) => setEditText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey && editText.trim()) {
+                      e.preventDefault();
+                      handleEdit(comment.id);
+                    }
+                  }}
                   className="w-full px-4 py-2 rounded-xl border-2 border-design-greyOutlines/50 focus:border-design-primaryPurple focus:ring-0 dark:bg-design-black/50 min-h-[80px]"
                   rows={2}
                 />

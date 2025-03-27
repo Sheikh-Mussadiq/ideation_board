@@ -11,7 +11,7 @@ export default function DeleteBoardModal({
   onConfirm,
   boardTitle,
 }) {
-  const [countdown, setCountdown] = useState(1);
+  const [countdown, setCountdown] = useState(5);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export default function DeleteBoardModal({
     }
     return () => {
       clearInterval(timer);
-      setCountdown(1);
+      setCountdown(5);
     };
   }, [isOpen]);
 

@@ -10,7 +10,7 @@
   input[type="text"],
   input[type="url"],
   textarea {
-    @apply border-design-greyOutlines rounded-md shadow-sm focus:ring-button-primary-cta focus:border-button-primary-cta;
+    @apply border-design-greyOutlines shadow-sm focus:ring-button-primary-cta focus:border-button-primary-cta;
   }
 
   h1 {
@@ -81,7 +81,6 @@
 .loading-cursor {
   cursor: wait !important;
 }
-
 
 .task-hover {
   @apply bg-design-lightPurpleButtonFill text-design-primaryPurple;

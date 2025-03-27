@@ -78,7 +78,8 @@ export default function ChecklistModal({
       >
         <div className="text-xl font-semibold text-design-black dark:text-design-white flex justify-between items-center mb-6">
           <span>
-            <Translate>Checklist</Translate> ({completedCount}/{checklist.length})
+            <Translate>Checklist</Translate> ({completedCount}/
+            {checklist.length})
           </span>
           <button
             onClick={handleClose}
@@ -130,7 +131,7 @@ export default function ChecklistModal({
               value={newItemText}
               onChange={(e) => setNewItemText(e.target.value)}
               placeholder="Add new item..."
-              className="flex-grow px-4 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all dark:bg-design-black/50 dark:border-design-greyOutlines/20"
+              className="flex-grow px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all dark:bg-design-black/50 dark:border-design-greyOutlines/20"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   handleAddItem();

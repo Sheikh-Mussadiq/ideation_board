@@ -56,7 +56,10 @@ export function AuthProvider({ children }) {
       );
       setCurrentUser({
         ...apiResponse.userInfo,
-        userName: `${apiResponse.userInfo.firstName}_${apiResponse.userInfo.lastName}`,
+        userName: `${apiResponse.userInfo.firstName.replace(
+          /\s+/g,
+          ""
+        )}_${apiResponse.userInfo.lastName.replace(/\s+/g, "")}`,
         email_preferance: emailPreferance,
       });
 
@@ -100,7 +103,9 @@ export function AuthProvider({ children }) {
       // const userData = apiResponse.userInfo.sbUser;
       // setAuthUser(userData);
 
-      const emailPreferance = await getUserEmailNotification(userData.data.user.id);
+      const emailPreferance = await getUserEmailNotification(
+        userData.data.user.id
+      );
       setCurrentUser({
         ...apiResponse.userInfo,
         userName: `${apiResponse.userInfo.firstName}_${apiResponse.userInfo.lastName}`,

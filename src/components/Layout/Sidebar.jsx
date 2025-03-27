@@ -97,16 +97,7 @@ export default function Sidebar() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isArchivedCardsOpen, setIsArchivedCardsOpen] = useState(false);
 
-  const navItems = [
-    { name: "Home", path: "/home", icon: Home },
-    { name: "Ideation", path: "/ideation", icon: Lightbulb },
-    {
-      name: "Archived Cards",
-      icon: Archive,
-      onClick: () => setIsArchivedCardsOpen(true),
-      isAction: true,
-    },
-  ];
+  const navItems = [{ name: "Home", path: "/home", icon: Home }];
 
   const sidebarVariants = {
     open: {
@@ -168,6 +159,10 @@ export default function Sidebar() {
   }, [sharedBoards, sharedBoardsSearch]);
 
   const handleBoardClickNoSidebar = () => {
+    if (boardsList.length === 0) {
+      navigate("/ideation");
+      return;
+    }
     toggleSidebar();
     setIsBoardsOpen(true);
   };
@@ -238,7 +233,7 @@ export default function Sidebar() {
               )}
             </AnimatePresence>
           </div>
-          <nav className="flex-1 px-3 space-y-2">
+          <nav className="flex flex-col px-3 space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -305,6 +300,10 @@ export default function Sidebar() {
               >
                 <button
                   onClick={() => {
+                    if (boardsList.length === 0) {
+                      navigate("/ideation");
+                      // return;
+                    }
                     isExpanded
                       ? setIsBoardsOpen(!isBoardsOpen)
                       : handleBoardClickNoSidebar();
@@ -355,7 +354,7 @@ export default function Sidebar() {
                       icon={UserSquare2}
                     />
                     <BoardSection
-                      title="Shared Boards"
+                      title="Shared with me"
                       boards={sharedBoardsFiltered}
                       searchValue={sharedBoardsSearch}
                       onSearchChange={setSharedBoardsSearch}
@@ -365,6 +364,31 @@ export default function Sidebar() {
                 )}
               </AnimatePresence>
             </div>
+
+            {/* Archived Cards Button */}
+            <Tooltip
+              text={!isExpanded ? "Archived Cards" : undefined}
+              position="right"
+            >
+              <button
+                onClick={() => setIsArchivedCardsOpen(true)}
+                className="flex items-center px-3 py-2.5 rounded-xl transition-all duration-300 group w-full text-design-primaryGrey hover:bg-design-primaryPurple/10 hover:text-design-primaryPurple"
+              >
+                <Archive className="h-[18px] w-[18px] flex-shrink-0" />
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.span
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      className="ml-3 font-medium overflow-hidden whitespace-nowrap text-sm"
+                    >
+                      <Translate>Archived Cards</Translate>
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </button>
+            </Tooltip>
           </nav>
           {/* User Profile Section */}
           <div className="p-3 mt-auto space-y-2">

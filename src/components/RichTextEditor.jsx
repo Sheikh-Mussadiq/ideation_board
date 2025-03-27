@@ -1,18 +1,28 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Underline from "@tiptap/extension-underline";
+import EmojiPicker from "emoji-picker-react";
 import {
   Bold,
   Italic,
   List,
   ListOrdered,
   Underline as UnderlineIcon,
+  Smile,
 } from "lucide-react";
 import Tooltip from "./Tooltip";
 
 const MenuBar = ({ editor }) => {
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  useEffect(() => {
+    const closeEmojiPicker = () => setShowEmojiPicker(false);
+    document.addEventListener("click", closeEmojiPicker);
+    return () => document.removeEventListener("click", closeEmojiPicker);
+  }, []);
+
   if (!editor) {
     return null;
   }
@@ -79,6 +89,44 @@ const MenuBar = ({ editor }) => {
           <ListOrdered className="h-4 w-4" />
         </button>
       </Tooltip>
+      {typeof window !== "undefined" && window.innerWidth > 768 && (
+        <Tooltip text="Emoji">
+          <div className="relative">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowEmojiPicker(!showEmojiPicker);
+              }}
+              className={`p-1.5 rounded hover:bg-design-primaryPurple/20 transition-colors ${
+                showEmojiPicker
+                  ? "bg-design-primaryPurple/20 text-design-primaryPurple"
+                  : "text-design-primaryGrey"
+              }`}
+            >
+              <Smile className="h-4 w-4" />
+            </button>
+            {showEmojiPicker && (
+              <div
+                className="absolute top-full mt-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <EmojiPicker
+                  onEmojiClick={(emojiData) => {
+                    editor.chain().focus().insertContent(emojiData.emoji).run();
+                    setShowEmojiPicker(false);
+                  }}
+                  width={300}
+                  height={400}
+                  previewConfig={{ showPreview: false }}
+                  searchPlaceholder="Search emoji..."
+                  skinTonesDisabled
+                  theme="light"
+                />
+              </div>
+            )}
+          </div>
+        </Tooltip>
+      )}
     </div>
   );
 };

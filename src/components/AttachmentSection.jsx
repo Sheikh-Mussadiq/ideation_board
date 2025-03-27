@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Paperclip,
   X,
@@ -17,6 +17,8 @@ import { supabase } from "../lib/supabase";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import Translate from "./Translate";
+import { useWindowDimensions } from "../hooks/useWindowDimensions";
+import { useScrollLock } from "../hooks/useScrollLock";
 
 const FileTypeIcon = ({ type, className = "h-4 w-4" }) => {
   const getFileType = (filename) => {
@@ -86,6 +88,9 @@ export default function AttachmentSection({
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [loadingFileId, setLoadingFileId] = useState(null);
+  const [imageUrls, setImageUrls] = useState({});
+  const { width: windowWidth } = useWindowDimensions();
+  const imageContainerRef = useRef(null);
 
   const isValidUrl = (urlString) => {
     try {
@@ -98,6 +103,15 @@ export default function AttachmentSection({
     } catch (e) {
       return false;
     }
+  };
+
+  const getFileCategory = (filename) => {
+    if (!filename) return "link";
+    const ext = filename.split(".").pop().toLowerCase();
+    if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) return "img";
+    if (["mp4", "mov", "avi", "webm"].includes(ext)) return "video";
+    if (["pdf", "doc", "docx", "txt"].includes(ext)) return "doc";
+    return "other";
   };
 
   const handleAddLink = () => {
@@ -123,6 +137,7 @@ export default function AttachmentSection({
       onAddAttachment({
         id: Date.now().toString(),
         type: "link",
+        file_type: "link",
         url: finalUrl,
         name: url.hostname,
         createdAt: new Date().toISOString(),
@@ -161,6 +176,7 @@ export default function AttachmentSection({
       onAddAttachment({
         id: Date.now().toString(),
         type: "file",
+        file_type: getFileCategory(file.name),
         storagePath: filePath,
         name: file.name,
         size: file.size,
@@ -235,29 +251,63 @@ export default function AttachmentSection({
     }
   };
 
+  const getImageSignedUrl = async (storagePath) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from("ideation_media")
+        .createSignedUrl(storagePath, 86400); // 24 hours = 86400 seconds
+
+      if (error) throw error;
+      return data.signedUrl;
+    } catch (error) {
+      console.error("Error generating image signed URL:", error);
+      return null;
+    }
+  };
+
+  React.useEffect(() => {
+    const loadImageUrls = async () => {
+      const imageAttachments = attachments.filter((a) => a.file_type === "img");
+      const urls = {};
+
+      for (const attachment of imageAttachments) {
+        if (attachment.storagePath) {
+          const signedUrl = await getImageSignedUrl(attachment.storagePath);
+          if (signedUrl) {
+            urls[attachment.storagePath] = signedUrl;
+          }
+        }
+      }
+
+      setImageUrls(urls);
+    };
+
+    loadImageUrls();
+  }, [attachments]);
+
   const visibleAttachments = showAllAttachments
     ? attachments
     : attachments.slice(0, 2);
   const hasMoreAttachments = attachments.length > 2;
 
   return (
-    <div className="space-y-4 bg-white/50 backdrop-blur-sm border border-design-greyOutlines/20 p-4 rounded-xl shadow-sm transition-all duration-300 hover:shadow-md">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 bg-white/50 backdrop-blur-sm border border-design-greyOutlines/20 p-3 sm:p-4 rounded-xl shadow-sm transition-all duration-300 hover:shadow-md">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center text-sm font-medium text-design-primaryGrey">
           <Paperclip className="h-5 w-5 mr-2 text-design-primaryPurple" />
           <Translate>Attachments</Translate>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-start sm:justify-end">
           <button
             onClick={() => setIsAddingLink(true)}
             disabled={isUploading || isDeleting}
-            className="flex items-center px-3 py-1.5 text-sm text-design-primaryPurple bg-design-lightPurpleButtonFill rounded-lg hover:bg-button-primary-cta hover:text-white transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+            className="flex items-center px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-design-primaryPurple bg-design-lightPurpleButtonFill rounded-lg hover:bg-button-primary-cta hover:text-white transition-all duration-300 transform hover:scale-105 disabled:opacity-50 flex-1 sm:flex-auto justify-center"
           >
             <Plus className="h-4 w-4 mr-1" />
             <Translate>Add Link</Translate>
           </button>
           <label
-            className={`flex items-center px-3 py-1.5 text-sm text-design-primaryPurple bg-design-lightPurpleButtonFill rounded-lg hover:bg-button-primary-cta hover:text-white transition-all duration-300 transform hover:scale-105 cursor-pointer ${
+            className={`flex items-center px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-design-primaryPurple bg-design-lightPurpleButtonFill rounded-lg hover:bg-button-primary-cta hover:text-white transition-all duration-300 transform hover:scale-105 cursor-pointer flex-1 sm:flex-auto justify-center ${
               isUploading ? "opacity-50 pointer-events-none" : ""
             }`}
           >
@@ -302,9 +352,9 @@ export default function AttachmentSection({
             <motion.div
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
-              className="bg-white p-4 rounded-lg shadow-sm border border-design-greyOutlines/20"
+              className="bg-white p-3 sm:p-4 rounded-lg shadow-sm border border-design-greyOutlines/20"
             >
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                 <motion.input
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
@@ -313,7 +363,7 @@ export default function AttachmentSection({
                   value={newLink}
                   onChange={(e) => setNewLink(e.target.value)}
                   placeholder="Enter URL..."
-                  className={`input flex-1 p-2 ${
+                  className={`input flex-1 p-2 w-full overflow-hidden text-ellipsis ${
                     linkError ? "border-semantic-error" : ""
                   }`}
                   onKeyDown={(e) => {
@@ -323,37 +373,39 @@ export default function AttachmentSection({
                     }
                   }}
                 />
-                <motion.button
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.2 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleAddLink}
-                  className="btn-primary"
-                >
-                  <Translate>Add</Translate>
-                </motion.button>
-                <motion.button
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  whileHover={{ scale: 1.1 }}
-                  onClick={() => {
-                    setIsAddingLink(false);
-                    setNewLink("");
-                    setLinkError(null);
-                  }}
-                  className="btn-ghost p-2"
-                >
-                  <X className="h-5 w-5" />
-                </motion.button>
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                  <motion.button
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleAddLink}
+                    className="btn-primary flex-1 sm:flex-none justify-center"
+                  >
+                    <Translate>Add</Translate>
+                  </motion.button>
+                  <motion.button
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    whileHover={{ scale: 1.1 }}
+                    onClick={() => {
+                      setIsAddingLink(false);
+                      setNewLink("");
+                      setLinkError(null);
+                    }}
+                    className="btn-ghost p-2"
+                  >
+                    <X className="h-5 w-5" />
+                  </motion.button>
+                </div>
               </div>
               {linkError && (
                 <motion.p
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-sm text-semantic-error mt-2"
+                  className="text-sm text-semantic-error mt-2 break-words overflow-hidden"
                 >
                   {linkError}
                 </motion.p>
@@ -367,16 +419,21 @@ export default function AttachmentSection({
         {visibleAttachments.map((attachment) => (
           <div
             key={attachment.id}
-            className="group flex items-center justify-between p-3 bg-white border border-design-greyOutlines/20 rounded-lg hover:border-design-primaryPurple/30 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-sm"
+            className="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-white border border-design-greyOutlines/20 rounded-lg hover:border-design-primaryPurple/30 transition-all duration-300 transform hover:scale-[1.01] hover:shadow-sm gap-3"
           >
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-lg bg-design-lightPurpleButtonFill flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <div className="flex items-center space-x-3 w-full sm:w-auto">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-design-lightPurpleButtonFill flex items-center justify-center group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                 <FileTypeIcon type={attachment.name} className="h-5 w-5" />
               </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-800 group-hover:text-design-primaryPurple transition-colors duration-300">
+              <div className="flex flex-col min-w-0 flex-1 sm:flex-auto">
+                <span className="text-sm font-medium text-gray-800 group-hover:text-design-primaryPurple transition-colors duration-300 truncate max-w-[150px] sm:max-w-[200px] md:max-w-[300px] lg:max-w-[400px] overflow-hidden text-ellipsis">
                   {attachment.name}
                 </span>
+                {attachment.type === "link" && (
+                  <span className="text-xs text-design-primaryGrey truncate max-w-[150px] sm:max-w-[200px] md:max-w-[300px] lg:max-w-[400px] overflow-hidden text-ellipsis">
+                    {attachment.url}
+                  </span>
+                )}
                 <span className="text-xs text-design-primaryGrey">
                   <Translate>Added</Translate>{" "}
                   {new Date(attachment.createdAt).toLocaleDateString()}
@@ -386,40 +443,58 @@ export default function AttachmentSection({
               </div>
             </div>
 
-            <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              {attachment.type === "link" ? (
-                <a
-                  href={attachment.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="p-2 rounded-full hover:bg-design-lightPurpleButtonFill text-design-primaryGrey hover:text-design-primaryPurple transition-all duration-300"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              ) : (
+            <div className="flex items-center justify-between w-full sm:w-auto gap-2">
+              {attachment.file_type === "img" && attachment.storagePath && (
+                <div className="w-16 h-16 sm:w-20 sm:h-20 overflow-hidden rounded-lg relative flex-shrink-0">
+                  {imageUrls[attachment.storagePath] ? (
+                    <img
+                      src={imageUrls[attachment.storagePath]}
+                      alt={attachment.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-lg">
+                      <Loader2 className="h-4 w-4 animate-spin text-design-primaryGrey" />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="flex items-center space-x-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-300 ml-auto">
+                {attachment.type === "link" ? (
+                  <a
+                    href={attachment.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-2 rounded-full hover:bg-design-lightPurpleButtonFill text-design-primaryGrey hover:text-design-primaryPurple transition-all duration-300"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => handleFileDownload(attachment)}
+                    disabled={loadingFileId === attachment.storagePath}
+                    className="p-2 rounded-full hover:bg-design-lightPurpleButtonFill text-design-primaryGrey hover:text-design-primaryPurple transition-all duration-300 disabled:opacity-50"
+                  >
+                    {loadingFileId === attachment.storagePath ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4" />
+                    )}
+                  </button>
+                )}
                 <button
-                  onClick={() => handleFileDownload(attachment)}
-                  disabled={loadingFileId === attachment.storagePath}
-                  className="p-2 rounded-full hover:bg-design-lightPurpleButtonFill text-design-primaryGrey hover:text-design-primaryPurple transition-all duration-300 disabled:opacity-50"
+                  onClick={() => handleDeleteAttachment(attachment.id)}
+                  disabled={isDeleting || loadingFileId === attachment.id}
+                  className="p-2 rounded-full hover:bg-semantic-error-light text-design-primaryGrey hover:text-semantic-error transition-all duration-300 disabled:opacity-50"
                 >
-                  {loadingFileId === attachment.storagePath ? (
+                  {loadingFileId === attachment.id ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <Download className="h-4 w-4" />
+                    <X className="h-4 w-4" />
                   )}
                 </button>
-              )}
-              <button
-                onClick={() => handleDeleteAttachment(attachment.id)}
-                disabled={isDeleting || loadingFileId === attachment.id}
-                className="p-2 rounded-full hover:bg-semantic-error-light text-design-primaryGrey hover:text-semantic-error transition-all duration-300 disabled:opacity-50"
-              >
-                {loadingFileId === attachment.id ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <X className="h-4 w-4" />
-                )}
-              </button>
+              </div>
             </div>
           </div>
         ))}

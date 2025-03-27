@@ -2,6 +2,7 @@
 
 import React, { useState, Fragment, useRef, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { supabase } from "../lib/supabase";
 import {
   X,
   Share2,
@@ -18,6 +19,7 @@ import {
   Paperclip,
   MessageSquare,
 } from "lucide-react";
+import SocialHubSmiley from "../assets/SocialHub.png";
 
 import toast from "react-hot-toast";
 import PrioritySelect from "./PrioritySelect";
@@ -94,21 +96,27 @@ export default function CardModal({
       channelIds: selectedChannelIds,
     };
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_BASE_URL}/api/cp/post`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(postData),
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Failed to create post");
-      }
+      // const response = await fetch(
+      //   `${import.meta.env.VITE_BACKEND_BASE_URL}/api/cp/post`,
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify(postData),
+      //   }
+      // );
+      // if (!response.ok) {
+      //   throw new Error("Failed to create post");
+      // }
 
-      const data = await response.json();
+      // const data = await response.json();
+      const response = await supabase.functions.invoke("create-draft-CP", {
+        body: JSON.stringify(postData),
+      });
+
+      const data = response.result;
+      console.log("Post created successfully:", data);
       toast.success("Successfully shared to selected channels!");
       console.log("Post created successfully:", data);
     } catch (error) {
@@ -164,13 +172,25 @@ export default function CardModal({
                   </p>
 
                   <div className="flex items-center space-x-2">
-                    <Tooltip text="Create draft in CP SocialHub" position="left">
+                    <Tooltip
+                      text="Create draft in CP SocialHub"
+                      position={window.innerWidth < 768 ? "bottom" : "left"}
+                      animated={true}
+                      persistent={true}
+                      persistentKey="socialHubTooltipClicked"
+                    >
                       <button
                         onClick={() => setIsShareModalOpen(true)}
                         className="p-2 text-gray-400 hover:text-primary rounded-full 
-                          hover:bg-primary-light transition-all duration-200 hover:scale-105"
+                          hover:bg-primary-light transition-all duration-200 hover:scale-105 
+                          animate-pulse relative group min-w-[2.5rem] min-h-[2.5rem] flex items-center justify-center"
                       >
-                        <Share2 className="h-5 w-5" />
+                        <img
+                          src={SocialHubSmiley}
+                          alt="SocialHub"
+                          className="relative z-10 w-7 h-7 object-contain"
+                        />
+                        {/* <span className="absolute inset-0 bg-design-socialHubYellow opacity-30 rounded-full animate-ping"></span> */}
                       </button>
                     </Tooltip>
 
@@ -228,7 +248,13 @@ export default function CardModal({
                           value={localTitle}
                           onChange={handleTitleChange}
                           onBlur={handleTitleBlur}
-                          className="w-full max-w-full text-xl font-semibold text-gray-900 border-b-2 border-primary focus:ring-0 focus:outline-none bg-primary-light/30 px-3 py-2 rounded-lg transition-all"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && localTitle.trim()) {
+                              e.preventDefault();
+                              handleTitleBlur();
+                            }
+                          }}
+                          className="w-full max-w-full text-xl font-semibold text-gray-900 border-b-2 border-primary focus:ring-0 focus:outline-none bg-primary-light/30 px-3 py-2 transition-all"
                           placeholder="Card title"
                         />
                       ) : (
@@ -241,18 +267,14 @@ export default function CardModal({
                       )}
                     </Dialog.Title>
                     <div className="group relative">
-                      <button
-                        onClick={() => setIsEditingTitle(true)}
-                        className="p-2 text-gray-400 hover:text-design-primaryPurple rounded-full hover:bg-design-primaryPurple/20 transition-all hover:scale-110 flex-shrink-0"
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </button>
-                      <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 hidden group-hover:block">
-                        <div className="bg-gray-800 text-white text-sm py-1 px-2 rounded-md shadow-lg whitespace-nowrap">
-                          <Translate>Edit Title</Translate>
-                          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-gray-800"></div>
-                        </div>
-                      </div>
+                      <Tooltip text="Edit Title" position="top">
+                        <button
+                          onClick={() => setIsEditingTitle(true)}
+                          className="p-2 text-gray-400 hover:text-design-primaryPurple rounded-full hover:bg-design-primaryPurple/20 transition-all hover:scale-110 flex-shrink-0"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                      </Tooltip>
                     </div>
                   </div>
 
@@ -382,11 +404,6 @@ export default function CardModal({
 
                   {/* Attachments */}
                   <div className="space-y-3">
-                    <h3 className="flex items-center text-base font-medium text-design-primaryGrey">
-                      <Paperclip className="h-5 w-5 mr-2 text-design-primaryGrey" />
-                      <Translate>Attachments</Translate> (
-                      {card.attachments?.length || 0})
-                    </h3>
                     <AttachmentSection
                       attachments={card.attachments || []}
                       onAddAttachment={(attachment) =>
@@ -411,11 +428,6 @@ export default function CardModal({
 
                   {/* Comments */}
                   <div className="space-y-3">
-                    <h3 className="flex items-center text-base font-medium text-design-primaryGrey">
-                      <MessageSquare className="h-5 w-5 mr-2 text-design-primaryGrey" />
-                      <Translate>Comments</Translate> (
-                      {card.comments?.length || 0})
-                    </h3>
                     <CommentSection
                       comments={card.comments || []}
                       userUserId={currentUser.userId}
@@ -438,6 +450,7 @@ export default function CardModal({
                           id: commentId,
                           text,
                           editedAt: new Date().toISOString(),
+                          user_id: currentUser.userId,
                         };
                         try {
                           await updateComment("edit", card.id, updatedComment);
@@ -449,7 +462,7 @@ export default function CardModal({
                         try {
                           await updateComment("delete", card.id, {
                             commentId: comment_ID,
-                            account_id: currentUser.accountId,
+                            user_id: currentUser.userId,
                           });
                         } catch (error) {
                           console.error("Error deleting comment:", error);

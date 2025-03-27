@@ -59,6 +59,8 @@ export async function fetchBoards() {
                 attachments: card.attachments || [],
                 comments: comments || [],
                 archived: card.archived,
+                updated_at: card.updated_at,
+                created_at: card.created_at,
               };
             })
           );

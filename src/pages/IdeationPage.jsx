@@ -96,6 +96,7 @@ export default function IdeationPage() {
   );
 
   const fileInputRef = useRef(null);
+  const [newCardId, setNewCardId] = useState(null);
 
   const handleTrelloImport = async (event) => {
     const file = event.target.files[0];
@@ -186,7 +187,11 @@ export default function IdeationPage() {
   }, [boardId]);
 
   useEffect(() => {
-    if (!selectedBoard) {
+    setSelectedBoardId(boardId);
+  }, [boardId]);
+
+  useEffect(() => {
+    if (!selectedBoard || !currentUser) {
       setTeamUsers([]);
       return;
     }
@@ -199,7 +204,9 @@ export default function IdeationPage() {
         (team) => team._id === selectedBoard.team_id
       );
       if (team) {
-        team.users.forEach((userId) => allowedUsers.add(userId));
+        team.users
+          .filter(userId => userId !== currentUser.userId) // Skip current user from team users
+          .forEach((userId) => allowedUsers.add(userId));
       }
       // Add admins when board has team_id
       currentUserUsers
@@ -215,13 +222,29 @@ export default function IdeationPage() {
       allowedUsers.has(user._id)
     );
 
-    setTeamUsers(filteredUsers);
+    // Create final users array with current user and filtered team users
+    const finalUsers = [
+      // Add current user first (formatted to match team users structure)
+      {
+        _id: currentUser.userId,
+        firstName: currentUser.firstName,
+        lastName: currentUser.lastName,
+        email: currentUser.email,
+        role: currentUser.role,
+        userName: currentUser.userName,
+      },
+      // Add other users, excluding current user if they're already in the team
+      ...filteredUsers.filter((user) => user._id !== currentUser._id),
+    ];
+
+    setTeamUsers(finalUsers);
   }, [
     selectedBoard?.team_id,
     selectedBoard?.shared_users,
     currentUserTeams,
     currentUserUsers,
     selectedBoard,
+    currentUser,
   ]);
 
   const handleBoardChange = async (payload) => {
@@ -590,6 +613,8 @@ export default function IdeationPage() {
         currentUser.accountId
       );
 
+      setNewCardId(newCard.id); // Store the new card ID
+
       updateBoardsList((prev) => {
         const updatedBoards = prev.map((board) => ({
           ...board,
@@ -664,15 +689,16 @@ export default function IdeationPage() {
           ? oldCard.assignee.map((user) => user._id)
           : [];
 
-        // Filter updates.assignee to only include truly new IDs
+        // Filter updates.assignee to only include truly new IDs and skip entries without _id
         const newAssignees = updates.assignee.filter(
-          (user) => !oldAssigneeIds.includes(user._id)
+          (user) => user._id !== currentUser.userId && !oldAssigneeIds.includes(user._id)
         );
 
         // Use the new title if provided; otherwise fallback to the old card title
         const cardTitle = updates.title || oldCard.title;
 
-        assigneeEmailService(
+
+        newAssignees.length > 0 && assigneeEmailService(
           newAssignees,
           currentUser.firstName,
           cardTitle,
@@ -682,7 +708,9 @@ export default function IdeationPage() {
         // Create notifications for the new assignees
         for (const user of newAssignees) {
           try {
-            console.log("Creating notification for user:", user);
+             if(!user._id || !cardTitle || !selectedBoard.title) {
+              throw new Error("Missing required data for notification");
+            }
             await supabase.from("notifications").insert([
               {
                 user_id: user._id,
@@ -1016,6 +1044,12 @@ export default function IdeationPage() {
                 placeholder="Enter board title..."
                 className="input p-2"
                 autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && newBoardTitle.trim()) {
+                    e.preventDefault();
+                    handleAddBoard();
+                  }
+                }}
               />
               <button
                 onClick={handleAddBoard}
@@ -1085,6 +1119,12 @@ export default function IdeationPage() {
                   placeholder="Board title..."
                   className="input"
                   autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && newBoardTitle.trim()) {
+                      e.preventDefault();
+                      handleAddBoard();
+                    }
+                  }}
                 />
                 <button onClick={handleAddBoard} className="btn-primary">
                   <Translate>Add</Translate>
@@ -1198,6 +1238,8 @@ export default function IdeationPage() {
                   boardId={selectedBoard.id}
                   teamUsers={teamUsers}
                   boardTitle={selectedBoard.title}
+                  newCardId={newCardId}
+                  onCardModalClose={() => setNewCardId(null)}
                 />
               ))}
             </SortableContext>
@@ -1208,6 +1250,12 @@ export default function IdeationPage() {
                   type="text"
                   value={newColumnTitle}
                   onChange={(e) => setNewColumnTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && newColumnTitle.trim()) {
+                      e.preventDefault();
+                      handleAddColumn();
+                    }
+                  }}
                   placeholder="Column title..."
                   className="input"
                   autoFocus

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { Plus, Trash2 } from "lucide-react";
@@ -8,6 +8,7 @@ import { usePresence } from "../hooks/usePresence";
 import DeleteColumnModal from "./DeleteColumnModal";
 import Tooltip from "./Tooltip";
 import Translate from "../components/Translate";
+import CardModal from "./CardModal";
 
 // Shimmer loading component
 const ShimmerColumn = () => (
@@ -35,6 +36,8 @@ export default function KanbanColumn({
   boardId,
   boardTitle,
   teamUsers,
+  newCardId,
+  onCardModalClose,
 }) {
   const { setNodeRef } = useDroppable({
     id: column.id,
@@ -45,6 +48,7 @@ export default function KanbanColumn({
   const [isLoading, setIsLoading] = React.useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(column.title);
+  const [selectedCard, setSelectedCard] = useState(null);
 
   const handleTitleSubmit = (e) => {
     e.preventDefault();
@@ -67,6 +71,23 @@ export default function KanbanColumn({
       updatePresence({ currentColumn: undefined });
     };
   }, [column.id, updatePresence]);
+
+  // Add useEffect to handle new card modal
+  useEffect(() => {
+    if (newCardId) {
+      const card = column.cards.find((c) => c.id === newCardId);
+      if (card) {
+        setSelectedCard(card);
+      }
+    }
+  }, [newCardId, column.cards]);
+
+  const handleModalClose = () => {
+    setSelectedCard(null);
+    if (onCardModalClose) {
+      onCardModalClose();
+    }
+  };
 
   // Ensure cards array exists
   const cards = column.cards || [];
@@ -104,6 +125,14 @@ export default function KanbanColumn({
               <PresenceIndicator location="column" id={column.id} />
             </div>
             <div className="flex items-center gap-2">
+              <Tooltip text={`Add Card to "${column.title}"`} position="bottom">
+                <button
+                  onClick={onAddCard}
+                  className="btn-ghost p-1 hover:text-button-primary-cta"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </Tooltip>
               <span className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-button-primary-hover bg-design-white rounded-full dark:bg-design-black dark:text-button-primary-text">
                 {visibleCards.length}
               </span>
@@ -176,6 +205,20 @@ export default function KanbanColumn({
         onConfirm={onDeleteColumn}
         columnTitle={column.title}
       />
+
+      {selectedCard && (
+        <CardModal
+          isOpen={true}
+          onClose={handleModalClose}
+          card={selectedCard}
+          onUpdate={onUpdateCard}
+          onDelete={onDeleteCard}
+          onArchive={onArchiveCard}
+          boardId={boardId}
+          boardTitle={boardTitle}
+          teamUsers={teamUsers}
+        />
+      )}
     </>
   );
 }

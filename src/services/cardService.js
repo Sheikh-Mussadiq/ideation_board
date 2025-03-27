@@ -21,18 +21,16 @@ export async function createCard(columnId, card, accountId) {
 
   if (cardError) throw cardError;
   const normalizedCard = normalizeSingleResult(newCard);
-  
+
   return {
     ...normalizedCard,
     attachments: normalizedCard?.attachments || [],
   };
 }
 
-
 export async function updateCard(cardId, updates) {
   console.log("updates in card service updateCard: ", updates);
 
- 
   const { error: cardError } = await supabase
     .from("cards")
     .update({
@@ -50,7 +48,7 @@ export async function updateCard(cardId, updates) {
       attachments: updates.attachments,
       updated_at: new Date().toISOString(),
     })
-    
+
     .eq("id", cardId);
 
   if (cardError) throw cardError;
@@ -58,15 +56,11 @@ export async function updateCard(cardId, updates) {
 
 export async function deleteCard(cardId, accountId) {
   const { error } = await supabase.from("cards").delete().eq("id", cardId);
- 
+
   if (error) throw error;
 }
 
-export const moveCardToColumn = async (
-  cardId,
-  columnId,
-  newPosition,
-) => {
+export const moveCardToColumn = async (cardId, columnId, newPosition) => {
   const { data, error } = await supabase
     .from("cards")
     .update({ column_id: columnId, position: newPosition })
@@ -121,7 +115,7 @@ export const updateComment = async (action, cardId, comment) => {
         })
         .eq("id", comment.id)
         .eq("card_id", cardId)
-        .eq("account_id", comment.account_id));
+        .eq("user_id", comment.user_id));
       break;
 
     case "delete":
@@ -129,7 +123,7 @@ export const updateComment = async (action, cardId, comment) => {
       ({ data, error } = await supabase
         .from("comments")
         .delete()
-        .eq("account_id", comment.account_id)
+        .eq("user_id", comment.user_id)
         .eq("id", comment.commentId));
       break;
 

@@ -61,7 +61,7 @@ export default function AssigneeModal({
             exit={{ y: 20, opacity: 0 }}
             className="w-[90%] max-w-md bg-white rounded-2xl shadow-lg overflow-hidden relative z-[201] flex flex-col max-h-[80vh]"
           >
-            {/* Header - Fixed */}
+            {/* Header */}
             <div className="p-4 border-b border-design-greyOutlines bg-design-greyBG/50 flex-shrink-0">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
@@ -89,7 +89,7 @@ export default function AssigneeModal({
                 <input
                   type="text"
                   placeholder="Search users..."
-                  value={searchQuery}
+                  value={searchQuery || ""}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 rounded-lg border border-design-greyOutlines bg-white focus:outline-none focus:ring-2 focus:ring-design-primaryPurple/20 focus:border-design-primaryPurple transition-all"
                 />
