@@ -35,7 +35,6 @@ import RichTextEditor from "./RichTextEditor";
 import Tooltip from "./Tooltip";
 import AssigneeModal from "./AssigneeModal";
 import ShareChannelModal from "./ShareChannelModal";
-import Translate from "../components/Translate"; // Import Translate component
 
 export default function CardModal({
   isOpen,
@@ -283,7 +282,7 @@ export default function CardModal({
                     <div className="grid grid-cols-2 items-center ">
                       <label className="flex text-base font-medium text-design-primaryGrey">
                         <Calendar className="h-5 w-5 mr-2 text-design-primaryGrey" />
-                        <Translate>Due Date</Translate>
+                        Due Date
                       </label>
                       <DatePicker
                         value={card.due_date}
@@ -293,7 +292,7 @@ export default function CardModal({
                     <div className="grid grid-cols-2 items-center">
                       <label className="flex gap-2 text-base font-medium text-design-primaryGrey">
                         <AlertCircle className="h-5 w-5 text-design-primaryGrey" />
-                        <Translate>Priority</Translate>
+                        Priority
                       </label>
                       <PrioritySelect
                         value={card.priority}
@@ -306,7 +305,7 @@ export default function CardModal({
                     <div className="grid grid-cols-2 items-center ">
                       <label className="flex gap-2 text-base font-medium text-design-primaryGrey">
                         <Tags className="h-5 w-5 text-design-primaryGrey" />
-                        <Translate>Labels</Translate>
+                        Labels
                       </label>
                       <LabelManager
                         labels={card.labels}
@@ -317,8 +316,7 @@ export default function CardModal({
                     <div className="grid grid-cols-2 items-center">
                       <label className="flex gap-2 text-base font-medium text-design-primaryGrey">
                         <UserCircle className="h-5 w-5 text-design-primaryGrey" />
-                        <Translate>Assignees</Translate> (
-                        {card.assignee?.length || 0})
+                        Assignees ({card.assignee?.length || 0})
                       </label>
                       <div className="flex items-center gap-2">
                         <div className="flex flex-wrap gap-2">
@@ -341,7 +339,7 @@ export default function CardModal({
                             </div>
                           ) : (
                             <span className="text-sm text-design-primaryGrey">
-                              <Translate>No assignees</Translate>
+                              No assignees
                             </span>
                           )}
                         </div>
@@ -359,7 +357,7 @@ export default function CardModal({
                   <div className="space-y-2">
                     <label className="flex text-base font-medium text-gray-700 items-center">
                       <NotebookText className="h-5 w-5 mr-2 text-design-primaryGrey" />
-                      <Translate>Description</Translate>
+                      Description
                     </label>
                     <RichTextEditor
                       key={card.id}
@@ -376,11 +374,7 @@ export default function CardModal({
                         onClick={() => setShowChecklist(!showChecklist)}
                         className="inline-flex items-center px-4 py-2 border border-design-greyOutlines rounded-lg shadow-sm text-sm font-medium text-primary bg-white transition-all hover:scale-105"
                       >
-                        {showChecklist ? (
-                          <Translate>Hide Checklist</Translate>
-                        ) : (
-                          <Translate>Show Checklist</Translate>
-                        )}
+                        {showChecklist ? "Hide Checklist" : "Show Checklist"}
                       </button>
                       {card.checklist && card.checklist.length > 0 && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium bg-button-tertiary-fill text-button-primary-cta dark:bg-button-tertiary-fill/20">

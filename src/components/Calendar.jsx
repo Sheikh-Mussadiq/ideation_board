@@ -22,7 +22,6 @@ import {
   ChevronRight,
   ArrowRight,
 } from "lucide-react";
-import Translate from "../components/Translate";
 
 const priorityColors = {
   high: "bg-semantic-error",
@@ -189,7 +188,7 @@ export default function Calendar({ tasks, onTaskClick }) {
         <div className="flex items-center gap-2">
           <CalendarIcon className="h-5 w-5 text-design-primaryPurple" />
           <h2 className="text-lg font-semibold text-design-black">
-            <Translate>Task Calendar</Translate>
+            Task Calendar
           </h2>
         </div>
         <div className="flex items-center gap-2">
@@ -203,7 +202,7 @@ export default function Calendar({ tasks, onTaskClick }) {
             <ChevronLeft className="h-5 w-5 text-design-primaryGrey" />
           </motion.button>
           <span className="text-sm font-medium text-design-black min-w-[100px] text-center">
-            <Translate>{format(currentMonth, "MMMM yyyy")}</Translate>
+            {format(currentMonth, "MMMM yyyy")}
           </span>
           <motion.button
             whileHover={{ scale: 1.1 }}
@@ -224,7 +223,7 @@ export default function Calendar({ tasks, onTaskClick }) {
             key={day}
             className="text-center text-xs lg:text-sm font-medium text-design-primaryGrey p-1"
           >
-            <Translate>{day}</Translate>
+            {day}
           </div>
         ))}
 

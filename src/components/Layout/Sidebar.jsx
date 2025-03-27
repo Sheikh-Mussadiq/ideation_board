@@ -24,7 +24,6 @@ import { useSidebar } from "../../context/SidebarContext";
 import SettingsModal from "../SettingsModal";
 import ArchivedCardsModal from "../ArchivedCardsModal";
 import toast from "react-hot-toast";
-import Translate from "../Translate";
 import SocialHubLogo from "../../assets/socialhub_wb_n_white_RGB.png";
 import SocialHubSmiley from "../../assets/SocialHub.png";
 
@@ -38,7 +37,7 @@ const BoardSection = React.memo(
       <div className="space-y-2">
         <div className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-design-primaryGrey">
           <Icon className="h-4 w-4" />
-          <Translate>{title}</Translate>
+          {title}
         </div>
         <div className="px-3">
           <div className="relative">
@@ -75,7 +74,7 @@ const BoardSection = React.memo(
             ))
           ) : (
             <p className="text-sm text-design-primaryGrey dark:text-design-greyOutlines px-3 py-2">
-              <Translate>No boards found</Translate>
+              No boards found
             </p>
           )}
         </div>
@@ -257,7 +256,7 @@ export default function Sidebar() {
                             exit={{ opacity: 0, x: -10 }}
                             className="ml-3 font-medium overflow-hidden whitespace-nowrap text-sm"
                           >
-                            <Translate>{item.name}</Translate>
+                            {item.name}
                           </motion.span>
                         )}
                       </AnimatePresence>
@@ -282,7 +281,7 @@ export default function Sidebar() {
                             exit={{ opacity: 0, x: -10 }}
                             className="ml-3 font-medium overflow-hidden whitespace-nowrap text-sm"
                           >
-                            <Translate>{item.name}</Translate>
+                            {item.name}
                           </motion.span>
                         )}
                       </AnimatePresence>
@@ -320,7 +319,7 @@ export default function Sidebar() {
                           exit={{ opacity: 0, x: -10 }}
                           className="ml-3 font-medium text-sm"
                         >
-                          <Translate>Boards</Translate>
+                          Boards
                         </motion.span>
                       )}
                     </AnimatePresence>
@@ -383,7 +382,7 @@ export default function Sidebar() {
                       exit={{ opacity: 0, x: -10 }}
                       className="ml-3 font-medium overflow-hidden whitespace-nowrap text-sm"
                     >
-                      <Translate>Archived Cards</Translate>
+                      Archived Cards
                     </motion.span>
                   )}
                 </AnimatePresence>
@@ -410,7 +409,7 @@ export default function Sidebar() {
                     exit={{ opacity: 0, x: -10 }}
                     className="text-sm font-medium"
                   >
-                    <Translate>Settings</Translate>
+                    Settings
                   </motion.span>
                 )}
               </AnimatePresence>

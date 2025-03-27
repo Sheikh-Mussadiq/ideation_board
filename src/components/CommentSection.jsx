@@ -5,7 +5,6 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 import { mentioningEmailService } from "../services/emailService";
 import toast from "react-hot-toast";
-import Translate from "./Translate"; // Import Translate component
 
 export default function CommentSection({
   comments,
@@ -112,7 +111,9 @@ export default function CommentSection({
       if (word.startsWith("@")) {
         const username = word.slice(1);
         const mentionedUser = teamUsers.find(
-          (user) => user.userName.toLowerCase() === username.toLowerCase() && user._id !== userUserId
+          (user) =>
+            user.userName.toLowerCase() === username.toLowerCase() &&
+            user._id !== userUserId
         );
         if (mentionedUser) {
           mentions.push(mentionedUser);
@@ -159,13 +160,14 @@ export default function CommentSection({
 
       setNewComment("");
 
-      mentionedUsers.length > 0 && mentioningEmailService(
-        mentionedUsers,
-        currentUser.userName,
-        cardTitle,
-        boardId,
-        newComment.trim()
-      );
+      mentionedUsers.length > 0 &&
+        mentioningEmailService(
+          mentionedUsers,
+          currentUser.userName,
+          cardTitle,
+          boardId,
+          newComment.trim()
+        );
     }
   };
 
@@ -184,7 +186,7 @@ export default function CommentSection({
       <div className="flex items-center space-x-3">
         <MessageSquare className="h-5 w-5 text-design-primaryPurple" />
         <span className="font-semibold text-design-black dark:text-design-white">
-          <Translate>Comments</Translate>
+          Comments
         </span>
         {comments.length > 0 && (
           <span className="px-2.5 py-1 rounded-full text-xs bg-design-lightPurpleButtonFill text-design-primaryPurple font-medium">
@@ -221,7 +223,7 @@ export default function CommentSection({
               disabled={!newComment.trim()}
               className="h-12 px-4 bg-design-primaryPurple text-white rounded-xl font-medium shadow-lg hover:shadow-design-primaryPurple/25 disabled:opacity-50 disabled:hover:shadow-none transition-all duration-200 hover:scale-105 disabled:scale-100 self-start"
             >
-              <Translate>Send</Translate>
+              Send
             </button>
           </div>
         </form>
@@ -339,11 +341,7 @@ export default function CommentSection({
             className="w-full py-3 text-design-primaryPurple hover:text-button-primary-hover flex items-center justify-center gap-2 group transition-colors duration-150"
           >
             <span className="font-medium">
-              {showAllComments ? (
-                <Translate>Show Less</Translate>
-              ) : (
-                <Translate>View All Comments</Translate>
-              )}
+              {showAllComments ? "Show Less" : "View All Comments"}
             </span>
             <ChevronDown
               className={`h-4 w-4 transition-transform duration-300 ${

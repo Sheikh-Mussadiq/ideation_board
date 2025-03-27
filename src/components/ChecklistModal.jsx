@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { X, Plus, CheckSquare, Square } from "lucide-react";
 import { useScrollLock } from "../hooks/useScrollLock";
-import Translate from "./Translate"; // Import Translate component
 
 export default function ChecklistModal({
   isOpen,
@@ -78,8 +77,7 @@ export default function ChecklistModal({
       >
         <div className="text-xl font-semibold text-design-black dark:text-design-white flex justify-between items-center mb-6">
           <span>
-            <Translate>Checklist</Translate> ({completedCount}/
-            {checklist.length})
+            Checklist ({completedCount}/{checklist.length})
           </span>
           <button
             onClick={handleClose}

@@ -54,7 +54,6 @@ import Tooltip from "../components/Tooltip";
 import { useBoards } from "../context/BoardContext";
 import { supabase } from "../lib/supabase";
 import { assigneeEmailService } from "../services/emailService";
-import Translate from "../components/Translate"; // Import the Translate component
 
 export default function IdeationPage() {
   const {
@@ -205,7 +204,7 @@ export default function IdeationPage() {
       );
       if (team) {
         team.users
-          .filter(userId => userId !== currentUser.userId) // Skip current user from team users
+          .filter((userId) => userId !== currentUser.userId) // Skip current user from team users
           .forEach((userId) => allowedUsers.add(userId));
       }
       // Add admins when board has team_id
@@ -691,24 +690,26 @@ export default function IdeationPage() {
 
         // Filter updates.assignee to only include truly new IDs and skip entries without _id
         const newAssignees = updates.assignee.filter(
-          (user) => user._id !== currentUser.userId && !oldAssigneeIds.includes(user._id)
+          (user) =>
+            user._id !== currentUser.userId &&
+            !oldAssigneeIds.includes(user._id)
         );
 
         // Use the new title if provided; otherwise fallback to the old card title
         const cardTitle = updates.title || oldCard.title;
 
-
-        newAssignees.length > 0 && assigneeEmailService(
-          newAssignees,
-          currentUser.firstName,
-          cardTitle,
-          selectedBoardId,
-          selectedBoard.title
-        );
+        newAssignees.length > 0 &&
+          assigneeEmailService(
+            newAssignees,
+            currentUser.firstName,
+            cardTitle,
+            selectedBoardId,
+            selectedBoard.title
+          );
         // Create notifications for the new assignees
         for (const user of newAssignees) {
           try {
-             if(!user._id || !cardTitle || !selectedBoard.title) {
+            if (!user._id || !cardTitle || !selectedBoard.title) {
               throw new Error("Missing required data for notification");
             }
             await supabase.from("notifications").insert([
@@ -940,19 +941,19 @@ export default function IdeationPage() {
 
     const dropdownItems = [
       {
-        label: <Translate>Board History</Translate>,
+        label: "Board History",
         icon: <Clock className="h-4 w-4" />,
         onClick: () => setIsLogsOpen(true),
         visible: true,
       },
       {
-        label: <Translate>Archived Cards</Translate>,
+        label: "Archived Cards",
         icon: <Archive className="h-4 w-4" />,
         onClick: () => setIsArchivedCardsOpen(true),
         visible: true,
       },
       {
-        label: <Translate>Delete Board</Translate>,
+        label: "Delete Board",
         icon: <Trash2 className="h-4 w-4 text-semantic-error" />,
         onClick: () => setIsDeleteModalOpen(true),
         className: "text-semantic-error",
@@ -1027,13 +1028,11 @@ export default function IdeationPage() {
             <ClipboardList className="w-16 h-16 text-primary" />
           </div>
           <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-3">
-            <Translate>No Boards Yet</Translate>
+            No Boards Yet
           </h2>
           <p className="text-gray-500 dark:text-gray-400 mb-8 text-center max-w-md">
-            <Translate>
-              Create your first board to start organizing your ideas and tasks
-              in a visual way.
-            </Translate>
+            Create your first board to start organizing your ideas and tasks in
+            a visual way.
           </p>
           {isAddingBoard ? (
             <div className="flex items-center gap-2">
@@ -1056,7 +1055,7 @@ export default function IdeationPage() {
                 className="btn-primary"
                 disabled={!newBoardTitle.trim()}
               >
-                <Translate>Create</Translate>
+                Create
               </button>
               <button
                 onClick={() => {
@@ -1065,7 +1064,7 @@ export default function IdeationPage() {
                 }}
                 className="btn-ghost"
               >
-                <Translate>Cancel</Translate>
+                Cancel
               </button>
             </div>
           ) : (
@@ -1075,7 +1074,7 @@ export default function IdeationPage() {
                 className="btn-primary flex items-center gap-2 px-6 py-3 text-lg animate-bounce"
               >
                 <Plus className="h-5 w-5" />
-                <Translate>Create Your First Board</Translate>
+                Create Your First Board
               </button>
 
               <div className="flex items-center gap-2">
@@ -1092,7 +1091,7 @@ export default function IdeationPage() {
                   className="btn-secondary flex items-center gap-2 cursor-pointer"
                 >
                   <Upload className="h-5 w-5" />
-                  <Translate> Import from Trello</Translate>
+                  Import from Trello
                 </label>
               </div>
             </div>
@@ -1127,7 +1126,7 @@ export default function IdeationPage() {
                   }}
                 />
                 <button onClick={handleAddBoard} className="btn-primary">
-                  <Translate>Add</Translate>
+                  Add
                 </button>
                 <button
                   onClick={() => {
@@ -1136,7 +1135,7 @@ export default function IdeationPage() {
                   }}
                   className="btn-ghost"
                 >
-                  <Translate>Cancel</Translate>
+                  Cancel
                 </button>
               </div>
             ) : (
@@ -1146,9 +1145,7 @@ export default function IdeationPage() {
                   className="btn-primary group flex items-center gap-2 px-3 py-2 sm:px-4"
                 >
                   <FolderPlus className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                  <span className="hidden sm:inline">
-                    <Translate>Add Board</Translate>
-                  </span>
+                  <span className="hidden sm:inline">Add Board</span>
                 </button>
 
                 <input
@@ -1164,9 +1161,7 @@ export default function IdeationPage() {
                   className="btn-secondary group flex items-center gap-2 px-3 py-2 sm:px-4 cursor-pointer"
                 >
                   <Upload className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                  <span className="hidden sm:inline">
-                    <Translate>Import Trello</Translate>
-                  </span>{" "}
+                  <span className="hidden sm:inline">Import Trello</span>{" "}
                 </label>
               </div>
             )}
@@ -1192,7 +1187,7 @@ export default function IdeationPage() {
                     : "bg-red-400"
                 } rounded-full`}
               ></span>
-              <Translate>Share Board</Translate>
+              Share Board
             </button>
             <div className="flex -space-x-3">
               {activeUsers.map((user, index) => (
@@ -1262,7 +1257,7 @@ export default function IdeationPage() {
                 />
                 <div className="flex justify-end gap-2 mt-2">
                   <button onClick={handleAddColumn} className="btn-primary">
-                    <Translate>Add</Translate>
+                    Add
                   </button>
                   <button
                     onClick={() => {
@@ -1271,7 +1266,7 @@ export default function IdeationPage() {
                     }}
                     className="btn-ghost"
                   >
-                    <Translate>Cancel</Translate>
+                    Cancel
                   </button>
                 </div>
               </div>
@@ -1281,7 +1276,7 @@ export default function IdeationPage() {
                 className="flex-shrink-0 w-80 bg-design-greyBG/50 backdrop-blur-sm rounded-2xl p-4 flex items-center justify-center text-primary hover:text-primary-hover hover:bg-primary-light/50 transition-all  snap-start group"
               >
                 <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform" />
-                <Translate>Add Column</Translate>
+                Add Column
               </button>
             )}
           </div>

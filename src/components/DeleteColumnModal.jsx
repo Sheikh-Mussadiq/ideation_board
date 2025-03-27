@@ -1,7 +1,6 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState, useEffect } from "react";
 import { AlertCircle } from "lucide-react";
-import Translate from "./Translate";
 
 export default function DeleteColumnModal({
   isOpen,
@@ -61,21 +60,21 @@ export default function DeleteColumnModal({
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl transition-all">
                 <Dialog.Title className="flex items-center gap-2 text-lg font-medium text-gray-900 dark:text-white">
                   <AlertCircle className="h-6 w-6 text-semantic-error" />
-                  <Translate>Delete Column</Translate>
+                  Delete Column
                 </Dialog.Title>
                 <div className="mt-4">
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    <Translate>Are you sure you want to delete the column</Translate>{" "}
+                    Are you sure you want to delete the column{" "}
                     <span className="font-medium text-gray-900 dark:text-white">
                       "{columnTitle}"
                     </span>
-                    ? <Translate>This action cannot be undone.</Translate>
+                    ? This action cannot be undone.
                   </p>
                 </div>
 
                 <div className="mt-6 flex justify-end gap-3">
                   <button onClick={onClose} className="btn-ghost">
-                    <Translate>Cancel</Translate>
+                    Cancel
                   </button>
                   <button
                     onClick={handleDelete}
@@ -86,13 +85,11 @@ export default function DeleteColumnModal({
                         : "hover:bg-semantic-error/90"
                     }`}
                   >
-                    {isDeleting ? (
-                      <Translate>Deleting...</Translate>
-                    ) : countdown > 0 ? (
-                      <><Translate>Delete</Translate> ({countdown}s)</>
-                    ) : (
-                      <Translate>Delete</Translate>
-                    )}
+                    {isDeleting
+                      ? "Deleting..."
+                      : countdown > 0
+                      ? `Delete (${countdown}s)`
+                      : "Delete"}
                   </button>
                 </div>
               </Dialog.Panel>

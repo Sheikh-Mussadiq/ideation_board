@@ -3,7 +3,6 @@ import { X, Share2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getSocialIcon } from "../utils/socialIcons";
 import { useScrollLock } from "../hooks/useScrollLock";
-import Translate from "./Translate";
 
 const overlayVariants = {
   hidden: { opacity: 0 },
@@ -87,7 +86,7 @@ export default function ShareChannelModal({
           >
             <div className="flex justify-between items-center mb-1">
               <h3 className="text-lg font-medium text-gray-900">
-                <Translate>Select Channels to Share</Translate>
+                Select Channels to Share
               </h3>
               <button
                 onClick={onClose}
@@ -97,21 +96,17 @@ export default function ShareChannelModal({
               </button>
             </div>
             <p className="text-sm text-gray-900 mb-3">
-              <Translate>
-                This will create a draft in the content planner for the selected
-                cahnnels in SocialHub
-              </Translate>
+              This will create a draft in the content planner for the selected
+              channels in SocialHub
             </p>
             {channels && channels.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8">
                 <Share2 className="w-16 h-16 text-gray-300 mb-4" />
                 <p className="text-gray-500 text-center mb-2">
-                  <Translate>No channels available</Translate>
+                  No channels available
                 </p>
                 <p className="text-gray-400 text-sm text-center">
-                  <Translate>
-                    Please add some channels to start sharing your content
-                  </Translate>
+                  Please add some channels to start sharing your content
                 </p>
               </div>
             ) : (
@@ -166,7 +161,7 @@ export default function ShareChannelModal({
                 disabled={selectedChannels.length === 0}
                 className="btn-primary"
               >
-                <Translate>Share</Translate>
+                Share
               </button>
             </div>
           </motion.div>

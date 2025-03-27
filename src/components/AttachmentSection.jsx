@@ -16,7 +16,6 @@ import {
 import { supabase } from "../lib/supabase";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import Translate from "./Translate";
 import { useWindowDimensions } from "../hooks/useWindowDimensions";
 import { useScrollLock } from "../hooks/useScrollLock";
 
@@ -295,7 +294,7 @@ export default function AttachmentSection({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center text-sm font-medium text-design-primaryGrey">
           <Paperclip className="h-5 w-5 mr-2 text-design-primaryPurple" />
-          <Translate>Attachments</Translate>
+          Attachments
         </div>
         <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-start sm:justify-end">
           <button
@@ -304,7 +303,7 @@ export default function AttachmentSection({
             className="flex items-center px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-design-primaryPurple bg-design-lightPurpleButtonFill rounded-lg hover:bg-button-primary-cta hover:text-white transition-all duration-300 transform hover:scale-105 disabled:opacity-50 flex-1 sm:flex-auto justify-center"
           >
             <Plus className="h-4 w-4 mr-1" />
-            <Translate>Add Link</Translate>
+            Add Link
           </button>
           <label
             className={`flex items-center px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-design-primaryPurple bg-design-lightPurpleButtonFill rounded-lg hover:bg-button-primary-cta hover:text-white transition-all duration-300 transform hover:scale-105 cursor-pointer flex-1 sm:flex-auto justify-center ${
@@ -314,12 +313,12 @@ export default function AttachmentSection({
             {isUploading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                <Translate>Uploading...</Translate>
+                Uploading...
               </>
             ) : (
               <>
                 <Plus className="h-4 w-4 mr-1" />
-                <Translate>Upload File</Translate>
+                Upload File
               </>
             )}
             <input
@@ -383,7 +382,7 @@ export default function AttachmentSection({
                     onClick={handleAddLink}
                     className="btn-primary flex-1 sm:flex-none justify-center"
                   >
-                    <Translate>Add</Translate>
+                    Add
                   </motion.button>
                   <motion.button
                     initial={{ rotate: -90, opacity: 0 }}
@@ -435,8 +434,7 @@ export default function AttachmentSection({
                   </span>
                 )}
                 <span className="text-xs text-design-primaryGrey">
-                  <Translate>Added</Translate>{" "}
-                  {new Date(attachment.createdAt).toLocaleDateString()}
+                  Added {new Date(attachment.createdAt).toLocaleDateString()}
                   {attachment.size &&
                     ` • ${Math.round(attachment.size / 1024)} KB`}
                 </span>
@@ -505,11 +503,7 @@ export default function AttachmentSection({
             className="w-full py-2 px-4 text-sm text-design-primaryPurple hover:text-button-primary-hover flex items-center justify-center gap-2 group transition-all duration-300"
           >
             <span>
-              {showAllAttachments ? (
-                <Translate>Show Less</Translate>
-              ) : (
-                <Translate>View More Attachments</Translate>
-              )}
+              {showAllAttachments ? "Show Less" : "View More Attachments"}
             </span>
             <ChevronDown
               className={`h-4 w-4 transition-transform duration-300 ${

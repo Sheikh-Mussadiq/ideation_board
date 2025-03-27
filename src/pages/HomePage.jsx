@@ -15,7 +15,6 @@ import { useNavigate } from "react-router-dom";
 import Calendar from "../components/Calendar";
 import TaskList from "../components/TaskList";
 import { Sun, Moon, Sunrise, Sunset } from "lucide-react";
-import Translate from "../components/Translate"; // Import Translate component
 
 const StatCard = ({ icon: Icon, title, value, color }) => (
   <motion.div
@@ -57,12 +56,8 @@ const StatCard = ({ icon: Icon, title, value, color }) => (
         />
       </div>
       <div>
-        <h3 className="text-sm font-medium text-design-primaryGrey">
-          <Translate>{title}</Translate>
-        </h3>
-        <p className="text-2xl font-bold text-design-black mt-1">
-          <Translate>{value}</Translate>
-        </p>
+        <h3 className="text-sm font-medium text-design-primaryGrey">{title}</h3>
+        <p className="text-2xl font-bold text-design-black mt-1">{value}</p>
       </div>
     </div>
   </motion.div>
@@ -84,22 +79,22 @@ const BoardTable = ({ boards, teams, onBoardClick }) => (
       <thead>
         <tr className="border-b border-design-greyOutlines">
           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
-            <Translate>Board Name</Translate>
+            Board Name
           </th>
           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
-            <Translate>Team</Translate>
+            Team
           </th>
           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
-            <Translate>Total Cards</Translate>
+            Total Cards
           </th>
           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
-            <Translate>Completed</Translate>
+            Completed
           </th>
           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
-            <Translate>Created At</Translate>
+            Created At
           </th>
           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
-            <Translate>Last Updated</Translate>
+            Last Updated
           </th>
           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey"></th>
         </tr>
@@ -139,7 +134,7 @@ const BoardTable = ({ boards, teams, onBoardClick }) => (
               <td className="p-3">
                 <span className="text-sm text-design-primaryGrey flex items-center gap-1">
                   <Users className="h-4 w-4" />
-                  <Translate>{team?.name || "Personal"}</Translate>
+                  {team?.name || "Personal"}
                 </span>
               </td>
               <td className="p-3">
@@ -197,7 +192,7 @@ const BoardDropdown = ({ boards, selectedBoard, onBoardSelect }) => {
         <div className="flex items-center gap-2">
           <Layers className="h-5 w-5 text-design-primaryPurple" />
           <span className="font-medium text-design-black">
-            {selectedBoard ? selectedBoard.title : <Translate>All Boards</Translate>}
+            {selectedBoard ? selectedBoard.title : "All Boards"}
           </span>
         </div>
         <ChevronDown className="h-4 w-4 text-design-primaryGrey ml-2" />
@@ -213,7 +208,7 @@ const BoardDropdown = ({ boards, selectedBoard, onBoardSelect }) => {
                 setIsOpen(false);
               }}
             >
-              <Translate>All Boards</Translate>
+              All Boards
             </div>
             {boards.map((board) => (
               <div
@@ -425,7 +420,7 @@ export default function HomePage() {
         <div className="flex items-center gap-3">
           <GreetingIcon className={`h-8 w-8 ${greeting.className}`} />
           <h1 className="text-2xl md:text-3xl font-bold text-design-black">
-            <Translate>{greeting.text}</Translate>, {currentUser.firstName}
+            {greeting.text}, {currentUser.firstName}
           </h1>
         </div>
         <div className="flex justify-end w-full md:w-auto">
@@ -441,19 +436,19 @@ export default function HomePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         <StatCard
           icon={ClipboardList}
-          title={<Translate>Total Tasks</Translate>}
+          title="Total Tasks"
           value={stats.totalTasks}
           color="total"
         />
         <StatCard
           icon={CheckCircle2}
-          title={<Translate>Completed Tasks</Translate>}
+          title="Completed Tasks"
           value={stats.completedTasks}
           color="completed"
         />
         <StatCard
           icon={Layers}
-          title={<Translate>My Tasks</Translate>}
+          title="My Tasks"
           value={stats.myTasks.length}
           color="tasks"
         />
@@ -487,11 +482,11 @@ export default function HomePage() {
             <div className="flex items-center gap-2">
               <Layers className="h-5 w-5 text-design-primaryPurple" />
               <h2 className="text-lg font-semibold text-design-black">
-                <Translate>My Boards</Translate>
+                My Boards
               </h2>
             </div>
             <span className="text-sm text-design-primaryGrey">
-              {boardsList.length} {boardsList.length === 1 ? <Translate>Board</Translate> : <Translate>Boards</Translate>}
+              {boardsList.length} {boardsList.length === 1 ? "Board" : "Boards"}
             </span>
           </div>
           <div className="overflow-x-auto -mx-4 md:mx-0">

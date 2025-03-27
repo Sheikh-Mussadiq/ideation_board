@@ -10,7 +10,6 @@ import {
   AlertCircle,
   Clock,
 } from "lucide-react";
-import Translate from "./Translate"; // Import Translate component
 
 const priorityConfig = {
   high: {
@@ -74,7 +73,7 @@ const TaskCard = ({ task }) => {
                 task.completed ? "line-through text-design-primaryGrey" : ""
               }`}
             >
-              <Translate>{task.title}</Translate>
+              {task.title}
             </h3>
             <ArrowRight className="h-5 w-5 text-design-primaryGrey opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
@@ -88,14 +87,14 @@ const TaskCard = ({ task }) => {
               } ${priorityConfig[task.priority]?.bg}`}
             >
               <PriorityIcon className="h-3 w-3" />
-              <Translate>{task.priority}</Translate>
+              {task.priority}
             </span>
 
             {/* Due Date */}
             {task.due_date && (
               <span className="inline-flex items-center gap-1 text-xs text-design-primaryGrey">
                 <Calendar className="h-3 w-3" />
-                <Translate>{formatDueDate(task.due_date)}</Translate>
+                {formatDueDate(task.due_date)}
               </span>
             )}
 
@@ -107,12 +106,12 @@ const TaskCard = ({ task }) => {
                     key={index}
                     className="px-2 py-0.5 rounded-full text-xs bg-design-lightPurpleButtonFill text-design-primaryPurple"
                   >
-                    <Translate>{label.text}</Translate>
+                    {label.text}
                   </span>
                 ))}
                 {task.labels.length > 2 && (
                   <span className="text-xs text-design-primaryGrey">
-                    <Translate>+{task.labels.length - 2}</Translate>
+                    +{task.labels.length - 2}
                   </span>
                 )}
               </div>
@@ -120,7 +119,7 @@ const TaskCard = ({ task }) => {
 
             {/* Board Name */}
             <span className="text-xs text-design-primaryGrey ml-auto">
-              <Translate>{task.boardTitle}</Translate>
+              {task.boardTitle}
             </span>
           </div>
         </div>
@@ -150,11 +149,10 @@ export default function TaskList({ tasks, onStatusChange }) {
   return (
     <div className="bg-white p-6 rounded-2xl border border-design-greyOutlines h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-design-black">
-          <Translate>My Tasks</Translate>
-        </h2>
+        <h2 className="text-lg font-semibold text-design-black">My Tasks</h2>
         <span className="text-sm text-design-primaryGrey">
-          <Translate>Showing {Math.min(5, sortedTasks.length)} of {sortedTasks.length} tasks</Translate>
+          Showing {Math.min(5, sortedTasks.length)} of {sortedTasks.length}{" "}
+          tasks
         </span>
       </div>
 
@@ -168,9 +166,7 @@ export default function TaskList({ tasks, onStatusChange }) {
               className="text-center py-8 text-design-primaryGrey"
             >
               <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-design-primaryPurple opacity-50" />
-              <p className="text-sm">
-                <Translate>No tasks assigned to you</Translate>
-              </p>
+              <p className="text-sm">No tasks assigned to you</p>
             </motion.div>
           ) : (
             <div className="space-y-3 lg:pr-2">

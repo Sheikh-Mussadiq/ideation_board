@@ -14,7 +14,6 @@ import { format } from "date-fns";
 // import PrioritySelect from "./PrioritySelect";
 import CardModal from "./CardModal";
 import Tooltip from "./Tooltip";
-import Translate from "../components/Translate"; // Import Translate component
 // Shimmer loading component
 const ShimmerCard = () => (
   <div className="card p-4 relative overflow-hidden">
@@ -193,7 +192,7 @@ export default function KanbanCard({
                 : "bg-semantic-success-light text-semantic-success dark:bg-semantic-success/20"
             }`}
           >
-            <Translate>{card.priority}</Translate>
+            {card.priority}
           </span>
 
           {/* Checklist Counter */}

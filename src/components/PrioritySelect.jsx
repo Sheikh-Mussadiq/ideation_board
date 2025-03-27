@@ -3,7 +3,6 @@
 import React from "react";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import Translate from "./Translate";
 
 const priorityColors = {
   low: {
@@ -40,7 +39,7 @@ export default function PrioritySelect({ value = "low", onChange }) {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.98 }}
       >
-        <Translate>{currentValue}</Translate>
+        {currentValue}
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.3 }}
@@ -68,7 +67,7 @@ export default function PrioritySelect({ value = "low", onChange }) {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Translate>{priority}</Translate>
+                  {priority}
                 </motion.button>
               ))}
             </div>

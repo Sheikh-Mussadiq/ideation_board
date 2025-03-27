@@ -4,7 +4,6 @@ import { Fragment } from "react";
 import { X, User, Mail, Shield, Hash, Bell, Globe } from "lucide-react";
 import { updateUserData } from "../services/userService";
 import { useLanguage, LANGUAGES } from "../context/LanguageContext";
-import Translate from "./Translate";
 
 const UserDetailItem = ({ icon: Icon, label, value }) => (
   <div className="flex items-center gap-3 p-3 bg-design-greyBG/50 hover:bg-design-greyBG/70 rounded-xl transition-all">
@@ -59,7 +58,7 @@ export default function SettingsModal({ isOpen, onClose, user, userId }) {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                   <Dialog.Title className="text-xl font-semibold text-design-black dark:text-white">
-                    <Translate>Settings</Translate>
+                    Settings
                   </Dialog.Title>
                   <button
                     onClick={onClose}
@@ -73,22 +72,22 @@ export default function SettingsModal({ isOpen, onClose, user, userId }) {
                 <div className="space-y-4">
                   <UserDetailItem
                     icon={User}
-                    label={<Translate>Full Name</Translate>}
+                    label="Full Name"
                     value={`${user.firstName} ${user.lastName}`}
                   />
                   <UserDetailItem
                     icon={Mail}
-                    label={<Translate>Email</Translate>}
+                    label="Email"
                     value={user.email}
                   />
                   <UserDetailItem
                     icon={Shield}
-                    label={<Translate>Role</Translate>}
+                    label="Role"
                     value={user.role || "User"}
                   />
                   <UserDetailItem
                     icon={Hash}
-                    label={<Translate>User ID</Translate>}
+                    label="User ID"
                     value={user.userId}
                   />
 
@@ -98,10 +97,10 @@ export default function SettingsModal({ isOpen, onClose, user, userId }) {
                       <Globe className="w-5 h-5 text-design-primaryPurple" />
                       <div>
                         <p className="font-medium text-design-black dark:text-white">
-                          <Translate>Language</Translate>
+                          Language
                         </p>
                         <p className="text-sm text-design-primaryGrey">
-                          <Translate>Select your preferred language</Translate>
+                          Select your preferred language
                         </p>
                       </div>
                     </div>
@@ -121,10 +120,10 @@ export default function SettingsModal({ isOpen, onClose, user, userId }) {
                       <Bell className="w-5 h-5 text-design-primaryPurple" />
                       <div>
                         <p className="font-medium text-design-black dark:text-white">
-                          <Translate>Email Notifications</Translate>
+                          Email Notifications
                         </p>
                         <p className="text-sm text-design-primaryGrey">
-                          <Translate>Receive email updates</Translate>
+                          Receive email updates
                         </p>
                       </div>
                     </div>

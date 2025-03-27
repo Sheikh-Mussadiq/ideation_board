@@ -21,7 +21,6 @@ import {
   parseISO,
 } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
-import Translate from "./Translate"; // Import Translate component
 
 export default function DatePicker({ value, onChange, className = "" }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,7 +30,7 @@ export default function DatePicker({ value, onChange, className = "" }) {
 
   const formattedDate = value
     ? format(parseISO(value), "MMM d, yyyy")
-    : <Translate>Set due date</Translate>;
+    : "Set due date";
 
   const days = eachDayOfInterval({
     start: startOfMonth(currentMonth),
@@ -47,9 +46,9 @@ export default function DatePicker({ value, onChange, className = "" }) {
   };
 
   const quickSelectOptions = [
-    { label: <Translate>Today</Translate>, date: new Date() },
-    { label: <Translate>Next month</Translate>, date: addMonths(new Date(), 1) },
-    { label: <Translate>In 2 months</Translate>, date: addMonths(new Date(), 2) },
+    { label: "Today", date: new Date() },
+    { label: "Next month", date: addMonths(new Date(), 1) },
+    { label: "In 2 months", date: addMonths(new Date(), 2) },
   ];
 
   const clearDate = () => {
@@ -90,7 +89,7 @@ export default function DatePicker({ value, onChange, className = "" }) {
                 <ChevronLeft className="h-5 w-5 text-gray-600" />
               </button>
               <h2 className="text-lg font-semibold text-gray-700">
-                <Translate>{format(currentMonth, "MMMM yyyy")}</Translate>
+                {format(currentMonth, "MMMM yyyy")}
               </h2>
               <button
                 onClick={nextMonth}
@@ -105,7 +104,7 @@ export default function DatePicker({ value, onChange, className = "" }) {
                   key={day}
                   className="text-center text-sm font-medium text-gray-400"
                 >
-                  <Translate>{day}</Translate>
+                  {day}
                 </div>
               ))}
               {days.map((day, dayIdx) => (
@@ -150,7 +149,7 @@ export default function DatePicker({ value, onChange, className = "" }) {
                 whileTap={{ scale: 0.98 }}
               >
                 <X className="h-4 w-4 mr-2" />
-                <Translate>Clear date</Translate>
+                Clear date
               </motion.button>
             </div>
           </motion.div>

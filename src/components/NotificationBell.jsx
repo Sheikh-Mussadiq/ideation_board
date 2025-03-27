@@ -14,7 +14,6 @@ import { useNotificationStore } from "../stores/notificationStore";
 import { useNotifications } from "../hooks/useNotifications";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import Translate from "./Translate"; // Import Translate component
 import { useWindowDimensions } from "../hooks/useWindowDimensions";
 
 const getNotificationIcon = (type) => {
@@ -103,11 +102,11 @@ export default function NotificationBell() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <h3 className="text-lg font-semibold text-design-black">
-                    <Translate>Notifications</Translate>
+                    Notifications
                   </h3>
                   {unreadCount > 0 && (
                     <span className="text-xs font-medium text-design-primaryGrey bg-white px-2 py-1 rounded-full">
-                      {unreadCount} <Translate>new</Translate>
+                      {unreadCount} new
                     </span>
                   )}
                 </div>
@@ -119,7 +118,7 @@ export default function NotificationBell() {
                     className="text-sm font-medium text-button-primary-cta hover:text-button-primary-hover transition-colors px-3 py-1.5 rounded-full hover:bg-button-tertiary-fill flex items-center gap-1.5"
                   >
                     <Check className="w-4 h-4" />
-                    <Translate>Mark all read</Translate>
+                    Mark all read
                   </motion.button>
                 )}
               </div>
@@ -138,12 +137,10 @@ export default function NotificationBell() {
                 >
                   <MailOpen className="h-12 w-12 text-design-primaryGrey mb-3" />
                   <p className="text-design-primaryGrey font-medium">
-                    <Translate>No notifications yet</Translate>
+                    No notifications yet
                   </p>
                   <p className="text-sm text-design-primaryGrey/70 mt-1">
-                    <Translate>
-                      We'll notify you when something arrives
-                    </Translate>
+                    We'll notify you when something arrives
                   </p>
                 </motion.div>
               ) : (

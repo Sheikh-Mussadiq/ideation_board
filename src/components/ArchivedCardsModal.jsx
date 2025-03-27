@@ -17,7 +17,6 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 import { useBoards } from "../context/BoardContext"; // Import the BoardContext hook
 import Tooltip from "./Tooltip";
-import Translate from "../components/Translate"; // Import Translate component
 
 export default function ArchivedCardsModal({
   isOpen,
@@ -250,13 +249,11 @@ export default function ArchivedCardsModal({
                     >
                       {boardId ? (
                         <>
-                          <Translate>
-                            {currentBoardTitle ? currentBoardTitle : "Board"}
-                          </Translate>{" "}
-                          <Translate>Archived Cards</Translate>
+                          {currentBoardTitle ? currentBoardTitle : "Board"}{" "}
+                          Archived Cards
                         </>
                       ) : (
-                        <Translate>All Archived Cards</Translate>
+                        "All Archived Cards"
                       )}
                     </Dialog.Title>
                   </div>
@@ -288,25 +285,21 @@ export default function ArchivedCardsModal({
                         onClick={() => setFilterOpen(!filterOpen)}
                       >
                         <Filter className="h-4 w-4" />
-                        <span>
-                          <Translate>Filter</Translate>
-                        </span>
+                        <span>Filter</span>
                       </button>
 
                       {filterOpen && (
                         <div className="absolute top-full mt-2 left-0 bg-white shadow-lg rounded-lg p-3 border border-gray-100 min-w-[200px] z-10">
                           <div className="mb-3">
                             <label className="text-sm font-medium text-design-primaryGrey mb-1 block">
-                              <Translate>Board</Translate>
+                              Board
                             </label>
                             <select
                               className="w-full p-2 border border-design-greyOutlines rounded-md"
                               value={selectedBoard}
                               onChange={(e) => setSelectedBoard(e.target.value)}
                             >
-                              <option value="all">
-                                <Translate>All Boards</Translate>
-                              </option>
+                              <option value="all">All Boards</option>
                               {boards.map((board) => (
                                 <option key={board.id} value={board.id}>
                                   {board.title}
@@ -375,13 +368,9 @@ export default function ArchivedCardsModal({
                 ) : filterCards().length === 0 ? (
                   <div className="flex flex-col items-center justify-center p-10 text-design-primaryGrey">
                     <Archive className="h-16 w-16 mb-4 opacity-30" />
-                    <p className="text-lg">
-                      <Translate>No archived cards found</Translate>
-                    </p>
+                    <p className="text-lg">No archived cards found</p>
                     <p className="text-sm mt-1">
-                      <Translate>
-                        Archive cards from your boards to see them here
-                      </Translate>
+                      Archive cards from your boards to see them here
                     </p>
                   </div>
                 ) : viewMode === "grid" ? (
@@ -404,7 +393,7 @@ export default function ArchivedCardsModal({
                                 : "bg-semantic-success-light text-semantic-success"
                             }`}
                           >
-                            <Translate>{card.priority}</Translate>
+                            {card.priority}
                           </span>
                         </div>
 
@@ -438,13 +427,13 @@ export default function ArchivedCardsModal({
                               onClick={() => handleRestoreCard(card)}
                               className="p-1.5 text-xs rounded-lg bg-semantic-success/10 text-semantic-success hover:bg-semantic-success/20 transition-colors"
                             >
-                              <Translate>Restore</Translate>
+                              Restore
                             </button>
                             <button
                               onClick={() => handleDeleteCard(card.id)}
                               className="p-1.5 text-xs rounded-lg bg-semantic-error/10 text-semantic-error hover:bg-semantic-error/20 transition-colors"
                             >
-                              <Translate>Delete</Translate>
+                              Delete
                             </button>
                           </div>
                         </div>
@@ -463,19 +452,19 @@ export default function ArchivedCardsModal({
                       <thead>
                         <tr className="bg-gray-50 border-b border-gray-200">
                           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
-                            <Translate>Title</Translate>
+                            Title
                           </th>
                           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
-                            <Translate>Board / Column</Translate>
+                            Board / Column
                           </th>
                           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
-                            <Translate>Priority</Translate>
+                            Priority
                           </th>
                           <th className="text-left p-3 text-sm font-medium text-design-primaryGrey">
-                            <Translate>Archived Date</Translate>
+                            Archived Date
                           </th>
                           <th className="text-right p-3 text-sm font-medium text-design-primaryGrey">
-                            <Translate>Actions</Translate>
+                            Actions
                           </th>
                         </tr>
                       </thead>
@@ -511,7 +500,7 @@ export default function ArchivedCardsModal({
                                     : "bg-semantic-success-light text-semantic-success"
                                 }`}
                               >
-                                <Translate>{card.priority}</Translate>
+                                {card.priority}
                               </span>
                             </td>
                             <td className="p-3 text-sm text-design-primaryGrey">
@@ -527,13 +516,13 @@ export default function ArchivedCardsModal({
                                   onClick={() => handleRestoreCard(card)}
                                   className="p-1.5 text-xs rounded-lg bg-semantic-success/10 text-semantic-success hover:bg-semantic-success/20 transition-colors"
                                 >
-                                  <Translate>Restore</Translate>
+                                  Restore
                                 </button>
                                 <button
                                   onClick={() => handleDeleteCard(card.id)}
                                   className="p-1.5 text-xs rounded-lg bg-semantic-error/10 text-semantic-error hover:bg-semantic-error/20 transition-colors"
                                 >
-                                  <Translate>Delete</Translate>
+                                  Delete
                                 </button>
                               </div>
                             </td>
